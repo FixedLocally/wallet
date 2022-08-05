@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wallet/rpc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
@@ -37,57 +38,69 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late WebViewController _controller;
   late Random _random;
-  String? _injectionJs;
 
-  String _messageHandlerKey = "";
+  String _injectionJs = "";
+  String _realMessageHandlerKey = "";
+
+  Set<JavascriptChannel> get _jsChannels => {
+    JavascriptChannel(
+        name: 'messageHandler$_realMessageHandlerKey',
+        onMessageReceived: (JavascriptMessage message) {
+          String msg = message.message;
+          Map call = jsonDecode(msg);
+          String method = call['method'];
+          Map args = call['args'];
+          int id = call['id'];
+          Rpc.rpcEntryPoint(method, args).then((value) {
+            if (value.isError) {
+              _rpcReject(value.response, id);
+            } else {
+              _rpcResolve(value.response, id);
+            }
+          });
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(msg),
+          ));
+        }
+    ),
+    ..._bogusMessageHandlerKeys.map((key) => JavascriptChannel(
+        name: 'messageHandler$key',
+        onMessageReceived: (JavascriptMessage message) {
+          // does nothing.
+        }
+    )),
+  };
+
+  final List<String> _bogusMessageHandlerKeys = [];
 
   @override
   void initState() {
     super.initState();
     _random = Random();
-    _messageHandlerKey = "${_random.nextInt(1e8.floor()).toString().padLeft(8, '0')}${_random.nextInt(1e8.floor()).toString().padLeft(8, '0')}";
+    _realMessageHandlerKey = _createKey();
     rootBundle.loadString('assets/inject.js').then((String js) {
       setState(() {
         _injectionJs = js;
       });
     });
+    for (int i = 0; i < 99; ++i) {
+      _bogusMessageHandlerKeys.add(_createKey());
+    }
+  }
+
+  String _createKey() {
+    return "${_random.nextInt(1e8.floor()).toString().padLeft(8, '0')}${_random.nextInt(1e8.floor()).toString().padLeft(8, '0')}";
   }
 
   void _runInjection() {
-    _controller.runJavascript('$_injectionJs\ncreatePhantom("$_messageHandlerKey")');
-    print("message handler key: $_messageHandlerKey");
+    _controller.runJavascript('$_injectionJs\ncreatePhantom("$_realMessageHandlerKey", [${jsonEncode(_bogusMessageHandlerKeys)}])');
   }
 
   @override
   Widget build(BuildContext context) {
-    print('messageHandler$_messageHandlerKey');
     return Scaffold(
       appBar: AppBar(title: const Text('Webview')),
-      body: _injectionJs != null ? WebView(
-        initialUrl: 'about:blank',
-        javascriptMode: JavascriptMode.unrestricted,
-        javascriptChannels: {
-          JavascriptChannel(
-            name: 'messageHandler$_messageHandlerKey',
-            onMessageReceived: (JavascriptMessage message) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(message.message),
-              ));
-            }
-          ),
-        },
-        onPageStarted: (String url) {
-          print('Page started loading: $url');
-          _runInjection();
-        },
-        onPageFinished: (String url) {
-          print('Page finished loading: $url');
-        },
-        onWebViewCreated: (WebViewController webviewController) {
-          _controller = webviewController;
-          _loadHtmlFromAssets();
-        },
-      ) : const CircularProgressIndicator(),
+      body: _injectionJs.isNotEmpty ? _webView() : const CircularProgressIndicator(),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.arrow_upward),
         onPressed: () {
@@ -103,5 +116,29 @@ class _MyHomePageState extends State<MyHomePage> {
         file,
         mimeType: 'text/html',
         encoding: Encoding.getByName('utf-8')).toString());
+  }
+
+  Widget _webView() {
+    return WebView(
+      initialUrl: 'about:blank',
+      javascriptMode: JavascriptMode.unrestricted,
+      javascriptChannels: _jsChannels,
+      onPageStarted: (String url) => _runInjection(),
+      onWebViewCreated: (WebViewController webviewController) {
+        _controller = webviewController;
+        _loadHtmlFromAssets();
+      },
+    );
+  }
+
+  void _rpcResolve(dynamic response, int id) {
+    String msg = jsonEncode(response);
+    print('rpcResolve: id=$id, msg=$msg');
+    _controller.runJavascript('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)');
+  }
+
+  void _rpcReject(dynamic response, int id) {
+    String msg = jsonEncode(response);
+    _controller.runJavascript('window["rejectRpc$_realMessageHandlerKey"]($id, $msg)');
   }
 }

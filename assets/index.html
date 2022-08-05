@@ -13,7 +13,9 @@
              }
 
              function sendBack() {
-                window.phantom.exit();
+                window.phantom.exit().then(function(result) {
+                    console.log(`Exited successfully ${result}`);
+                });
              }
         </script>
 </body>
