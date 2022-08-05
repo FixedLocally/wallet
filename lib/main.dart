@@ -36,7 +36,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late WebViewController _controller;
+  WebViewController? _controller;
+  String? _title;
   late Random _random;
 
   String _injectionJs = "";
@@ -47,9 +48,10 @@ class _MyHomePageState extends State<MyHomePage> {
         name: 'messageHandler$_realMessageHandlerKey',
         onMessageReceived: (JavascriptMessage message) {
           String msg = message.message;
+          print('messageHandler: $msg');
           Map call = jsonDecode(msg);
           String method = call['method'];
-          Map args = call['args'];
+          Map args = call['args'] ?? {};
           int id = call['id'];
           Rpc.entryPoint(context, method, args).then((value) {
             if (value.isError) {
@@ -92,53 +94,63 @@ class _MyHomePageState extends State<MyHomePage> {
     return "${_random.nextInt(1e8.floor()).toString().padLeft(8, '0')}${_random.nextInt(1e8.floor()).toString().padLeft(8, '0')}";
   }
 
-  void _runInjection() {
-    _controller.runJavascript('$_injectionJs\ncreatePhantom("$_realMessageHandlerKey", [${jsonEncode(_bogusMessageHandlerKeys)}])');
+  Future _runInjection() async {
+    String js = '($_injectionJs)("$_realMessageHandlerKey", ${jsonEncode(_bogusMessageHandlerKeys)})';
+    await _controller!.runJavascript(js);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Webview')),
+      appBar: AppBar(title: Text(_title ?? 'WebView')),
       body: _injectionJs.isNotEmpty ? _webView() : const CircularProgressIndicator(),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.arrow_upward),
         onPressed: () {
-          _controller.runJavascript('fromFlutter("From Flutter")');
+          _controller!.runJavascript('fromFlutter("From Flutter")');
         },
       ),
     );
   }
 
   _loadHtmlFromAssets() async {
-    String file = await rootBundle.loadString('assets/index.html');
-    _controller.loadUrl(Uri.dataFromString(
-        file,
-        mimeType: 'text/html',
-        encoding: Encoding.getByName('utf-8')).toString());
+    return _controller!.loadFlutterAsset('assets/index.html');
   }
 
   Widget _webView() {
     return WebView(
-      initialUrl: 'about:blank',
+      initialUrl: 'https://r3byv.csb.app/',
+      // initialUrl: 'about:blank',
+      // initialUrl: 'https://tulip.garden/',
       javascriptMode: JavascriptMode.unrestricted,
       javascriptChannels: _jsChannels,
-      onPageStarted: (String url) => _runInjection(),
+      onPageStarted: (String url) {
+        setState(() {
+          _title = url;
+        });
+      },
       onWebViewCreated: (WebViewController webviewController) {
         _controller = webviewController;
-        _loadHtmlFromAssets();
+        // _loadHtmlFromAssets();
+      },
+      onPageFinished: (String url) async {
+        _runInjection();
+        _controller?.getTitle().then((title) {
+          setState(() {
+            _title = title.toString();
+          });
+        });
       },
     );
   }
 
   void _rpcResolve(dynamic response, int id) {
     String msg = jsonEncode(response);
-    print('rpcResolve: id=$id, msg=$msg');
-    _controller.runJavascript('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)');
+    _controller!.runJavascript('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)');
   }
 
   void _rpcReject(dynamic response, int id) {
     String msg = jsonEncode(response);
-    _controller.runJavascript('window["rejectRpc$_realMessageHandlerKey"]($id, $msg)');
+    _controller!.runJavascript('window["rejectRpc$_realMessageHandlerKey"]($id, $msg)');
   }
 }

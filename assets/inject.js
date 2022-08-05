@@ -1,4 +1,4 @@
-window.createPhantom = function(key, bogusKeys) {
+function(key, bogusKeys) {
     window.phantom = (function() {
         let id = 0;
         let pendingRpcs = {};
@@ -32,23 +32,30 @@ window.createPhantom = function(key, bogusKeys) {
                 window[`resolveRpc${bogusKey}`] = bogusRpc;
                 window[`rejectRpc${bogusKey}`] = bogusRpc;
             }
+//            realMessageHandler.postMessage(JSON.stringify({method: "setup", args: [window.phantom]}));
+            alert(1);
         }
 
         setup();
 
         // public methods
         return {
-            exit: function() {
-               return rpc("exit", {});
-            },
-            print: function(message) {
-               return rpc("print", {"message": message});
-            },
-            createError: function(message) {
-               return rpc("create_error", {});
+            solana: {
+                exit: function() {
+                   return rpc("exit", {});
+                },
+                print: function(message) {
+                   return rpc("print", {"message": message});
+                },
+                createError: function(message) {
+                   return rpc("create_error", {});
+                },
+                connect: function(opts) {
+                   return rpc("connect", opts);
+                },
+                on: function() {},
+                isPhantom: true,
             },
         };
     })();
-    // remove this function from existence
-    delete window.createPhantom;
 }

@@ -17,7 +17,7 @@
              }
 
              function callPrint() {
-                window.phantom.print("hello world")
+                window.phantom.solana.print("hello world")
                     .then(function(result) {
                         document.getElementById("result").innerHTML = (`Printed successfully ${result}`);
                     })
@@ -27,7 +27,7 @@
                 }
 
              function callExit() {
-                window.phantom.exit()
+                window.phantom.solana.exit()
                     .then(function(result) {
                         document.getElementById("result").innerHTML = (`Exited successfully ${result}`);
                     })
@@ -37,7 +37,7 @@
                 }
 
              function callCreateError() {
-                window.phantom.createError()
+                window.phantom.solana.createError()
                     .then(function(result) {
                         document.getElementById("result").innerHTML = (`createError successfully ${result}`);
                     })
@@ -49,6 +49,7 @@
              function sendBack() {
 
              }
-        </script>
+
+</script>
 </body>
 </html>
