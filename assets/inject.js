@@ -39,7 +39,13 @@ window.createPhantom = function(key, bogusKeys) {
         // public methods
         return {
             exit: function() {
-               return rpc("print", {"message": "from phantom"});
+               return rpc("exit", {});
+            },
+            print: function(message) {
+               return rpc("print", {"message": message});
+            },
+            createError: function(message) {
+               return rpc("create_error", {});
             },
         };
     })();

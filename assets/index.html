@@ -6,16 +6,48 @@
 
 <body>
 <h1 id="title">Hello World!</h1>
+<h1 id="result">RPC result goes here</h1>
+<button onclick="callExit()">Exit</button>
+<button onclick="callPrint()">Print</button>
+<button onclick="callCreateError()">createError</button>
 <script type="text/javascript">
             function fromFlutter(newTitle) {
                 document.getElementById("title").innerHTML = newTitle;
                 sendBack();
              }
 
+             function callPrint() {
+                window.phantom.print("hello world")
+                    .then(function(result) {
+                        document.getElementById("result").innerHTML = (`Printed successfully ${result}`);
+                    })
+                    .catch(function(error) {
+                        document.getElementById("result").innerHTML = (`Print failed ${error}`);
+                    });
+                }
+
+             function callExit() {
+                window.phantom.exit()
+                    .then(function(result) {
+                        document.getElementById("result").innerHTML = (`Exited successfully ${result}`);
+                    })
+                    .catch(function(error) {
+                        document.getElementById("result").innerHTML = (`Exit failed ${error}`);
+                    });
+                }
+
+             function callCreateError() {
+                window.phantom.createError()
+                    .then(function(result) {
+                        document.getElementById("result").innerHTML = (`createError successfully ${result}`);
+                    })
+                    .catch(function(error) {
+                        document.getElementById("result").innerHTML = (`createError failed ${error}`);
+                    });
+                }
+
              function sendBack() {
-                window.phantom.exit().then(function(result) {
-                    console.log(`Exited successfully ${result}`);
-                });
+
              }
         </script>
 </body>

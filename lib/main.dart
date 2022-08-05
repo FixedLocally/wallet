@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
           String method = call['method'];
           Map args = call['args'];
           int id = call['id'];
-          Rpc.rpcEntryPoint(method, args).then((value) {
+          Rpc.entryPoint(context, method, args).then((value) {
             if (value.isError) {
               _rpcReject(value.response, id);
             } else {
