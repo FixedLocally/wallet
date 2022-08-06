@@ -11,11 +11,11 @@ import 'context_holder.dart';
 import 'rpc/rpc.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const WalletApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class WalletApp extends StatelessWidget {
+  const WalletApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -25,23 +25,24 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const DAppRoute(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class DAppRoute extends StatefulWidget {
+  const DAppRoute({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<DAppRoute> createState() => _DAppRouteState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomePage> {
+class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute> {
   WebViewController? _controller;
   String? _title;
+  String? _subtitle;
   late Random _random;
   late StreamSubscription<RpcEvent> _sub;
 
@@ -123,7 +124,18 @@ class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomeP
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_title ?? 'WebView')),
+      appBar: AppBar(
+        title: Column(
+          children: [
+            Text(_title ?? 'WebView'),
+            if (_subtitle != null)
+              Text(
+                _subtitle!,
+                style: const TextStyle(fontSize: 14),
+              ),
+          ],
+        ),
+      ),
       body: _injectionJs.isNotEmpty && _web3Js.isNotEmpty ? _webView() : const CircularProgressIndicator(),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.refresh),
@@ -133,10 +145,6 @@ class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomeP
         },
       ),
     );
-  }
-
-  _loadHtmlFromAssets() async {
-    return _controller!.loadFlutterAsset('assets/index.html');
   }
 
   Widget _webView() {
@@ -161,9 +169,12 @@ class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomeP
       onPageFinished: (String url) async {
         _runInjection();
         _controller?.getTitle().then((title) {
-          setState(() {
-            _title = title.toString();
-          });
+          if (title != null) {
+            setState(() {
+              _subtitle = _title;
+              _title = title;
+            });
+          }
         });
       },
       navigationDelegate: (NavigationRequest request) async {
@@ -171,6 +182,10 @@ class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomeP
         if (request.url.split("#").first != currentUrl.split("#").first) {
           // page changed
           await RpcServer.entryPoint(contextHolder, "disconnect", {});
+          setState(() {
+            _title = request.url;
+            _subtitle = null;
+          });
         }
         return NavigationDecision.navigate;
       },
