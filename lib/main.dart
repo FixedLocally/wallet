@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -49,6 +50,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
   String _injectionJs = "";
   String _web3Js = "";
   String _realMessageHandlerKey = "";
+  bool _injected = false;
 
   Set<JavascriptChannel> get _jsChannels => {
     JavascriptChannel(
@@ -87,6 +89,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
     super.initState();
     _random = Random();
     _realMessageHandlerKey = _createKey();
+    if (Platform.isAndroid) WebView.platform = AndroidWebView();
     Utils.loadTokenList().then((value) {
       rootBundle.loadString('assets/inject.js').then((String js) {
         setState(() {
@@ -118,6 +121,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
     await f2;
     Future f1 = _controller!.runJavascript(js);
     await f1;
+    _injected = true;
     // return Future.wait([f1, f2]);
   }
 
@@ -152,21 +156,25 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
       // initialUrl: 'https://r3byv.csb.app/',
       // initialUrl: 'about:blank',
       // initialUrl: 'https://tulip.garden/',
-      // initialUrl: 'https://mainnet.zeta.markets/',
-      initialUrl: 'https://solend.fi/dashboard',
+      initialUrl: 'https://mainnet.zeta.markets/',
+      // initialUrl: 'https://solend.fi/dashboard',
       // initialUrl: 'http://localhost:3000/',
       javascriptMode: JavascriptMode.unrestricted,
       javascriptChannels: _jsChannels,
+
       onPageStarted: (String url) {
         setState(() {
           _title = url;
         });
       },
       onWebViewCreated: (WebViewController webviewController) {
+        print("webview created");
         _controller = webviewController;
         // _loadHtmlFromAssets();
       },
       onPageFinished: (String url) async {
+        if (_injected) return;
+        print("page finished: $url");
         _runInjection();
         _controller?.getTitle().then((title) {
           if (title != null) {
@@ -185,6 +193,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
           setState(() {
             _title = request.url;
             _subtitle = null;
+            _injected = false;
           });
         }
         return NavigationDecision.navigate;

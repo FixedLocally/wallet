@@ -1,26 +1,24 @@
 function(key, bogusKeys) {
     (function() {
+        console.log("injection start");
         let id = 0;
-        let pendingRpcs = {};
         let realMessageHandler = window[`messageHandler${key}`];
         let eventHandlers = {};
         let injectedScope = {
             publicKey: null,
             isConnected: false,
+            pendingRpcs: {},
         };
 
         // instance methods
         function newCall(Cls, args) {
             return new (Function.prototype.bind.apply(Cls, [Cls, ...args]));
-            // or even
-            // return new (Cls.bind.apply(Cls, arguments));
-            // if you know that Cls.bind has not been overwritten
         }
         function rpc(method, params) {
             ++id;
             realMessageHandler.postMessage(JSON.stringify({method, params, id}));
             return new Promise((resolve, reject) => {
-                pendingRpcs[id] = {resolve, reject};
+                injectedScope.pendingRpcs[id] = {resolve, reject};
             });
         }
         function parseRpcResult(result) {
@@ -45,13 +43,13 @@ function(key, bogusKeys) {
         }
         function resolveRpc(rpcId, result) {
             console.log("resolveRpc", rpcId, result);
-            pendingRpcs[rpcId].resolve(parseRpcResult(result));
-            delete pendingRpcs[rpcId];
+            injectedScope.pendingRpcs[rpcId].resolve(parseRpcResult(result));
+            delete injectedScope.pendingRpcs[rpcId];
         }
         function rejectRpc(rpcId, ex) {
             console.log("rejectRpc", rpcId, ex);
-            pendingRpcs[rpcId].reject(ex);
-            delete pendingRpcs[rpcId];
+            injectedScope.pendingRpcs[rpcId].reject(ex);
+            delete injectedScope.pendingRpcs[rpcId];
         }
         function eventIngestion(type, evt, setters) {
             console.log("eventIngestion", type, evt);
@@ -76,7 +74,6 @@ function(key, bogusKeys) {
                 window[`rejectRpc${bogusKey}`] = bogusRpc;
                 window[`eventIngestion${bogusKey}`] = bogusRpc;
             }
-            alert(1);
         }
 
         setup();
@@ -110,7 +107,6 @@ function(key, bogusKeys) {
                 return sig;
             },
             on: function(trigger, callback) {
-                console.log(new Error().stack);
                 let callbacks = eventHandlers[trigger] || [];
                 callbacks.push(callback);
                 eventHandlers[trigger] = callbacks;
