@@ -25,10 +25,17 @@ function(key, bogusKeys) {
         }
         function parseRpcResult(result) {
             let _result;
+            console.log("parse", result);
             if (result.type != null) {
                 _result = newCall(solanaWeb3[result.type], result.value);
             } else {
                 _result = result.value;
+                console.log("nest", _result);
+                if ("object" === typeof _result) {
+                    for (let key in _result) {
+                        _result[key] = parseRpcResult(_result[key]);
+                    }
+                }
             }
             return _result;
         }
@@ -39,7 +46,7 @@ function(key, bogusKeys) {
         }
         function rejectRpc(rpcId, ex) {
             console.log("rejectRpc", rpcId, ex);
-            pendingRpcs[rpcId].reject(parseRpcResult(ex));
+            pendingRpcs[rpcId].reject(ex);
             delete pendingRpcs[rpcId];
         }
         function eventIngestion(type, evt, setters) {
@@ -86,6 +93,9 @@ function(key, bogusKeys) {
             },
             disconnect: function(opts) {
                 return rpc("disconnect", opts);
+            },
+            signTransaction: function(opts) {
+                return rpc("signTransaction", opts);
             },
             on: function(trigger, callback) {
                 console.log(new Error().stack);

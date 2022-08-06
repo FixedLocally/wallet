@@ -85,7 +85,9 @@ class RpcServer {
         "isConnected": {"type": null, "value": true},
       },
     ));
-    return RpcResponse.object("PublicKey", [_hardcodedWallet]);
+    return RpcResponse.primitive({
+      "publicKey": {"type": "PublicKey", "value": [_hardcodedWallet]},
+    });
   }
 
   // disconnect wallet
