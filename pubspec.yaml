@@ -32,6 +32,7 @@ flutter:
   assets:
     - assets/index.html
     - assets/inject.js
+    - assets/web3.js
 
   # fonts:
   #   - family: Schyler

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -39,8 +40,10 @@ class _MyHomePageState extends State<MyHomePage> {
   WebViewController? _controller;
   String? _title;
   late Random _random;
+  late StreamSubscription<RpcEvent> _sub;
 
   String _injectionJs = "";
+  String _web3Js = "";
   String _realMessageHandlerKey = "";
 
   Set<JavascriptChannel> get _jsChannels => {
@@ -54,6 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Map args = call['args'] ?? {};
           int id = call['id'];
           Rpc.entryPoint(context, method, args).then((value) {
+            print("rpcCall: $method, $args => $value");
             if (value.isError) {
               _rpcReject(value.response, id);
             } else {
@@ -85,9 +89,18 @@ class _MyHomePageState extends State<MyHomePage> {
         _injectionJs = js;
       });
     });
+    rootBundle.loadString('assets/web3.js').then((String js) {
+      setState(() {
+        _web3Js = js;
+      });
+    });
     for (int i = 0; i < 99; ++i) {
       _bogusMessageHandlerKeys.add(_createKey());
     }
+    _sub = Rpc.eventStream.listen((event) async {
+      print("rpcEvent: $event");
+      await _controller?.runJavascript("window.eventIngestion$_realMessageHandlerKey('${event.trigger}', ${jsonEncode(event.response)}, ${jsonEncode(event.updates)})");
+    });
   }
 
   String _createKey() {
@@ -96,18 +109,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future _runInjection() async {
     String js = '($_injectionJs)("$_realMessageHandlerKey", ${jsonEncode(_bogusMessageHandlerKeys)})';
-    await _controller!.runJavascript(js);
+    Future f2 = _controller!.runJavascript(_web3Js);
+    await f2;
+    Future f1 = _controller!.runJavascript(js);
+    await f1;
+    // return Future.wait([f1, f2]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(_title ?? 'WebView')),
-      body: _injectionJs.isNotEmpty ? _webView() : const CircularProgressIndicator(),
+      body: _injectionJs.isNotEmpty && _web3Js.isNotEmpty ? _webView() : const CircularProgressIndicator(),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.arrow_upward),
+        child: const Icon(Icons.refresh),
         onPressed: () {
-          _controller!.runJavascript('fromFlutter("From Flutter")');
+          // _controller!.runJavascript('document.write(phantom.solana.publicKey)');
+          _controller!.reload();
         },
       ),
     );
@@ -152,5 +170,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void _rpcReject(dynamic response, int id) {
     String msg = jsonEncode(response);
     _controller!.runJavascript('window["rejectRpc$_realMessageHandlerKey"]($id, $msg)');
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
   }
 }
