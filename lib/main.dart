@@ -139,6 +139,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
               ),
           ],
         ),
+        centerTitle: true,
       ),
       body: _injectionJs.isNotEmpty && _web3Js.isNotEmpty ? _webView() : const CircularProgressIndicator(),
       floatingActionButton: FloatingActionButton(
@@ -179,7 +180,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
         _controller?.getTitle().then((title) {
           if (title != null) {
             setState(() {
-              _subtitle = _title;
+              _subtitle = url;
               _title = title;
             });
           }
