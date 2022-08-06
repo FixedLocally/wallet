@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wallet/rpc.dart';
+import 'package:wallet/rpc/rpc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
           String method = call['method'];
           Map params = call['params'] ?? {};
           int id = call['id'];
-          Rpc.entryPoint(context, method, params).then((value) {
+          RpcServer.entryPoint(context, method, params).then((value) {
             print("rpcCall: $method, $params => $value");
             if (value.isError) {
               _rpcReject(value.response, id);
@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
     for (int i = 0; i < 99; ++i) {
       _bogusMessageHandlerKeys.add(_createKey());
     }
-    _sub = Rpc.eventStream.listen((event) async {
+    _sub = RpcServer.eventStream.listen((event) async {
       print("rpcEvent: $event");
       await _controller?.runJavascript("window.eventIngestion$_realMessageHandlerKey('${event.trigger}', ${jsonEncode(event.response)}, ${jsonEncode(event.updates)})");
     });

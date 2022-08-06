@@ -1,11 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:wallet/rpc/constants.dart';
+
+import 'event.dart';
+import 'response.dart';
 
 String _hardcodedWallet = "EpDbR2jE1YB9Tutk36EtKrqz4wZBCwZNMdbHvbqd3TCv";
 // String _hardcodedWallet = "GQP9XKoRfwo229MA8iDq8GsC4piAruxrg578QbTNQuqD";
 
-class Rpc {
+class RpcServer {
   static final StreamController<RpcEvent> _eventStreamController = StreamController.broadcast();
 
   static Stream<RpcEvent> get eventStream => _eventStreamController.stream;
@@ -22,7 +26,7 @@ class Rpc {
       case "disconnect":
         return _disconnect(context, args);
     }
-    return RpcResponse.error("Unknown method: $method");
+    return RpcResponse.error(RpcConstants.kMethodNotFound);
   }
 
   // print a message to the console
@@ -52,7 +56,7 @@ class Rpc {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop(RpcResponse.error("cannot exit"));
+                        Navigator.of(context).pop(RpcResponse.error(RpcConstants.kUserRejected));
                       },
                       child: const Text("No"),
                     ),
@@ -64,13 +68,13 @@ class Rpc {
         );
       },
     );
-    return resp ?? RpcResponse.error("cannot exit");
+    return resp ?? RpcResponse.error(RpcConstants.kUserRejected);
   }
 
   // return a pubkey
   static Future<RpcResponse> _connect(BuildContext context, Map args) async {
     if (args["onlyIfTrusted"] == true) {
-      return RpcResponse.error("cannot connect");
+      return RpcResponse.error(RpcConstants.kUserRejected);
     }
     // await Future.delayed(const Duration(milliseconds: 2500));
     _eventStreamController.add(RpcEvent.object(
@@ -95,57 +99,5 @@ class Rpc {
       },
     ));
     return RpcResponse.primitive(null);
-  }
-}
-
-class RpcResponse {
-  final bool isError;
-  final Map response;
-
-  RpcResponse._(this.isError, this.response);
-
-  factory RpcResponse.primitive(dynamic response) {
-    return RpcResponse._(false, {"type": null, "value": response});
-  }
-
-  factory RpcResponse.object(String type, List params) {
-    return RpcResponse._(false, {"type": type, "value": params});
-  }
-
-  factory RpcResponse.error(dynamic error) {
-    return RpcResponse._(true, {"type": null, "value": error});
-  }
-
-  @override
-  String toString() {
-    return 'RpcResponse._(isError: $isError, response: $response)';
-  }
-}
-
-class RpcEvent {
-  /// event type
-  final String trigger;
-  /// event params
-  final Map response;
-  /// vars to update in the injected scope
-  final Map<String, Map> updates;
-
-  RpcEvent._(this.trigger, this.response, [this.updates = const {}]);
-
-  factory RpcEvent.primitive(String trigger, dynamic response, [Map<String, Map> updates = const {}]) {
-    return RpcEvent._(trigger, {"type": null, "value": response}, updates);
-  }
-
-  factory RpcEvent.object(String trigger, String type, List params, [Map<String, Map> updates = const {}]) {
-    return RpcEvent._(trigger, {"type": type, "value": params}, updates);
-  }
-
-  factory RpcEvent.error(String trigger, dynamic error, [Map<String, Map> updates = const {}]) {
-    return RpcEvent._(trigger, {"type": null, "value": error}, updates);
-  }
-
-  @override
-  String toString() {
-    return 'RpcEvent._(trigger: $trigger, response: $response)';
   }
 }

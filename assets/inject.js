@@ -52,7 +52,7 @@ function(key, bogusKeys) {
                 eventHandlers[type].map(handler => handler(arg));
             }
         }
-        function bogusRpc() { console.log("bogus") } // does precisely nothing
+        function bogusRpc() {} // does precisely nothing
         function setup() {
             resolveRpc.toString = () => "uwu";
             rejectRpc.toString = () => "uwu";
@@ -71,40 +71,38 @@ function(key, bogusKeys) {
         setup();
 
         // public methods
-        let phantom = {
-            solana: {
-                exit: function() {
-                    return rpc("exit", {});
-                },
-                print: function(message) {
-                    return rpc("print", {"message": message});
-                },
-                createError: function(message) {
-                    return rpc("create_error", {});
-                },
-                connect: function(opts) {
-                    console.log(new Error().stack);
-                    return rpc("connect", opts);
-                },
-                disconnect: function(opts) {
-                    return rpc("disconnect", opts);
-                },
-                on: function(trigger, callback) {
-                    console.log(new Error().stack);
-                    let callbacks = eventHandlers[trigger] || [];
-                    callbacks.push(callback);
-                    eventHandlers[trigger] = callbacks;
-                },
-                off: function(trigger, callback) {
-                    let callbacks = eventHandlers[trigger] || [];
-                    callbacks = callbacks.filter(cb => cb !== callback);
-                    eventHandlers[trigger] = callbacks;
-                },
-                request: rpc,
-                _handleDisconnect: function() {},
-                isPhantom: true,
+        let solana = {
+            exit: function() {
+                return rpc("exit", {});
             },
+            print: function(message) {
+                return rpc("print", {"message": message});
+            },
+            createError: function(message) {
+                return rpc("create_error", {});
+            },
+            connect: function(opts) {
+                return rpc("connect", opts);
+            },
+            disconnect: function(opts) {
+                return rpc("disconnect", opts);
+            },
+            on: function(trigger, callback) {
+                console.log(new Error().stack);
+                let callbacks = eventHandlers[trigger] || [];
+                callbacks.push(callback);
+                eventHandlers[trigger] = callbacks;
+            },
+            off: function(trigger, callback) {
+                let callbacks = eventHandlers[trigger] || [];
+                callbacks = callbacks.filter(cb => cb !== callback);
+                eventHandlers[trigger] = callbacks;
+            },
+            request: rpc,
+            _handleDisconnect: function() {},
+            isPhantom: true,
         };
+        let phantom = {solana};
         // getters
         phantom.solana.__defineGetter__("publicKey", function() {
             return injectedScope["publicKey"];
@@ -112,9 +110,9 @@ function(key, bogusKeys) {
         phantom.solana.__defineGetter__("isConnected", function() {
             return injectedScope["isConnected"];
         });
+        window.__defineGetter__("solana", () => solana);
+        window.__defineGetter__("phantom", () => phantom);
 
-        window.phantom = phantom;
-        window.solana = phantom.solana;
         // debug
 //        window.injectedScope = injectedScope;
 //        window.eventHandlers = eventHandlers;
