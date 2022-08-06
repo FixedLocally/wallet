@@ -98,7 +98,10 @@ function(key, bogusKeys) {
                 callbacks = callbacks.filter(cb => cb !== callback);
                 eventHandlers[trigger] = callbacks;
             },
-            request: rpc,
+            request: function(opts) {
+                if (!opts.method) return Promise.reject({code: -32000, message: "Invalid Input"});
+                return rpc(opts.method, opts.params);
+            },
             _handleDisconnect: function() {},
             isPhantom: true,
         };
