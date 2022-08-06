@@ -4,8 +4,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wallet/rpc/rpc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import 'context_holder.dart';
+import 'rpc/rpc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,7 +38,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomePage> {
   WebViewController? _controller;
   String? _title;
   late Random _random;
@@ -48,26 +50,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Set<JavascriptChannel> get _jsChannels => {
     JavascriptChannel(
-        name: 'messageHandler$_realMessageHandlerKey',
-        onMessageReceived: (JavascriptMessage message) {
-          String msg = message.message;
-          print('messageHandler: $msg');
-          Map call = jsonDecode(msg);
-          String method = call['method'];
-          Map params = call['params'] ?? {};
-          int id = call['id'];
-          RpcServer.entryPoint(context, method, params).then((value) {
-            print("rpcCall: $method, $params => $value");
-            if (value.isError) {
-              _rpcReject(value.response, id);
-            } else {
-              _rpcResolve(value.response, id);
-            }
-          });
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(msg),
-          ));
-        }
+      name: 'messageHandler$_realMessageHandlerKey',
+      onMessageReceived: (JavascriptMessage message) {
+        String msg = message.message;
+        print('messageHandler: $msg');
+        Map call = jsonDecode(msg);
+        String method = call['method'];
+        Map params = call['params'] ?? {};
+        int id = call['id'];
+        RpcServer.entryPoint(contextHolder, method, params).then((value) {
+          print("rpcCall: $method, $params => $value");
+          if (value.isError) {
+            _rpcReject(value.response, id);
+          } else {
+            _rpcResolve(value.response, id);
+          }
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(msg),
+        ));
+      }
     ),
     ..._bogusMessageHandlerKeys.map((key) => JavascriptChannel(
         name: 'messageHandler$key',

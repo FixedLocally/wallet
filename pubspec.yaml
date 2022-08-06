@@ -19,8 +19,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  webview_flutter: ^3.0.4
   cupertino_icons: ^1.0.2
+  solana: ^0.26.0
+  webview_flutter: ^3.0.4
 
 dev_dependencies:
   flutter_test:

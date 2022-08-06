@@ -27,10 +27,14 @@ function(key, bogusKeys) {
             let _result;
             console.log("parse", result);
             if (result.type != null) {
+                // constructor
                 _result = newCall(solanaWeb3[result.type], result.value);
             } else {
                 _result = result.value;
                 console.log("nest", _result);
+                if (Array.isArray(_result)) {
+                    return _result;
+                }
                 if ("object" === typeof _result) {
                     for (let key in _result) {
                         _result[key] = parseRpcResult(_result[key]);
@@ -94,8 +98,11 @@ function(key, bogusKeys) {
             disconnect: function(opts) {
                 return rpc("disconnect", opts);
             },
-            signTransaction: function(opts) {
-                return rpc("signTransaction", opts);
+            signTransaction: async function(tx) {
+                let signature = await rpc("signTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash});
+                signature.signature = new Uint8Array(signature.signature);
+                tx.signatures = [signature];
+                return tx;
             },
             on: function(trigger, callback) {
                 console.log(new Error().stack);
