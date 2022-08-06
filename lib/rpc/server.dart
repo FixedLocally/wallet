@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:solana/base58.dart';
+import 'package:solana/dto.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:wallet/context_holder.dart';
@@ -12,6 +14,7 @@ import 'response.dart';
 
 String _hardcodedWallet = "EpDbR2jE1YB9Tutk36EtKrqz4wZBCwZNMdbHvbqd3TCv";
 // String _hardcodedWallet = "GQP9XKoRfwo229MA8iDq8GsC4piAruxrg578QbTNQuqD";
+SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
 
 class RpcServer {
   static final StreamController<RpcEvent> _eventStreamController = StreamController.broadcast();
@@ -55,43 +58,20 @@ class RpcServer {
 
   // show a "ask for permission" dialog
   static Future<RpcResponse> _exit(ContextHolder contextHolder, Map args) async {
-    RpcResponse? resp;
+    bool approved = false;
     if (contextHolder.context != null) {
-      resp = await showModalBottomSheet<RpcResponse>(
+      approved = await _showConfirmDialog(
         context: contextHolder.context!,
         builder: (ctx) {
-          return SizedBox(
-            height: 200,
-            child: Center(
-              child: Column(
-                children: [
-                  const Text("Exit?"),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(contextHolder.context!).pop(
-                              RpcResponse.primitive("can exit"));
-                        },
-                        child: const Text("Yes"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(contextHolder.context!).pop(
-                              RpcResponse.error(RpcConstants.kUserRejected));
-                        },
-                        child: const Text("No"),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
+          return const Text("Exit?");
         },
       );
     }
-    return resp ?? RpcResponse.error(RpcConstants.kUserRejected);
+    if (approved) {
+      return RpcResponse.primitive("can exit");
+    } else {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
   }
 
   // return a pubkey
@@ -129,13 +109,87 @@ class RpcServer {
 
   // sign transaction
   static Future<RpcResponse> _signTransaction(ContextHolder contextHolder, Map args) async {
+    if (contextHolder.disposed) {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
     List<int> payload = args["tx"].cast<int>();
-    Message message = Message.decompile(CompiledMessage(ByteArray(payload)));
-    String recentBlockhash = args["recentBlockhash"];
-    SignedTx signedTx = await _wallet!.signMessage(message: message, recentBlockhash: recentBlockhash);
-    return RpcResponse.primitive({
-      "signature": {"type": null, "value": signedTx.signatures.first.bytes},
-      "publicKey": {"type": "PublicKey", "value": [_wallet!.publicKey.toBase58()]},
-    });
+    CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
+    Message message = Message.decompile(compiledMessage);
+    // prepend header
+    List<int> simulationPayload = [1, ...List.generate(64, (_) => 0), ...payload];
+    print(base64Encode(simulationPayload));
+    List<List<String>> _addresses = message.instructions.map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList();
+    List<String> addresses = _addresses.expand((e) => e).toList();
+    TransactionStatus status = await _solanaClient.rpcClient.simulateTransaction(
+      base64Encode(simulationPayload),
+      replaceRecentBlockhash: true,
+      commitment: Commitment.confirmed,
+      accounts: SimulateTransactionAccounts(
+        accountEncoding: Encoding.jsonParsed,
+        addresses: addresses,
+      ),
+    );
+    for (int i = 0; i < addresses.length; ++i) {
+      Account? element = status.accounts?[i];
+      if (element?.data is BinaryAccountData) {
+        List<int> data = (element?.data as BinaryAccountData).data;
+        print("${addresses[i]} ${data.length} $data");
+      } else {
+        print("${addresses[i]} lol");
+      }
+    }
+    bool approved = await _showConfirmDialog(
+      context: contextHolder.context!,
+      builder: (context) {
+        return const Text("Approve?");
+      },
+    );
+    if (approved) {
+      String recentBlockhash = args["recentBlockhash"];
+      SignedTx signedTx = await _wallet!.signMessage(message: message, recentBlockhash: recentBlockhash);
+      print(signedTx.signatures.first);
+      return RpcResponse.primitive({
+        "signature": {"type": null, "value": signedTx.signatures.first.bytes},
+        "publicKey": {
+          "type": "PublicKey",
+          "value": [_wallet!.publicKey.toBase58()]
+        },
+      });
+    } else {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
   }
+}
+
+Future<bool> _showConfirmDialog({
+  required BuildContext context,
+  required WidgetBuilder builder,
+}) async {
+  bool? result = await showModalBottomSheet<bool>(
+    context: context,
+    builder: (ctx) {
+      return Column(
+        children: [
+          builder(ctx),
+          Row(
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text("Yes"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text("No"),
+              ),
+            ],
+          ),
+        ],
+      );
+    },
+  );
+  return result ?? false;
 }

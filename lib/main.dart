@@ -53,7 +53,6 @@ class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomeP
       name: 'messageHandler$_realMessageHandlerKey',
       onMessageReceived: (JavascriptMessage message) {
         String msg = message.message;
-        print('messageHandler: $msg');
         Map call = jsonDecode(msg);
         String method = call['method'];
         Map params = call['params'] ?? {};
