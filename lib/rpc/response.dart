@@ -14,8 +14,8 @@ class RpcResponse {
     return RpcResponse._(false, {"type": type, "value": params});
   }
 
-  factory RpcResponse.error(int error) {
-    return RpcResponse._(true, {"code": error, "error": RpcConstants.kErrorMessages[error]});
+  factory RpcResponse.error(int error, [String? message]) {
+    return RpcResponse._(true, {"code": error, "message": message ?? RpcConstants.kErrorMessages[error]});
   }
 
   @override

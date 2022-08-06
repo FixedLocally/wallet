@@ -104,6 +104,11 @@ function(key, bogusKeys) {
                 tx.signatures = [signature];
                 return tx;
             },
+            signAndSendTransaction: async function(tx) {
+                let sig = await rpc("signAndSendTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash});
+                console.log(sig);
+                return sig;
+            },
             on: function(trigger, callback) {
                 console.log(new Error().stack);
                 let callbacks = eventHandlers[trigger] || [];

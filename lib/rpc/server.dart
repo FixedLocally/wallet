@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:solana/base58.dart';
-import 'package:solana/dto.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:wallet/context_holder.dart';
@@ -38,7 +36,9 @@ class RpcServer {
       case "disconnect":
         return _disconnect(contextHolder, args);
       case "signTransaction":
-        return _signTransaction(contextHolder, args);
+        return _signTransaction(contextHolder, args, false);
+      case "signAndSendTransaction":
+        return _signTransaction(contextHolder, args, true);
     }
     return RpcResponse.error(RpcConstants.kMethodNotFound);
   }
@@ -109,7 +109,7 @@ class RpcServer {
   }
 
   // sign transaction
-  static Future<RpcResponse> _signTransaction(ContextHolder contextHolder, Map args) async {
+  static Future<RpcResponse> _signTransaction(ContextHolder contextHolder, Map args, bool send) async {
     if (contextHolder.disposed) {
       return RpcResponse.error(RpcConstants.kUserRejected);
     }
@@ -145,7 +145,23 @@ class RpcServer {
     if (approved) {
       String recentBlockhash = args["recentBlockhash"];
       SignedTx signedTx = await _wallet!.signMessage(message: message, recentBlockhash: recentBlockhash);
-      print(signedTx.signatures.first);
+      print(signedTx.signatures.first.toBase58());
+      print(signedTx.encode());
+      if (send) {
+        try {
+          String sig = await _solanaClient.rpcClient.sendTransaction(
+              signedTx.encode(), preflightCommitment: Commitment.confirmed);
+          return RpcResponse.primitive({
+            "signature": {"type": null, "value": sig},
+            "publicKey": {
+              "type": "PublicKey",
+              "value": [_wallet!.publicKey.toBase58()]
+            },
+          });
+        } on JsonRpcException catch (e) {
+          return RpcResponse.error(e.code, e.message);
+        }
+      }
       return RpcResponse.primitive({
         "signature": {"type": null, "value": signedTx.signatures.first.bytes},
         "publicKey": {
