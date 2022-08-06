@@ -34,6 +34,7 @@ flutter:
     - assets/index.html
     - assets/inject.js
     - assets/web3.js
+    - assets/tokens.json
 
   # fonts:
   #   - family: Schyler

@@ -9,6 +9,7 @@ import 'package:solana/solana.dart';
 import 'package:wallet/context_holder.dart';
 import 'package:wallet/rpc/constants.dart';
 
+import '../utils/utils.dart';
 import 'event.dart';
 import 'response.dart';
 
@@ -115,33 +116,30 @@ class RpcServer {
     List<int> payload = args["tx"].cast<int>();
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
     Message message = Message.decompile(compiledMessage);
-    // prepend header
-    List<int> simulationPayload = [1, ...List.generate(64, (_) => 0), ...payload];
-    print(base64Encode(simulationPayload));
-    List<List<String>> _addresses = message.instructions.map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList();
-    List<String> addresses = _addresses.expand((e) => e).toList();
-    TransactionStatus status = await _solanaClient.rpcClient.simulateTransaction(
-      base64Encode(simulationPayload),
-      replaceRecentBlockhash: true,
-      commitment: Commitment.confirmed,
-      accounts: SimulateTransactionAccounts(
-        accountEncoding: Encoding.jsonParsed,
-        addresses: addresses,
-      ),
-    );
-    for (int i = 0; i < addresses.length; ++i) {
-      Account? element = status.accounts?[i];
-      if (element?.data is BinaryAccountData) {
-        List<int> data = (element?.data as BinaryAccountData).data;
-        print("${addresses[i]} ${data.length} $data");
-      } else {
-        print("${addresses[i]} lol");
-      }
-    }
+
     bool approved = await _showConfirmDialog(
       context: contextHolder.context!,
       builder: (context) {
-        return const Text("Approve?");
+        return FutureBuilder<TokenChanges>(
+          future: Utils.simulateTx(payload, _wallet!.publicKey.toBase58()),
+          builder: (ctx, snapshot) {
+            return Column(
+              children: [
+                const Text("Approve transaction?"),
+                if (snapshot.hasData)
+                  ...snapshot.data!.changes.map((key, value) {
+                    String mint = snapshot.data!.updatedAccounts[key]!.mint;
+                    String symbol = Utils.getToken(mint)?["symbol"] ?? mint;
+                    return MapEntry(key, Text("$symbol: ${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}"));
+                  }).values
+                else if (snapshot.hasError)
+                  const Text("Transaction may fail to confirm")
+                else
+                  const Text("Loading..."),
+              ],
+            );
+          },
+        );
       },
     );
     if (approved) {

@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wallet/utils/utils.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'context_holder.dart';
@@ -85,14 +86,16 @@ class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomeP
     super.initState();
     _random = Random();
     _realMessageHandlerKey = _createKey();
-    rootBundle.loadString('assets/inject.js').then((String js) {
-      setState(() {
-        _injectionJs = js;
+    Utils.loadTokenList().then((value) {
+      rootBundle.loadString('assets/inject.js').then((String js) {
+        setState(() {
+          _injectionJs = js;
+        });
       });
-    });
-    rootBundle.loadString('assets/web3.js').then((String js) {
-      setState(() {
-        _web3Js = js;
+      rootBundle.loadString('assets/web3.js').then((String js) {
+        setState(() {
+          _web3Js = js;
+        });
       });
     });
     for (int i = 0; i < 99; ++i) {
@@ -141,7 +144,8 @@ class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomeP
       // initialUrl: 'https://r3byv.csb.app/',
       // initialUrl: 'about:blank',
       // initialUrl: 'https://tulip.garden/',
-      initialUrl: 'https://mainnet.zeta.markets/',
+      // initialUrl: 'https://mainnet.zeta.markets/',
+      initialUrl: 'https://solend.fi/dashboard',
       // initialUrl: 'http://localhost:3000/',
       javascriptMode: JavascriptMode.unrestricted,
       javascriptChannels: _jsChannels,
