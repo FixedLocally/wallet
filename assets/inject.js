@@ -1,10 +1,13 @@
 function(key, bogusKeys) {
-    window.phantom = (function() {
+    (function() {
         let id = 0;
         let pendingRpcs = {};
         let realMessageHandler = window[`messageHandler${key}`];
         let eventHandlers = {};
-        let injectedScope = {};
+        let injectedScope = {
+            publicKey: null,
+            isConnected: false,
+        };
 
         // instance methods
         function newCall(Cls, args) {
@@ -13,9 +16,9 @@ function(key, bogusKeys) {
             // return new (Cls.bind.apply(Cls, arguments));
             // if you know that Cls.bind has not been overwritten
         }
-        function rpc(method, args) {
+        function rpc(method, params) {
             ++id;
-            realMessageHandler.postMessage(JSON.stringify({method, args, id}));
+            realMessageHandler.postMessage(JSON.stringify({method, params, id}));
             return new Promise((resolve, reject) => {
                 pendingRpcs[id] = {resolve, reject};
             });
@@ -71,18 +74,23 @@ function(key, bogusKeys) {
         let phantom = {
             solana: {
                 exit: function() {
-                   return rpc("exit", {});
+                    return rpc("exit", {});
                 },
                 print: function(message) {
-                   return rpc("print", {"message": message});
+                    return rpc("print", {"message": message});
                 },
                 createError: function(message) {
-                   return rpc("create_error", {});
+                    return rpc("create_error", {});
                 },
                 connect: function(opts) {
-                   return rpc("connect", opts);
+                    console.log(new Error().stack);
+                    return rpc("connect", opts);
+                },
+                disconnect: function(opts) {
+                    return rpc("disconnect", opts);
                 },
                 on: function(trigger, callback) {
+                    console.log(new Error().stack);
                     let callbacks = eventHandlers[trigger] || [];
                     callbacks.push(callback);
                     eventHandlers[trigger] = callbacks;
@@ -92,6 +100,8 @@ function(key, bogusKeys) {
                     callbacks = callbacks.filter(cb => cb !== callback);
                     eventHandlers[trigger] = callbacks;
                 },
+                request: rpc,
+                _handleDisconnect: function() {},
                 isPhantom: true,
             },
         };
@@ -99,6 +109,14 @@ function(key, bogusKeys) {
         phantom.solana.__defineGetter__("publicKey", function() {
             return injectedScope["publicKey"];
         });
-        return phantom;
+        phantom.solana.__defineGetter__("isConnected", function() {
+            return injectedScope["isConnected"];
+        });
+
+        window.phantom = phantom;
+        window.solana = phantom.solana;
+        // debug
+//        window.injectedScope = injectedScope;
+//        window.eventHandlers = eventHandlers;
     })();
 }

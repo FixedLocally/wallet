@@ -54,10 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
           print('messageHandler: $msg');
           Map call = jsonDecode(msg);
           String method = call['method'];
-          Map args = call['args'] ?? {};
+          Map params = call['params'] ?? {};
           int id = call['id'];
-          Rpc.entryPoint(context, method, args).then((value) {
-            print("rpcCall: $method, $args => $value");
+          Rpc.entryPoint(context, method, params).then((value) {
+            print("rpcCall: $method, $params => $value");
             if (value.isError) {
               _rpcReject(value.response, id);
             } else {
@@ -137,9 +137,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _webView() {
     return WebView(
-      initialUrl: 'https://r3byv.csb.app/',
+      // initialUrl: 'https://r3byv.csb.app/',
       // initialUrl: 'about:blank',
       // initialUrl: 'https://tulip.garden/',
+      initialUrl: 'https://mainnet.zeta.markets/',
+      // initialUrl: 'http://localhost:3000/',
       javascriptMode: JavascriptMode.unrestricted,
       javascriptChannels: _jsChannels,
       onPageStarted: (String url) {

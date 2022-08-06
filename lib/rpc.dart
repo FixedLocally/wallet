@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+String _hardcodedWallet = "EpDbR2jE1YB9Tutk36EtKrqz4wZBCwZNMdbHvbqd3TCv";
+// String _hardcodedWallet = "GQP9XKoRfwo229MA8iDq8GsC4piAruxrg578QbTNQuqD";
+
 class Rpc {
   static final StreamController<RpcEvent> _eventStreamController = StreamController.broadcast();
 
@@ -16,6 +19,8 @@ class Rpc {
         return _exit(context, args);
       case "connect":
         return _connect(context, args);
+      case "disconnect":
+        return _disconnect(context, args);
     }
     return RpcResponse.error("Unknown method: $method");
   }
@@ -67,14 +72,29 @@ class Rpc {
     if (args["onlyIfTrusted"] == true) {
       return RpcResponse.error("cannot connect");
     }
+    // await Future.delayed(const Duration(milliseconds: 2500));
     _eventStreamController.add(RpcEvent.object(
       "connect",
-      "PublicKey", ["GQP9XKoRfwo229MA8iDq8GsC4piAruxrg578QbTNQuqD"],
+      "PublicKey", [_hardcodedWallet],
       {
-        "publicKey": {"type": "PublicKey", "value": ["GQP9XKoRfwo229MA8iDq8GsC4piAruxrg578QbTNQuqD"]},
+        "publicKey": {"type": "PublicKey", "value": [_hardcodedWallet]},
+        "isConnected": {"type": null, "value": true},
       },
     ));
-    return RpcResponse.object("PublicKey", ["GQP9XKoRfwo229MA8iDq8GsC4piAruxrg578QbTNQuqD"]);
+    return RpcResponse.object("PublicKey", [_hardcodedWallet]);
+  }
+
+  // disconnect wallet
+  static Future<RpcResponse> _disconnect(BuildContext context, Map args) async {
+    _eventStreamController.add(RpcEvent.primitive(
+      "disconnect",
+      null,
+      {
+        "publicKey": {"type": null, "value": null},
+        "isConnected": {"type": null, "value": false},
+      },
+    ));
+    return RpcResponse.primitive(null);
   }
 }
 
