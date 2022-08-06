@@ -19,7 +19,7 @@ class RpcConstants {
     kMethodNotFound: "Method Not Found",
     kInternalError: "Internal Error",
     kDisconnected: "Disconnected",
-    kUnauthorized: "Unauthorized",
-    kUserRejected: "User Rejected Request",
+    kUnauthorized: "The requested method and/or account has not been authorized by the user.",
+    kUserRejected: "User rejected the request",
   };
 }

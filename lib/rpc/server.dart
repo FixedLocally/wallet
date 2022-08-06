@@ -19,6 +19,7 @@ class RpcServer {
   static final StreamController<RpcEvent> _eventStreamController = StreamController.broadcast();
 
   static bool _init = false;
+  static bool _connected = false;
   static Wallet? _wallet;
 
   static Stream<RpcEvent> get eventStream => _eventStreamController.stream;
@@ -82,6 +83,7 @@ class RpcServer {
     }
 
     // await Future.delayed(const Duration(milliseconds: 2500));
+    _connected = true;
     _eventStreamController.add(RpcEvent.object(
       "connect",
       "PublicKey", [_wallet!.publicKey.toBase58()],
@@ -97,6 +99,7 @@ class RpcServer {
 
   // disconnect wallet
   static Future<RpcResponse> _disconnect(ContextHolder contextHolder, Map args) async {
+    _connected = false;
     _eventStreamController.add(RpcEvent.primitive(
       "disconnect",
       null,
@@ -113,6 +116,13 @@ class RpcServer {
     if (contextHolder.disposed) {
       return RpcResponse.error(RpcConstants.kUserRejected);
     }
+    if (!_connected) {
+      return RpcResponse.error(RpcConstants.kUnauthorized);
+    }
+    if (args["tx"] == null) {
+      return RpcResponse.error(RpcConstants.kInvalidInput);
+    }
+
     List<int> payload = args["tx"].cast<int>();
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
     Message message = Message.decompile(compiledMessage);

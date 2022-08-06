@@ -166,6 +166,14 @@ class _MyHomePageState extends State<MyHomePage> with ContextHolderMixin<MyHomeP
           });
         });
       },
+      navigationDelegate: (NavigationRequest request) async {
+        String currentUrl = await _controller!.currentUrl() ?? "";
+        if (request.url.split("#").first != currentUrl.split("#").first) {
+          // page changed
+          await RpcServer.entryPoint(contextHolder, "disconnect", {});
+        }
+        return NavigationDecision.navigate;
+      },
     );
   }
 
