@@ -5,8 +5,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:wallet/routes/mixins/timer.dart';
-import 'package:wallet/utils/utils.dart';
+import 'mixins/timer.dart';
+import '../utils/utils.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'mixins/context_holder.dart';
@@ -80,11 +80,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
     _random = Random();
     _realMessageHandlerKey = _createKey();
     if (Platform.isAndroid) WebView.platform = AndroidWebView();
-    Utils.loadAssets().then((value) {
-      setState(() {
-        _ready = true;
-      });
-    });
+    _ready = true;
     for (int i = 0; i < 99; ++i) {
       _bogusMessageHandlerKeys.add(_createKey());
     }

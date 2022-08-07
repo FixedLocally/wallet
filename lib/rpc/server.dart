@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
-import 'package:wallet/routes/mixins/context_holder.dart';
-import 'package:wallet/rpc/constants.dart';
-import 'package:wallet/widgets/approve_tx.dart';
 
 import '../utils/utils.dart';
 import 'event.dart';
 import 'response.dart';
+import '../routes/mixins/context_holder.dart';
+import 'constants.dart';
+import '../widgets/approve_tx.dart';
 
 String _hardcodedWallet = "EpDbR2jE1YB9Tutk36EtKrqz4wZBCwZNMdbHvbqd3TCv";
 // String _hardcodedWallet = "GQP9XKoRfwo229MA8iDq8GsC4piAruxrg578QbTNQuqD";
@@ -184,7 +184,7 @@ class RpcServer {
     List<Message> messages = [];
     List<List<int>> payloads = [];
     List<String> blockhashes = [];
-    txs.forEach((e) {
+    for (var e in txs) {
       List<int> payload = e["tx"].cast<int>();
       CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
       Message message = Message.decompile(compiledMessage);
@@ -192,7 +192,7 @@ class RpcServer {
       messages.add(message);
       payloads.add(payload);
       blockhashes.add(e["recentBlockhash"]);
-    });
+    }
 
     Future<TokenChanges> simulation = Utils.simulateTxs(payloads, _wallet!.publicKey.toBase58());
     bool approved = await _showConfirmDialog(

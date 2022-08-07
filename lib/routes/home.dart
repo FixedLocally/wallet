@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wallet/routes/webview.dart';
-import 'package:wallet/utils/utils.dart';
+import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
   const HomeRoute({Key? key}) : super(key: key);
@@ -10,11 +9,6 @@ class HomeRoute extends StatefulWidget {
 }
 
 class _HomeRouteState extends State<HomeRoute> {
-  @override
-  void initState() {
-    Utils.loadAssets();
-    super.initState();
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

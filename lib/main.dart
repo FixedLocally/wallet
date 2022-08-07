@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wallet/routes/home.dart';
+import 'routes/entry_point.dart';
 
 void main() {
   runApp(const WalletApp());
@@ -16,7 +16,7 @@ class WalletApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const HomeRoute(),
+      home: const EntryPointRoute(),
     );
   }
 }
