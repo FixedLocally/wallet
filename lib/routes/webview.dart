@@ -4,10 +4,11 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:wallet/routes/mixins/timer.dart';
 import 'package:wallet/utils/utils.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../context_holder.dart';
+import 'mixins/context_holder.dart';
 import '../rpc/rpc.dart';
 
 class DAppRoute extends StatefulWidget {
@@ -24,7 +25,7 @@ class DAppRoute extends StatefulWidget {
   State<DAppRoute> createState() => _DAppRouteState();
 }
 
-class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute> {
+class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute>, TimerMixin<DAppRoute> {
   WebViewController? _controller;
   String? _title;
   String? _subtitle;
@@ -66,6 +67,9 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
     )),
   };
 
+  @override
+  int get frequency => 1000;
+
   final List<String> _bogusMessageHandlerKeys = [];
 
   @override
@@ -85,6 +89,17 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
     _sub = RpcServer.eventStream.listen((event) async {
       print("rpcEvent: $event");
       await _controller?.runJavascript("window.eventIngestion$_realMessageHandlerKey('${event.trigger}', ${jsonEncode(event.response)}, ${jsonEncode(event.updates)})");
+    });
+  }
+
+  @override
+  void onTimer() {
+    _controller?.getTitle().then((value) {
+      if (value != _title) {
+        setState(() {
+          _title = value;
+        });
+      }
     });
   }
 
