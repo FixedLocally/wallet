@@ -166,7 +166,10 @@ class Utils {
     for (int i = 0; i < rawMessage.length; ++i) {
       changes.add(await simulateTx(rawMessage[i], owner));
     }
-    return TokenChanges.merge(changes);
+    TokenChanges _changes = TokenChanges.merge(changes);
+    print(changes);
+    print(_changes);
+    return _changes;
   }
 
   static Future<TokenAmount?> _getTokenAmountOrNull(String address) async {
@@ -189,7 +192,7 @@ class TokenChanges {
     Map<String, double> changes = {};
     Map<String, SplTokenAccountDataInfo> updatedAccounts = {};
     int solOffset = 0;
-    for (int i = 0; i < changes.length; ++i) {
+    for (int i = 0; i < tokenChanges.length; ++i) {
       tokenChanges[i].changes.forEach((key, value) {
         changes[key] = (changes[key] ?? 0) + value;
       });
@@ -199,5 +202,10 @@ class TokenChanges {
       solOffset += tokenChanges[i].solOffset;
     }
     return TokenChanges(changes, updatedAccounts, solOffset);
+  }
+
+  @override
+  String toString() {
+    return 'TokenChanges{changes: $changes, updatedAccounts: $updatedAccounts, solOffset: $solOffset}';
   }
 }
