@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:wallet/routes/mixins/timer.dart';
 import 'package:wallet/utils/utils.dart';
@@ -32,8 +33,9 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
   late Random _random;
   late StreamSubscription<RpcEvent> _sub;
 
+  late Completer _injectionCompleter;
+
   String _realMessageHandlerKey = "";
-  bool _injected = false;
   bool _ready = false;
 
   Set<JavascriptChannel> get _jsChannels => {
@@ -108,13 +110,12 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
   }
 
   Future _runInjection() async {
+    Completer completer = Completer();
+    _injectionCompleter = completer;
     String js = '(${Utils.injectionJs})("$_realMessageHandlerKey", ${jsonEncode(_bogusMessageHandlerKeys)})';
-    Future f2 = _controller!.runJavascript(Utils.web3Js);
-    await f2;
     Future f1 = _controller!.runJavascript(js);
     await f1;
-    _injected = true;
-    // return Future.wait([f1, f2]);
+    completer.complete();
   }
 
   @override
@@ -139,7 +140,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
         onPressed: () {
           // _controller!.runJavascript('document.write(phantom.solana.publicKey)');
           _controller!.reload();
-          _injected = false;
+          print('reloading');
         },
       ),
     );
@@ -148,26 +149,28 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
   Widget _webView() {
     return WebView(
       // initialUrl: 'https://r3byv.csb.app/',
-      // initialUrl: 'about:blank',
+      initialUrl: 'about:blank',
       // initialUrl: 'https://tulip.garden/',
       // initialUrl: 'https://mainnet.zeta.markets/',
       // initialUrl: 'https://solend.fi/dashboard',
       // initialUrl: 'http://localhost:3000/',
-      initialUrl: widget.initialUrl,
+      // initialUrl: widget.initialUrl,
       javascriptMode: JavascriptMode.unrestricted,
       javascriptChannels: _jsChannels,
+      debuggingEnabled: kDebugMode,
 
       onPageStarted: (String url) {
+        _runInjection();
         setState(() {
           _title = "Loading...";
         });
       },
       onWebViewCreated: (WebViewController webviewController) {
         _controller = webviewController;
+        webviewController.loadUrl(widget.initialUrl);
         // _loadHtmlFromAssets();
       },
       onPageFinished: (String url) async {
-        if (_injected) return;
         _runInjection();
         _controller?.getTitle().then((title) {
           if (title != null) {
@@ -182,11 +185,12 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
         String currentUrl = await _controller!.currentUrl() ?? "";
         if (request.url.split("#").first != currentUrl.split("#").first) {
           // page changed
-          await RpcServer.entryPoint(contextHolder, "disconnect", {});
+          if (RpcServer.connected) {
+            await RpcServer.entryPoint(contextHolder, "disconnect", {});
+          }
           setState(() {
             _title = request.url;
             _subtitle = null;
-            _injected = false;
           });
         }
         return NavigationDecision.navigate;
@@ -196,12 +200,13 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
 
   void _rpcResolve(dynamic response, int id) {
     String msg = jsonEncode(response);
-    _controller!.runJavascript('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)');
+    print('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)');
+    _injectionCompleter.future.then((value) => _controller!.runJavascript('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)'));
   }
 
   void _rpcReject(dynamic response, int id) {
     String msg = jsonEncode(response);
-    _controller!.runJavascript('window["rejectRpc$_realMessageHandlerKey"]($id, $msg)');
+    _injectionCompleter.future.then((value) => _controller!.runJavascript('window["rejectRpc$_realMessageHandlerKey"]($id, $msg)'));
   }
 
   @override

@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
-import 'package:wallet/context_holder.dart';
+import 'package:wallet/routes/mixins/context_holder.dart';
 import 'package:wallet/rpc/constants.dart';
+import 'package:wallet/widgets/approve_tx.dart';
 
 import '../utils/utils.dart';
 import 'event.dart';
@@ -23,6 +24,7 @@ class RpcServer {
   static Wallet? _wallet;
 
   static Stream<RpcEvent> get eventStream => _eventStreamController.stream;
+  static bool get connected => _connected;
 
   static Future<RpcResponse> entryPoint(ContextHolder contextHolder, String method, Map args) async {
     if (!_init) await _doInit();
@@ -38,6 +40,8 @@ class RpcServer {
         return _disconnect(contextHolder, args);
       case "signTransaction":
         return _signTransaction(contextHolder, args, false);
+      case "signAllTransactions":
+        return _signAllTransactions(contextHolder, args, false);
       case "signAndSendTransaction":
         return _signTransaction(contextHolder, args, true);
     }
@@ -113,11 +117,9 @@ class RpcServer {
 
   // sign transaction
   static Future<RpcResponse> _signTransaction(ContextHolder contextHolder, Map args, bool send) async {
-    if (contextHolder.disposed) {
-      return RpcResponse.error(RpcConstants.kUserRejected);
-    }
-    if (!_connected) {
-      return RpcResponse.error(RpcConstants.kUnauthorized);
+    RpcResponse? error = _sigPreChecks(contextHolder);
+    if (error != null) {
+      return error;
     }
     if (args["tx"] == null) {
       return RpcResponse.error(RpcConstants.kInvalidInput);
@@ -131,37 +133,16 @@ class RpcServer {
     bool approved = await _showConfirmDialog(
       context: contextHolder.context!,
       builder: (context) {
-        return FutureBuilder<TokenChanges>(
-          future: simulation,
-          builder: (ctx, snapshot) {
-            double solOffset = (snapshot.data?.solOffset ?? 0) / lamportsPerSol;
-            return Column(
-              children: [
-                const Text("Approve transaction?"),
-                if (snapshot.hasData)
-                  ...[
-                    ...snapshot.data!.changes.map((key, value) {
-                      String mint = snapshot.data!.updatedAccounts[key]!.mint;
-                      String symbol = Utils.getToken(mint)?["symbol"] ?? mint;
-                      return MapEntry(key, Text("$symbol: ${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}"));
-                    }).values,
-                    Text("SOL: ${solOffset > 0 ? "+" : ""}${solOffset.toStringAsFixed(6)}"),
-                  ]
-                else if (snapshot.hasError)
-                  Text("Transaction may fail to confirm ${snapshot.error}")
-                else
-                  const Text("Loading..."),
-              ],
-            );
-          },
-        );
+        return ApproveTransactionWidget(simulation: simulation);
       },
     );
     if (approved) {
       String recentBlockhash = args["recentBlockhash"];
       SignedTx signedTx = await _wallet!.signMessage(message: message, recentBlockhash: recentBlockhash);
       print(signedTx.signatures.first.toBase58());
+      Signature signature = await _wallet!.sign(payload);
       print(signedTx.encode());
+      print(signature.toBase58());
       if (send) {
         try {
           String sig = await _solanaClient.rpcClient.sendTransaction(
@@ -178,7 +159,7 @@ class RpcServer {
         }
       }
       return RpcResponse.primitive({
-        "signature": {"type": null, "value": signedTx.signatures.first.bytes},
+        "signature": {"type": null, "value": signature.bytes},
         "publicKey": {
           "type": "PublicKey",
           "value": [_wallet!.publicKey.toBase58()]
@@ -187,6 +168,92 @@ class RpcServer {
     } else {
       return RpcResponse.error(RpcConstants.kUserRejected);
     }
+  }
+
+  // sign all transactions
+  static Future<RpcResponse> _signAllTransactions(ContextHolder contextHolder, Map args, bool send) async {
+    // {"txs": [{"tx", "recentBlockhash"}]}
+    RpcResponse? error = _sigPreChecks(contextHolder);
+    if (error != null) {
+      return error;
+    }
+    if (args["txs"] == null) return RpcResponse.error(RpcConstants.kInvalidInput);
+    List<Map<String, dynamic>> txs = args["txs"]!.cast<Map<String, dynamic>>();
+
+    List<CompiledMessage> compiledMessages = [];
+    List<Message> messages = [];
+    List<List<int>> payloads = [];
+    List<String> blockhashes = [];
+    txs.forEach((e) {
+      List<int> payload = e["tx"].cast<int>();
+      CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
+      Message message = Message.decompile(compiledMessage);
+      compiledMessages.add(compiledMessage);
+      messages.add(message);
+      payloads.add(payload);
+      blockhashes.add(e["recentBlockhash"]);
+    });
+
+    Future<TokenChanges> simulation = Utils.simulateTxs(payloads, _wallet!.publicKey.toBase58());
+    bool approved = await _showConfirmDialog(
+      context: contextHolder.context!,
+      builder: (context) {
+        return ApproveTransactionWidget(simulation: simulation);
+      },
+    );
+    if (approved) {
+      List<SignedTx> signedTxs = [];
+      List<Signature> signatures = [];
+      for (int i = 0; i < payloads.length; ++i) {
+        String recentBlockhash = blockhashes[i];
+        SignedTx signedTx = await _wallet!.signMessage(message: messages[i], recentBlockhash: recentBlockhash);
+        Signature signature = await _wallet!.sign(payloads[i]);
+        signedTxs.add(signedTx);
+        signatures.add(signature);
+        print(signedTx.signatures.first.toBase58());
+        print(signedTx.encode());
+        print(signature.toBase58());
+      }
+
+      if (send) {
+        try {
+          List<String> sigs = [];
+          for (SignedTx signedTx in signedTxs) {
+            String sig = await _solanaClient.rpcClient.sendTransaction(
+                signedTx.encode(), preflightCommitment: Commitment.confirmed);
+            sigs.add(sig);
+          }
+          return RpcResponse.primitive(sigs.map((e) => {
+            "signature": {"type": null, "value": e},
+            "publicKey": {
+              "type": "PublicKey",
+              "value": [_wallet!.publicKey.toBase58()]
+            },
+          }).toList());
+        } on JsonRpcException catch (e) {
+          return RpcResponse.error(e.code, e.message);
+        }
+      }
+      return RpcResponse.primitive(signatures.map((e) => {
+        "signature": {"type": null, "value": e.bytes},
+        "publicKey": {
+          "type": "PublicKey",
+          "value": [_wallet!.publicKey.toBase58()]
+        },
+      }).toList());
+    } else {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
+  }
+
+  static RpcResponse? _sigPreChecks(ContextHolder contextHolder) {
+    if (contextHolder.disposed) {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
+    if (!_connected) {
+      return RpcResponse.error(RpcConstants.kUnauthorized);
+    }
+    return null;
   }
 }
 

@@ -89,7 +89,6 @@ class Utils {
   }
 
   static Future<TokenChanges> simulateTx(List<int> rawMessage, String owner) async {
-    print('simulateTx');
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(rawMessage));
     Message message = Message.decompile(compiledMessage);
     // prepend header
@@ -159,7 +158,15 @@ class Utils {
         updatedAcctsMap[tokenAccounts[i]] = updatedAccts[i];
       }
     }
-    return TokenChanges(message, changes, updatedAcctsMap, postSolBalance - preSolBalance);
+    return TokenChanges(changes, updatedAcctsMap, postSolBalance - preSolBalance);
+  }
+
+  static Future<TokenChanges> simulateTxs(List<List<int>> rawMessage, String owner) async {
+    List<TokenChanges> changes = [];
+    for (int i = 0; i < rawMessage.length; ++i) {
+      changes.add(await simulateTx(rawMessage[i], owner));
+    }
+    return TokenChanges.merge(changes);
   }
 
   static Future<TokenAmount?> _getTokenAmountOrNull(String address) async {
@@ -172,10 +179,25 @@ class Utils {
 }
 
 class TokenChanges {
-  final Message message;
   final Map<String, double> changes;
   final Map<String, SplTokenAccountDataInfo> updatedAccounts;
   final int solOffset;
 
-  TokenChanges(this.message, this.changes, this.updatedAccounts, this.solOffset);
+  TokenChanges(this.changes, this.updatedAccounts, this.solOffset);
+
+  static TokenChanges merge(List<TokenChanges> tokenChanges) {
+    Map<String, double> changes = {};
+    Map<String, SplTokenAccountDataInfo> updatedAccounts = {};
+    int solOffset = 0;
+    for (int i = 0; i < changes.length; ++i) {
+      tokenChanges[i].changes.forEach((key, value) {
+        changes[key] = (changes[key] ?? 0) + value;
+      });
+      tokenChanges[i].updatedAccounts.forEach((key, value) {
+        updatedAccounts[key] = value;
+      });
+      solOffset += tokenChanges[i].solOffset;
+    }
+    return TokenChanges(changes, updatedAccounts, solOffset);
+  }
 }
