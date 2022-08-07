@@ -147,6 +147,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
         onPressed: () {
           // _controller!.runJavascript('document.write(phantom.solana.publicKey)');
           _controller!.reload();
+          _injected = false;
         },
       ),
     );
@@ -156,8 +157,8 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
     return WebView(
       // initialUrl: 'https://r3byv.csb.app/',
       // initialUrl: 'about:blank',
-      // initialUrl: 'https://tulip.garden/',
-      initialUrl: 'https://mainnet.zeta.markets/',
+      initialUrl: 'https://tulip.garden/',
+      // initialUrl: 'https://mainnet.zeta.markets/',
       // initialUrl: 'https://solend.fi/dashboard',
       // initialUrl: 'http://localhost:3000/',
       javascriptMode: JavascriptMode.unrestricted,

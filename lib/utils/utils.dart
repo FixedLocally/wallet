@@ -60,15 +60,44 @@ class Utils {
     );
   }
 
+  // get accounts in batches of 10
+  static Future<List<Account?>> batchGetAccounts(List<String> addresses) async{
+    List<Account?> accounts = [];
+    for (int i = 0; i < addresses.length; i += 10) {
+      List<String> batch = addresses.sublist(i, min(i + 10, addresses.length));
+      accounts.addAll(await _solanaClient.rpcClient.getMultipleAccounts(batch, commitment: Commitment.confirmed, encoding: Encoding.base64));
+    }
+    return accounts;
+  }
+
   static Future<TokenChanges> simulateTx(List<int> rawMessage, String owner) async {
+    print('simulateTx');
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(rawMessage));
     Message message = Message.decompile(compiledMessage);
     // prepend header
     List<int> simulationPayload = [1, ...List.generate(64, (_) => 0), ...rawMessage];
     List<String> addresses = message.instructions
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
-        .expand((e) => e).toList();
-    TransactionStatus status = await _solanaClient.rpcClient.simulateTransaction(
+        .expand((e) => e).toSet().toList();
+    List<String> tokenProgramAddresses = message.instructions
+        .where((e) => e.programId.toBase58() == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" || e.programId.toBase58() == "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+        .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
+        .expand((e) => e).where((e) => !e.contains("111111111")).toSet().toList();
+    List<Account?> accounts = await batchGetAccounts(addresses);
+    for (int i = 0; i < addresses.length; i++) {
+      if (accounts[i] != null) {
+        if ((accounts[i]!.data as BinaryAccountData).data.length != 165) {
+          addresses[i] = "";
+        }
+      } else {
+        if (!tokenProgramAddresses.contains(addresses[i])) {
+          addresses[i] = "";
+        }
+      }
+    }
+    addresses = addresses.where((element) => element.isNotEmpty).toList();
+    addresses = [...addresses, owner];
+    Future<TransactionStatus> statusFuture = _solanaClient.rpcClient.simulateTransaction(
       base64Encode(simulationPayload),
       replaceRecentBlockhash: true,
       commitment: Commitment.confirmed,
@@ -77,38 +106,50 @@ class Utils {
         addresses: addresses,
       ),
     );
+    Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed);
+    List results = await Future.wait([statusFuture, solBalanceFuture]);
+    TransactionStatus status = results[0];
+    int preSolBalance = results[1];
 
     List<String> tokenAccounts = [];
     List<Future<SplTokenAccountDataInfo>> updatedAcctFutures = [];
-    List<Future<TokenAmount>> preBalanceFutures = [];
+    List<Future<TokenAmount?>> preBalanceFutures = [];
     int count = 0;
-    for (int i = 0; i < addresses.length; ++i) {
+    for (int i = 0; i < addresses.length - 1; ++i) {
       Account? element = status.accounts?[i];
       if (element?.data is BinaryAccountData) {
         List<int> data = (element?.data as BinaryAccountData).data;
         if (data.length == RpcConstants.kTokenAccountLength) {
           tokenAccounts.add(addresses[i]);
           updatedAcctFutures.add(Utils.parseTokenAccount(data));
-          preBalanceFutures.add(_solanaClient.rpcClient.getTokenAccountBalance(addresses[i], commitment: Commitment.confirmed));
+          preBalanceFutures.add(_getTokenAmountOrNull(addresses[i]));
           ++count;
         }
       }
     }
+    int postSolBalance = status.accounts?.last.lamports ?? 0;
     List result = await Future.wait([Future.wait(updatedAcctFutures), Future.wait(preBalanceFutures)]);
     List<SplTokenAccountDataInfo> updatedAccts = result[0];
-    List<TokenAmount> preBalances = result[1];
+    List<TokenAmount?> preBalances = result[1];
     Map<String, SplTokenAccountDataInfo> updatedAcctsMap = {};
     Map<String, double> changes = {};
     for (int i = 0; i < count; ++i) {
-      double oldAmt = double.parse(preBalances[i].uiAmountString!);
+      double oldAmt = double.parse(preBalances[i]?.uiAmountString ?? "0");
       double newAmt = double.parse(updatedAccts[i].tokenAmount.uiAmountString!);
-      print("${tokenAccounts[i]} ${updatedAccts[i].owner} ${updatedAccts[i].mint} $oldAmt -> $newAmt");
       if (updatedAccts[i].owner == owner) {
         changes[tokenAccounts[i]] = newAmt - oldAmt;
         updatedAcctsMap[tokenAccounts[i]] = updatedAccts[i];
       }
     }
-    return TokenChanges(message, changes, updatedAcctsMap);
+    return TokenChanges(message, changes, updatedAcctsMap, postSolBalance - preSolBalance);
+  }
+
+  static Future<TokenAmount?> _getTokenAmountOrNull(String address) async {
+    try {
+      return await _solanaClient.rpcClient.getTokenAccountBalance(address, commitment: Commitment.confirmed);
+    } catch (e) {
+      return null;
+    }
   }
 }
 
@@ -116,6 +157,7 @@ class TokenChanges {
   final Message message;
   final Map<String, double> changes;
   final Map<String, SplTokenAccountDataInfo> updatedAccounts;
+  final int solOffset;
 
-  TokenChanges(this.message, this.changes, this.updatedAccounts);
+  TokenChanges(this.message, this.changes, this.updatedAccounts, this.solOffset);
 }
