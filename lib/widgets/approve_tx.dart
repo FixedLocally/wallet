@@ -18,14 +18,22 @@ class ApproveTransactionWidget extends StatelessWidget {
           children: [
             const Text("Approve transaction?"),
             if (snapshot.hasData)
-              ...[
-                ...snapshot.data!.changes.map((key, value) {
-                  String mint = snapshot.data!.updatedAccounts[key]!.mint;
-                  String symbol = Utils.getToken(mint)?["symbol"] ?? mint;
-                  return MapEntry(key, Text("$symbol: ${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}"));
-                }).values,
-                Text("SOL: ${solOffset > 0 ? "+" : ""}${solOffset.toStringAsFixed(6)}"),
-              ]
+              if (snapshot.data!.error)
+                Text("Transaction may fail to confirm ${snapshot.error}")
+              else
+                ...[
+                  ...snapshot.data!.changes.map((key, value) {
+                    String mint = snapshot.data!.updatedAccounts[key]!.mint;
+                    String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
+                    String symbol = Utils.getToken(mint)?["symbol"] ?? shortMint;
+                    if (value != 0) {
+                      return MapEntry(key, Text("$symbol: ${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}"));
+                    } else {
+                      return MapEntry(key, const SizedBox.shrink());
+                    }
+                  }).values,
+                  Text("SOL: ${solOffset > 0 ? "+" : ""}${solOffset.toStringAsFixed(6)}"),
+                ]
             else if (snapshot.hasError)
               Text("Transaction may fail to confirm ${snapshot.error}")
             else

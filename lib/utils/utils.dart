@@ -124,7 +124,8 @@ class Utils {
       ),
     );
     Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed);
-    List results = await Future.wait([statusFuture, solBalanceFuture]);
+    List results = await Future.wait([statusFuture, solBalanceFuture]).catchError((_) => <Object>[]);
+    if (results.isEmpty) return TokenChanges.error();
     TransactionStatus status = results[0];
     int preSolBalance = results[1];
 
@@ -185,14 +186,19 @@ class TokenChanges {
   final Map<String, double> changes;
   final Map<String, SplTokenAccountDataInfo> updatedAccounts;
   final int solOffset;
+  final bool error;
 
-  TokenChanges(this.changes, this.updatedAccounts, this.solOffset);
+  TokenChanges(this.changes, this.updatedAccounts, this.solOffset) : error = false;
+  TokenChanges.error() : changes = {}, updatedAccounts = {}, solOffset = 0, error = true;
 
   static TokenChanges merge(List<TokenChanges> tokenChanges) {
     Map<String, double> changes = {};
     Map<String, SplTokenAccountDataInfo> updatedAccounts = {};
     int solOffset = 0;
     for (int i = 0; i < tokenChanges.length; ++i) {
+      if (tokenChanges[i].error) {
+        return TokenChanges.error();
+      }
       tokenChanges[i].changes.forEach((key, value) {
         changes[key] = (changes[key] ?? 0) + value;
       });
