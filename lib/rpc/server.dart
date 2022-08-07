@@ -197,26 +197,29 @@ Future<bool> _showConfirmDialog({
   bool? result = await showModalBottomSheet<bool>(
     context: context,
     builder: (ctx) {
-      return Column(
-        children: [
-          builder(ctx),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text("Yes"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: const Text("No"),
-              ),
-            ],
-          ),
-        ],
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            builder(ctx),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text("Yes"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: const Text("No"),
+                ),
+              ],
+            ),
+          ],
+        ),
       );
     },
   );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -12,13 +13,30 @@ import '../rpc/constants.dart';
 
 class Utils {
   static final SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
-  static final Map<String, Map<String, dynamic>> _tokenList = {};
 
-  static Future loadTokenList() async {
-    if (_tokenList.isNotEmpty) return _tokenList;
-    rootBundle.load("assets/tokens.json").then((ByteData byteData) {
+  static final Map<String, Map<String, dynamic>> _tokenList = {};
+  static String _injectionJs = "";
+  static String _web3Js = "";
+  static Completer<void>? _completer;
+
+  static String get injectionJs => _injectionJs;
+  static String get web3Js => _web3Js;
+
+  static Future loadAssets() async {
+    if (_tokenList.isNotEmpty && _injectionJs.isNotEmpty && _web3Js.isNotEmpty) return;
+    if (_completer != null) return;
+    _completer = Completer<void>();
+    Future f1 = rootBundle.load("assets/tokens.json").then((ByteData byteData) {
       _tokenList.addAll(jsonDecode(utf8.decode(byteData.buffer.asUint8List())).cast<String, Map<String, dynamic>>());
     });
+    Future f2 = rootBundle.loadString('assets/inject.js').then((String js) {
+      _injectionJs = js;
+    });
+    Future f3 = rootBundle.loadString('assets/web3.js').then((String js) {
+      _web3Js = js;
+    });
+    Future.wait([f1, f2, f3]).then((value) => _completer!.complete(null));
+    return _completer!.future;
   }
 
   static Map<String, dynamic>? getToken(String token) {
