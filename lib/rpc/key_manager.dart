@@ -96,6 +96,10 @@ class KeyManager {
     await _db.transaction((txn) async {
       await txn.execute("update wallets set active=0");
       await txn.execute("update wallets set active=1 where id=?", [key._id]);
+      for (ManagedKey key in _wallets) {
+        key._active = false;
+      }
+      key._active = true;
       _activeWallet = key;
     });
   }
@@ -140,9 +144,9 @@ class KeyManager {
         active: true,
       );
       await txn.execute("update wallets set active=0");
-      _wallets.forEach((ManagedKey key) {
+      for (ManagedKey key in _wallets) {
         key._active = false;
-      });
+      }
       int id = await txn.insert("wallets", newKey.toJSON());
       newKey._id = id;
       _wallets.add(newKey);

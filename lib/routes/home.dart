@@ -152,7 +152,9 @@ class _HomeRouteState extends State<HomeRoute> {
       style: ListTileStyle.drawer,
       subtitle: Text(key.pubKey, maxLines: 1, overflow: TextOverflow.ellipsis),
       onTap: () async {
+        Navigator.pop(context);
         await KeyManager.instance.setActiveKey(key);
+        setState(() {});
       },
     );
   }
