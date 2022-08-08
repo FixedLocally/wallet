@@ -26,6 +26,7 @@ class KeyManager {
   bool get isEmpty => _wallets.isEmpty;
   bool get isNotEmpty => _wallets.isNotEmpty;
   String get pubKey => _activeWallet!.pubKey;
+  String get walletName => _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 
   KeyManager._();

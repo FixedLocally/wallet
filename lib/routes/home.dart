@@ -18,7 +18,7 @@ class _HomeRouteState extends State<HomeRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Wallet'),
+        title: Text(KeyManager.instance.walletName),
         actions: [
           IconButton(
             onPressed: () async {
