@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import 'home.dart';
+import 'setup.dart';
 
 class EntryPointRoute extends StatefulWidget {
   const EntryPointRoute({Key? key}) : super(key: key);
@@ -17,7 +19,11 @@ class _EntryPointRouteState extends State<EntryPointRoute> {
     Utils.loadAssets().then((value) {
       Navigator.pushReplacement(context, MaterialPageRoute(
         builder: (ctx) {
-          return const HomeRoute();
+          if (KeyManager.instance.isEmpty) {
+            return const SetupRoute();
+          } else {
+            return const HomeRoute();
+          }
         },
       ));
     });
