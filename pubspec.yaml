@@ -17,24 +17,26 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  bip39: ^1.0.6
+  crypto: ^3.0.2
+  cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.2
   flutter_secure_storage: ^5.1.0
   solana: ^0.26.0
+  sqflite: ^2.0.3+1
   webview_flutter: ^3.0.4
 
 dev_dependencies:
+  flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/index.html
     - assets/inject.js
-    - assets/web3.js
     - assets/tokens.json
 
   # fonts:
