@@ -10,20 +10,19 @@ import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 
 import '../rpc/constants.dart';
+import '../rpc/key_manager.dart';
 
 class Utils {
   static final SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
 
   static final Map<String, Map<String, dynamic>> _tokenList = {};
   static String _injectionJs = "";
-  static String _web3Js = "";
   static Completer<void>? _completer;
 
   static String get injectionJs => _injectionJs;
-  static String get web3Js => _web3Js;
 
   static Future loadAssets() async {
-    if (_tokenList.isNotEmpty && _injectionJs.isNotEmpty && _web3Js.isNotEmpty) return;
+    if (_tokenList.isNotEmpty && _injectionJs.isNotEmpty) return;
     if (_completer != null) return;
     _completer = Completer<void>();
     Future f1 = rootBundle.load("assets/tokens.json").then((ByteData byteData) {
@@ -32,9 +31,7 @@ class Utils {
     Future f2 = rootBundle.loadString('assets/inject.js').then((String js) {
       _injectionJs = js;
     });
-    Future f3 = rootBundle.loadString('assets/web3.js').then((String js) {
-      _web3Js = js;
-    });
+    Future f3 = KeyManager.instance.init();
     Future.wait([f1, f2, f3]).then((value) => _completer!.complete(null));
     return _completer!.future;
   }
@@ -44,17 +41,17 @@ class Utils {
   }
 
   static Future<SplTokenAccountDataInfo> parseTokenAccount(List<int> data) async {
-    List<int> _mint = data.sublist(0, 32);
-    String mint = base58encode(_mint);
-    List<int> _owner = data.sublist(32, 64);
-    String owner = base58encode(_owner);
-    List<int> _amount = data.sublist(64, 72);
-    int amount = Int8List.fromList(_amount).buffer.asUint64List().first;
-    List<int> _delegate = data.sublist(72, 108);
-    String? delegate = _delegate.sublist(0, 4).any((e) => e != 0) ? null : base58encode(_delegate.sublist(4));
-    List<int> _state = data.sublist(108, 109);
-    List<int> _isNative = data.sublist(109, 121);
-    bool isNative = _isNative.sublist(0, 4).any((e) => e != 0);
+    List<int> rawMint = data.sublist(0, 32);
+    String mint = base58encode(rawMint);
+    List<int> rawOwner = data.sublist(32, 64);
+    String owner = base58encode(rawOwner);
+    List<int> rawAmount = data.sublist(64, 72);
+    int amount = Int8List.fromList(rawAmount).buffer.asUint64List().first;
+    List<int> rawDelegate = data.sublist(72, 108);
+    String? delegate = rawDelegate.sublist(0, 4).any((e) => e != 0) ? null : base58encode(rawDelegate.sublist(4));
+    List<int> rawState = data.sublist(108, 109);
+    List<int> rawIsNative = data.sublist(109, 121);
+    bool isNative = rawIsNative.sublist(0, 4).any((e) => e != 0);
     // List<int> _delegatedAmount = data.sublist(121, 129);
     // int? delegatedAmount = _delegatedAmount.sublist(0, 4).any((e) => e != 0) ? null : Int8List.fromList(_delegatedAmount).buffer.asUint64List().first;
     // List<int> _closeAuthority = data.sublist(129, 165);
@@ -71,7 +68,7 @@ class Utils {
       owner: owner,
       tokenAmount: TokenAmount(amount: "$amount", decimals: decimals, uiAmountString: "${amount / pow(10, decimals)}"),
       delegate: delegate,
-      state: "${_state[0]}",
+      state: "${rawState[0]}",
       isNative: isNative,
       // delegatedAmount: delegatedAmount,
       // closeAuthority: closeAuthority,
@@ -167,10 +164,8 @@ class Utils {
     for (int i = 0; i < rawMessage.length; ++i) {
       changes.add(await simulateTx(rawMessage[i], owner));
     }
-    TokenChanges _changes = TokenChanges.merge(changes);
-    print(changes);
-    print(_changes);
-    return _changes;
+    TokenChanges mergedChanges = TokenChanges.merge(changes);
+    return mergedChanges;
   }
 
   static Future<TokenAmount?> _getTokenAmountOrNull(String address) async {
