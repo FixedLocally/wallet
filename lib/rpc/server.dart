@@ -1,19 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 
 import '../utils/utils.dart';
 import 'event.dart';
+import 'key_manager.dart';
 import 'response.dart';
 import '../routes/mixins/context_holder.dart';
 import 'constants.dart';
 import '../widgets/approve_tx.dart';
 
-String _hardcodedWallet = "EpDbR2jE1YB9Tutk36EtKrqz4wZBCwZNMdbHvbqd3TCv";
-// String _hardcodedWallet = "GQP9XKoRfwo229MA8iDq8GsC4piAruxrg578QbTNQuqD";
 SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
 
 class RpcServer {
@@ -21,7 +19,7 @@ class RpcServer {
 
   static bool _init = false;
   static bool _connected = false;
-  static Wallet? _wallet;
+  // static Wallet? _wallet;
 
   static Stream<RpcEvent> get eventStream => _eventStreamController.stream;
   static bool get connected => _connected;
@@ -49,10 +47,6 @@ class RpcServer {
   }
 
   static Future _doInit() async {
-    _wallet = await Wallet.fromPrivateKeyBytes(privateKey: base58decode(_hardcodedKey).sublist(0, 32));
-    Signature signature = await _wallet!.sign("solana".codeUnits);
-    print(signature);
-    print(signature.toBase58());
     _init = true;
   }
 
@@ -90,14 +84,14 @@ class RpcServer {
     _connected = true;
     _eventStreamController.add(RpcEvent.object(
       "connect",
-      "PublicKey", [_wallet!.publicKey.toBase58()],
+      "PublicKey", [KeyManager.instance.pubKey],
       {
-        "publicKey": {"type": "PublicKey", "value": [_wallet!.publicKey.toBase58()]},
+        "publicKey": {"type": "PublicKey", "value": [KeyManager.instance.pubKey]},
         "isConnected": {"type": null, "value": true},
       },
     ));
     return RpcResponse.primitive({
-      "publicKey": {"type": "PublicKey", "value": [_wallet!.publicKey.toBase58()]},
+      "publicKey": {"type": "PublicKey", "value": [KeyManager.instance.pubKey]},
     });
   }
 
@@ -129,7 +123,7 @@ class RpcServer {
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
     Message message = Message.decompile(compiledMessage);
 
-    Future<TokenChanges> simulation = Utils.simulateTx(payload, _wallet!.publicKey.toBase58());
+    Future<TokenChanges> simulation = Utils.simulateTx(payload, KeyManager.instance.pubKey);
     bool approved = await _showConfirmDialog(
       context: contextHolder.context!,
       builder: (context) {
@@ -138,9 +132,9 @@ class RpcServer {
     );
     if (approved) {
       String recentBlockhash = args["recentBlockhash"];
-      SignedTx signedTx = await _wallet!.signMessage(message: message, recentBlockhash: recentBlockhash);
+      SignedTx signedTx = await KeyManager.instance.signMessage(message, recentBlockhash);
       print(signedTx.signatures.first.toBase58());
-      Signature signature = await _wallet!.sign(payload);
+      Signature signature = await KeyManager.instance.sign(payload);
       print(signedTx.encode());
       print(signature.toBase58());
       if (send) {
@@ -151,7 +145,7 @@ class RpcServer {
             "signature": {"type": null, "value": sig},
             "publicKey": {
               "type": "PublicKey",
-              "value": [_wallet!.publicKey.toBase58()]
+              "value": [KeyManager.instance.pubKey]
             },
           });
         } on JsonRpcException catch (e) {
@@ -162,7 +156,7 @@ class RpcServer {
         "signature": {"type": null, "value": signature.bytes},
         "publicKey": {
           "type": "PublicKey",
-          "value": [_wallet!.publicKey.toBase58()]
+          "value": [KeyManager.instance.pubKey]
         },
       });
     } else {
@@ -194,7 +188,7 @@ class RpcServer {
       blockhashes.add(e["recentBlockhash"]);
     }
 
-    Future<TokenChanges> simulation = Utils.simulateTxs(payloads, _wallet!.publicKey.toBase58());
+    Future<TokenChanges> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey);
     bool approved = await _showConfirmDialog(
       context: contextHolder.context!,
       builder: (context) {
@@ -206,8 +200,8 @@ class RpcServer {
       List<Signature> signatures = [];
       for (int i = 0; i < payloads.length; ++i) {
         String recentBlockhash = blockhashes[i];
-        SignedTx signedTx = await _wallet!.signMessage(message: messages[i], recentBlockhash: recentBlockhash);
-        Signature signature = await _wallet!.sign(payloads[i]);
+        SignedTx signedTx = await KeyManager.instance.signMessage(messages[i], recentBlockhash);
+        Signature signature = await KeyManager.instance.sign(payloads[i]);
         signedTxs.add(signedTx);
         signatures.add(signature);
         print(signedTx.signatures.first.toBase58());
@@ -227,7 +221,7 @@ class RpcServer {
             "signature": {"type": null, "value": e},
             "publicKey": {
               "type": "PublicKey",
-              "value": [_wallet!.publicKey.toBase58()]
+              "value": [KeyManager.instance.pubKey]
             },
           }).toList());
         } on JsonRpcException catch (e) {
@@ -238,7 +232,7 @@ class RpcServer {
         "signature": {"type": null, "value": e.bytes},
         "publicKey": {
           "type": "PublicKey",
-          "value": [_wallet!.publicKey.toBase58()]
+          "value": [KeyManager.instance.pubKey]
         },
       }).toList());
     } else {
