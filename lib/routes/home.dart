@@ -4,6 +4,7 @@ import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
+import '../widgets/header.dart';
 import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -86,34 +87,45 @@ class _HomeRouteState extends State<HomeRoute> {
         ],
       ),
       drawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Stack(
-                children: [
-                  const Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Text('Wallet'),
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                      onPressed: () async {
-                        await Utils.showLoadingDialog(context, KeyManager.instance.createWallet());
-                        setState(() {});
-                      },
-                      icon: const Icon(Icons.add),
+        child: CustomScrollView(
+          slivers: [
+            SliverPersistentHeader(
+              delegate: SliverHeaderDelegate(
+                builder: (ctx) {
+                  return DrawerHeader(
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
                     ),
-                  ),
-                ],
+                    child: Stack(
+                      children: [
+                        const Positioned(
+                          top: 0,
+                          left: 0,
+                          child: Text('Wallet'),
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            onPressed: () async {
+                              await Utils.showLoadingDialog(context, KeyManager.instance.createWallet());
+                              setState(() {});
+                            },
+                            icon: const Icon(Icons.add),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
               ),
+              pinned: true,
             ),
-            ...KeyManager.instance.wallets.map(_createWalletListTile),
+            ...KeyManager.instance.wallets.map((wallet) {
+              return SliverToBoxAdapter(
+                child: _createWalletListTile(wallet),
+              );
+            }),
           ],
         ),
       ),

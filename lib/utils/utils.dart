@@ -186,6 +186,7 @@ class Utils {
           content: Row(
             children: const [
               CircularProgressIndicator(),
+              SizedBox(width: 16),
               Text("Loading..."),
             ],
           ),
