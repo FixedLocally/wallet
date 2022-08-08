@@ -26,11 +26,11 @@ class _SetupRouteState extends State<SetupRoute> {
             TextButton(
               child: const Text('Import Wallet'),
               onPressed: () {
-                Navigator.pushReplacement(context, MaterialPageRoute(
-                  builder: (ctx) {
-                    return const HomeRoute();
-                  },
-                ));
+                // Navigator.pushReplacement(context, MaterialPageRoute(
+                //   builder: (ctx) {
+                //     return const HomeRoute();
+                //   },
+                // ));
               },
             ),
             TextButton(

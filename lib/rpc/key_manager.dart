@@ -7,7 +7,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'errors/errors.dart';
 
-const String defaultDerivationPath = "m/44'/501'/0'/0'";
+const String derivationPathTemplate = "m/44'/501'/%s'/0'";
 
 class KeyManager {
   static KeyManager? _instance;
@@ -26,6 +26,7 @@ class KeyManager {
   bool get isEmpty => _wallets.isEmpty;
   bool get isNotEmpty => _wallets.isNotEmpty;
   String get pubKey => _activeWallet!.pubKey;
+  List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 
   KeyManager._();
 
@@ -66,27 +67,36 @@ class KeyManager {
     String seedHash = sha256.convert(seed).bytes.sublist(0, 4).map((e) => e.toRadixString(16).padLeft(2, "0")).join("");
     Ed25519HDKeyPair keypair = await compute(
       _generateKey,
-      [seed, defaultDerivationPath],
+      [seed, derivationPathTemplate.replaceAll("%s", "0")],
     );
     const FlutterSecureStorage().write(
       key: "seed_$seedHash",
-      value: seed.join(","),
+      value: "${seed.join(",")};0",
     );
     ManagedKey newKey = ManagedKey(
       name: "Wallet ${_wallets.length + 1}",
       pubKey: keypair.publicKey.toBase58(),
       keyType: "seed",
       keyHash: seedHash,
-      keyPath: defaultDerivationPath,
+      keyPath: derivationPathTemplate.replaceAll("%s", "0"),
       active: true,
     );
     await _db.transaction((txn) async {
-      await txn.insert("wallets", newKey.toJSON());
       int id = await txn.insert("wallets", newKey.toJSON());
       await txn.execute("update wallets set active=0 where id=?", [id]);
       newKey._id = id;
       _wallets.add(newKey);
       _activeWallet = newKey;
+    });
+  }
+
+  Future<void> setActiveKey(ManagedKey key) async {
+    assert(_ready);
+    assert(_wallets.contains(key));
+    await _db.transaction((txn) async {
+      await txn.execute("update wallets set active=0");
+      await txn.execute("update wallets set active=1 where id=?", [key._id]);
+      _activeWallet = key;
     });
   }
 
@@ -101,18 +111,59 @@ class KeyManager {
     Wallet? wallet = await _activeWallet!.getWallet();
     return wallet.signMessage(message: message, recentBlockhash: recentBlockhash);
   }
+
+  Future<ManagedKey> createWallet() async {
+    // get seed
+    String seedHash = _wallets.where((element) => element.keyType == "seed").map((element) => element.keyHash).first;
+    String? seed = await const FlutterSecureStorage().read(key: "seed_$seedHash");
+    if (seed == null) throw MissingKeyError("keyHash not found");
+    List<String> seedSegments = seed.split(";");
+    int index = 0;
+    if (seedSegments.length > 1) index = int.parse(seedSegments[1]);
+    ++index;
+    String path = derivationPathTemplate.replaceAll("%s", index.toString());
+    Wallet wallet = await compute(
+      _generateKey,
+      [seedSegments.first.split(",").map(int.parse).toList(), path],
+    );
+    const FlutterSecureStorage().write(
+      key: "seed_$seedHash",
+      value: "${seedSegments.first};$index",
+    );
+    return await _db.transaction((txn) async {
+      ManagedKey newKey = ManagedKey(
+        name: "Wallet ${_wallets.length + 1}",
+        pubKey: wallet.publicKey.toBase58(),
+        keyType: "seed",
+        keyHash: seedHash,
+        keyPath: path,
+        active: true,
+      );
+      await txn.execute("update wallets set active=0");
+      _wallets.forEach((ManagedKey key) {
+        key._active = false;
+      });
+      int id = await txn.insert("wallets", newKey.toJSON());
+      newKey._id = id;
+      _wallets.add(newKey);
+      _activeWallet = newKey;
+      return newKey;
+    });
+  }
 }
 
 class ManagedKey {
   int _id = -1;
+  bool _active;
+
   int get id => _id;
+  bool get active => _active;
 
   final String name;
   final String pubKey;
   final String keyType;
   final String keyHash;
   final String keyPath;
-  final bool active;
 
   ManagedKey({
     required this.name,
@@ -120,8 +171,8 @@ class ManagedKey {
     required this.keyType,
     required this.keyHash,
     required this.keyPath,
-    required this.active,
-  });
+    bool active = false,
+  }) : _active = active;
 
   ManagedKey._(
     this._id, {
@@ -130,8 +181,8 @@ class ManagedKey {
     required this.keyType,
     required this.keyHash,
     required this.keyPath,
-    required this.active,
-  });
+    required bool active,
+  }) : _active = active;
 
   factory ManagedKey.fromJSON(Map<String, Object?> m) {
     return ManagedKey._(
@@ -152,9 +203,10 @@ class ManagedKey {
         // get seed
         String? seed = await const FlutterSecureStorage().read(key: "seed_$keyHash");
         if (seed == null) throw MissingKeyError("keyHash not found");
+        List<String> seedSegments = seed.split(";");
         wallet = await compute(
           _generateKey,
-          [seed.split(",").map(int.parse).toList(), keyPath],
+          [seedSegments.first.split(",").map(int.parse).toList(), keyPath],
         );
         return wallet;
     }
