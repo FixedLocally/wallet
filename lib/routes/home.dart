@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import '../rpc/key_manager.dart';
+import '../utils/utils.dart';
 import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -103,8 +104,7 @@ class _HomeRouteState extends State<HomeRoute> {
                     right: 0,
                     child: IconButton(
                       onPressed: () async {
-                        print("creating wallet");
-                        await KeyManager.instance.createWallet();
+                        await Utils.showLoadingDialog(context, KeyManager.instance.createWallet());
                         setState(() {});
                       },
                       icon: const Icon(Icons.add),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/dto.dart';
@@ -174,6 +175,26 @@ class Utils {
     } catch (e) {
       return null;
     }
+  }
+
+  static Future<T> showLoadingDialog<T>(BuildContext context, Future<T> future) async {
+    showDialog<T>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: const [
+              CircularProgressIndicator(),
+              Text("Loading..."),
+            ],
+          ),
+        );
+      },
+    );
+    return future.whenComplete(() {
+      Navigator.of(context).pop();
+    });
   }
 }
 
