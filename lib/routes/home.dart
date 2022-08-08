@@ -27,10 +27,10 @@ class _HomeRouteState extends State<HomeRoute> {
                 context: context,
                 builder: (ctx) {
                   return AlertDialog(
+                    title: const Text("Enter the message to sign:"),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text("Enter the message to sign:"),
                         TextField(
                           controller: controller,
                           decoration: const InputDecoration(
@@ -54,7 +54,7 @@ class _HomeRouteState extends State<HomeRoute> {
                                   builder: (ctx, snapshot) {
                                     if (snapshot.hasData) {
                                       return Text(
-                                        "Base58: ${base58encode(snapshot.data!.bytes)}\n"
+                                        "Base58: ${base58encode(snapshot.data!.bytes)}\n\n"
                                         "Hex: ${snapshot.data!.bytes.map((e) => e.toRadixString(16).padLeft(2, '0')).join()}",
                                       );
                                     } else {
