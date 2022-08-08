@@ -155,6 +155,23 @@ class KeyManager {
       return newKey;
     });
   }
+
+  Future<void> removeWallet(ManagedKey key) async {
+    // get seed
+    if (_wallets.length <= 1) return;
+    return await _db.transaction((txn) async {
+      await txn.execute("delete from wallets where id=?", [key.id]);
+      _wallets.remove(key);
+      if (key.active) {
+        if (_wallets.isNotEmpty) {
+          _activeWallet = _wallets.first;
+        } else {
+          _activeWallet = null;
+        }
+        await txn.execute("update wallets set active=1 where id=?", [_activeWallet!.id]);
+      }
+    });
+  }
 }
 
 class ManagedKey {

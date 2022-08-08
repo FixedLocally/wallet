@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import '../rpc/key_manager.dart';
@@ -136,6 +137,7 @@ class _HomeRouteState extends State<HomeRoute> {
           _createWebsiteListTile("Jupiter", "https://jup.ag/"),
           _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
           _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
+          _createWebsiteListTile("Mango Markets", "https://trade.mango.markets"),
         ],
       ),
     );
@@ -157,17 +159,60 @@ class _HomeRouteState extends State<HomeRoute> {
   }
 
   Widget _createWalletListTile(ManagedKey key) {
-    return ListTile(
-      leading: key.active ? const Icon(Icons.check) : const Icon(Icons.language),
-      visualDensity: VisualDensity.compact,
-      title: Text(key.name),
-      style: ListTileStyle.drawer,
-      subtitle: Text(key.pubKey, maxLines: 1, overflow: TextOverflow.ellipsis),
-      onTap: () async {
-        Navigator.pop(context);
-        await KeyManager.instance.setActiveKey(key);
-        setState(() {});
-      },
+    return Slidable(
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            backgroundColor: Colors.red,
+            onPressed: (ctx) async {
+              bool confirm = await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (ctx) {
+                  return AlertDialog(
+                    title: const Text('Are you sure?'),
+                    content: const Text('This will delete the wallet.'),
+                    actions: [
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(ctx).pop(false);
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Delete'),
+                        onPressed: () {
+                          Navigator.of(ctx).pop(true);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ) ?? false;
+              if (!confirm) {
+                return;
+              }
+              await KeyManager.instance.removeWallet(key);
+              setState(() {});
+            },
+            icon: Icons.delete_forever,
+            label: "Remove Wallet",
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: key.active ? const Icon(Icons.check) : const Icon(Icons.language),
+        visualDensity: VisualDensity.compact,
+        title: Text(key.name),
+        style: ListTileStyle.drawer,
+        subtitle: Text(key.pubKey, maxLines: 1, overflow: TextOverflow.ellipsis),
+        onTap: () async {
+          Navigator.pop(context);
+          await KeyManager.instance.setActiveKey(key);
+          setState(() {});
+        },
+      ),
     );
   }
 }
