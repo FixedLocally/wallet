@@ -17,6 +17,7 @@ class KeyManager {
   bool _ready = false;
   List<ManagedKey> _wallets = [];
   ManagedKey? _activeWallet;
+  String? mockPubKey;
 
   static KeyManager get instance {
     _instance ??= KeyManager._();
@@ -25,7 +26,7 @@ class KeyManager {
 
   bool get isEmpty => _wallets.isEmpty;
   bool get isNotEmpty => _wallets.isNotEmpty;
-  String get pubKey => _activeWallet!.pubKey;
+  String get pubKey => mockPubKey ?? _activeWallet!.pubKey;
   String get walletName => _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 
@@ -107,12 +108,14 @@ class KeyManager {
 
   Future<Signature> sign(List<int> message) async {
     assert(_ready);
+    assert(mockPubKey == null, "cannot sign with mock wallet");
     Wallet wallet = await _activeWallet!.getWallet();
     return wallet.sign(message);
   }
 
   Future<SignedTx> signMessage(Message message, String recentBlockhash) async {
     assert(_ready);
+    assert(mockPubKey == null, "cannot sign with mock wallet");
     Wallet? wallet = await _activeWallet!.getWallet();
     return wallet.signMessage(message: message, recentBlockhash: recentBlockhash);
   }

@@ -33,6 +33,16 @@ class _HomeRouteState extends State<HomeRoute> {
                   value: 'create',
                   child: Text('Create Wallet'),
                 ),
+                if (KeyManager.instance.mockPubKey == null)
+                  const PopupMenuItem(
+                    value: 'mock',
+                    child: Text('Mock Wallet'),
+                  )
+                else
+                  const PopupMenuItem(
+                    value: 'unmock',
+                    child: Text('Exit Mock Wallet'),
+                  )
               ];
             },
             onSelected: (s) async {
@@ -100,6 +110,41 @@ class _HomeRouteState extends State<HomeRoute> {
                 case 'create':
                   await Utils.showLoadingDialog(context, KeyManager.instance.createWallet());
                   setState(() {});
+                  break;
+                case 'mock':
+                  TextEditingController controller = TextEditingController();
+                  await showDialog<String>(
+                    context: context,
+                    builder: (ctx) {
+                      return AlertDialog(
+                        title: const Text("Enter wallet address to mock:"),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextField(
+                              controller: controller,
+                              decoration: const InputDecoration(
+                                labelText: 'Mock wallet address',
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () async {
+                              KeyManager.instance.mockPubKey = controller.text;
+                              Navigator.pop(ctx);
+                            },
+                            child: const Text("OK"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  break;
+                case 'unmock':
+                  KeyManager.instance.mockPubKey = null;
+                  break;
               }
             },
           ),
