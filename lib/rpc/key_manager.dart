@@ -95,6 +95,7 @@ class KeyManager {
   Future<void> setActiveKey(ManagedKey key) async {
     assert(_ready);
     assert(_wallets.contains(key));
+    mockPubKey = null;
     await _db.transaction((txn) async {
       await txn.execute("update wallets set active=0");
       await txn.execute("update wallets set active=1 where id=?", [key._id]);

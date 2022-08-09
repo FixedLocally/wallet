@@ -257,7 +257,7 @@ class _HomeRouteState extends State<HomeRoute> {
         ],
       ),
       child: ListTile(
-        leading: key.active ? const Icon(Icons.check) : const Icon(Icons.language),
+        leading: key.active && KeyManager.instance.mockPubKey == null ? const Icon(Icons.check) : const Icon(Icons.language),
         visualDensity: VisualDensity.compact,
         title: Text(key.name),
         style: ListTileStyle.drawer,
