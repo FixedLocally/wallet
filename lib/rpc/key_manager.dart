@@ -27,7 +27,7 @@ class KeyManager {
   bool get isEmpty => _wallets.isEmpty;
   bool get isNotEmpty => _wallets.isNotEmpty;
   String get pubKey => mockPubKey ?? _activeWallet!.pubKey;
-  String get walletName => _activeWallet!.name;
+  String get walletName => mockPubKey != null ? "Mocked ${mockPubKey!.substring(0, 4)}...${mockPubKey!.substring(mockPubKey!.length - 4)}" : _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 
   KeyManager._();
@@ -138,6 +138,7 @@ class KeyManager {
       key: "seed_$seedHash",
       value: "${seedSegments.first};$index",
     );
+    mockPubKey = null;
     return await _db.transaction((txn) async {
       ManagedKey newKey = ManagedKey(
         name: "Wallet ${_wallets.length + 1}",

@@ -25,10 +25,11 @@ class _HomeRouteState extends State<HomeRoute> {
           PopupMenuButton(
             itemBuilder: (context) {
               return [
-                const PopupMenuItem(
-                  value: 'sign',
-                  child: Text('Sign Message'),
-                ),
+                if (KeyManager.instance.mockPubKey == null)
+                  const PopupMenuItem(
+                    value: 'sign',
+                    child: Text('Sign Message'),
+                  ),
                 const PopupMenuItem(
                   value: 'create',
                   child: Text('Create Wallet'),
@@ -134,6 +135,7 @@ class _HomeRouteState extends State<HomeRoute> {
                             onPressed: () async {
                               KeyManager.instance.mockPubKey = controller.text;
                               Navigator.pop(ctx);
+                              setState(() {});
                             },
                             child: const Text("OK"),
                           ),
@@ -144,6 +146,7 @@ class _HomeRouteState extends State<HomeRoute> {
                   break;
                 case 'unmock':
                   KeyManager.instance.mockPubKey = null;
+                  setState(() {});
                   break;
               }
             },
