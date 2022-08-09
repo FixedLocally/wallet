@@ -118,6 +118,10 @@ class RpcServer {
     if (args["tx"] == null) {
       return RpcResponse.error(RpcConstants.kInvalidInput);
     }
+    // auto reject mocked requests
+    if (KeyManager.instance.mockPubKey != null) {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
 
     List<int> payload = args["tx"].cast<int>();
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
@@ -170,6 +174,10 @@ class RpcServer {
     RpcResponse? error = _sigPreChecks(contextHolder);
     if (error != null) {
       return error;
+    }
+    // auto reject mocked requests
+    if (KeyManager.instance.mockPubKey != null) {
+      return RpcResponse.error(RpcConstants.kUserRejected);
     }
     if (args["txs"] == null) return RpcResponse.error(RpcConstants.kInvalidInput);
     List<Map<String, dynamic>> txs = args["txs"]!.cast<Map<String, dynamic>>();
