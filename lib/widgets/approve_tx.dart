@@ -25,7 +25,7 @@ class ApproveTransactionWidget extends StatelessWidget {
                   ...snapshot.data!.changes.map((key, value) {
                     String mint = snapshot.data!.updatedAccounts[key]!.mint;
                     String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
-                    String symbol = Utils.getToken(mint)?["symbol"] ?? shortMint;
+                    String symbol = snapshot.data!.tokens[mint]?["symbol"] ?? shortMint;
                     if (value != 0) {
                       return MapEntry(key, Text("$symbol: ${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}"));
                     } else {

@@ -9,6 +9,7 @@ import 'package:solana/base58.dart';
 import 'package:solana/dto.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
@@ -16,29 +17,41 @@ import '../rpc/key_manager.dart';
 class Utils {
   static final SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
 
-  static final Map<String, Map<String, dynamic>> _tokenList = {};
   static String _injectionJs = "";
   static Completer<void>? _completer;
+  static Database? _db;
 
   static String get injectionJs => _injectionJs;
 
   static Future loadAssets() async {
-    if (_tokenList.isNotEmpty && _injectionJs.isNotEmpty) return;
+    if (_injectionJs.isNotEmpty) return;
     if (_completer != null) return;
     _completer = Completer<void>();
-    Future f1 = rootBundle.load("assets/tokens.json").then((ByteData byteData) {
-      _tokenList.addAll(jsonDecode(utf8.decode(byteData.buffer.asUint8List())).cast<String, Map<String, dynamic>>());
-    });
+    Future f1 = _openDatabase().then((value) => _db = value);
     Future f2 = rootBundle.loadString('assets/inject.js').then((String js) {
       _injectionJs = js;
     });
+
     Future f3 = KeyManager.instance.init();
     Future.wait([f1, f2, f3]).then((value) => _completer!.complete(null));
     return _completer!.future;
   }
 
-  static Map<String, dynamic>? getToken(String token) {
-    return _tokenList[token];
+  static Future<Map<String, dynamic>?> getToken(String token) async {
+    return await _db!.query("token", where: "mint = ?", whereArgs: [token]).then((List<Map<String, dynamic>> tokens) {
+      if (tokens.isEmpty) return null;
+      return tokens.first;
+    });
+  }
+
+  static Future<Map<String, Map<String, dynamic>?>> getTokens(List<String> tokens) async {
+    return await _db!.query("token", where: "mint IN (${tokens.map((token) => '?').join(',')})", whereArgs: tokens).then((List<Map<String, dynamic>> tokens) {
+      Map<String, Map<String, dynamic>?> result = {};
+      for (Map<String, dynamic> token in tokens) {
+        result[token['mint']] = token;
+      }
+      return result;
+    });
   }
 
   static Future<SplTokenAccountDataInfo> parseTokenAccount(List<int> data) async {
@@ -157,7 +170,7 @@ class Utils {
         updatedAcctsMap[tokenAccounts[i]] = updatedAccts[i];
       }
     }
-    return TokenChanges(changes, updatedAcctsMap, postSolBalance - preSolBalance);
+    return TokenChanges(changes, updatedAcctsMap, await getTokens(updatedAcctsMap.values.map((e) => e.mint).toList()), postSolBalance - preSolBalance);
   }
 
   static Future<TokenChanges> simulateTxs(List<List<int>> rawMessage, String owner) async {
@@ -197,20 +210,74 @@ class Utils {
       Navigator.of(context).pop();
     });
   }
+
+  static Future<List<SplTokenAccountDataInfo>> getBalances(String pubKey) async {
+    List<SplTokenAccountDataInfo> results = [];
+    List<ProgramAccount> accounts = await _solanaClient.rpcClient.getTokenAccountsByOwner(pubKey,
+        const TokenAccountsFilter.byProgramId("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"), encoding: Encoding.jsonParsed);
+    for (final ProgramAccount value in accounts) {
+      if (value.account.data is ParsedSplTokenProgramAccountData) {
+        ParsedSplTokenProgramAccountData data = value.account.data as ParsedSplTokenProgramAccountData;
+        if (data.parsed is TokenAccountData) {
+          TokenAccountData tokenAccountData = data.parsed as TokenAccountData;
+          print(tokenAccountData.info.mint);
+          print(tokenAccountData.info.tokenAmount.uiAmountString);
+          results.add(tokenAccountData.info);
+        }
+      }
+    }
+    return results;
+  }
+
+  static Future<Database> _openDatabase() async {
+    return openDatabase(
+      "token.db",
+      version: 1,
+      onCreate: (Database db, int version) async {
+        await db.execute(
+          "CREATE TABLE token ("
+              "mint TEXT PRIMARY KEY,"
+              "symbol TEXT,"
+              "name TEXT,"
+              "decimals INTEGER,"
+              "image TEXT)");
+        // load token list into db
+        Map<String, Map<String, dynamic>> tokenList = {};
+        await rootBundle.load("assets/tokens.json").then((ByteData byteData) {
+          tokenList.addAll(jsonDecode(utf8.decode(byteData.buffer.asUint8List())).cast<String, Map<String, dynamic>>());
+        });
+        for (String key in tokenList.keys) {
+          await db.insert(
+            "token",
+            {
+              "mint": key,
+              "symbol": tokenList[key]!["symbol"],
+              "name": tokenList[key]!["name"],
+              "decimals": tokenList[key]!["decimals"],
+              "image": tokenList[key]!["image"],
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      },
+    );
+  }
 }
 
 class TokenChanges {
   final Map<String, double> changes;
   final Map<String, SplTokenAccountDataInfo> updatedAccounts;
+  final Map<String, Map<String, dynamic>?> tokens;
   final int solOffset;
   final bool error;
 
-  TokenChanges(this.changes, this.updatedAccounts, this.solOffset) : error = false;
-  TokenChanges.error() : changes = {}, updatedAccounts = {}, solOffset = 0, error = true;
+  TokenChanges(this.changes, this.updatedAccounts, this.tokens, this.solOffset) : error = false;
+  TokenChanges.error() : changes = {}, updatedAccounts = {}, tokens = {}, solOffset = 0, error = true;
 
   static TokenChanges merge(List<TokenChanges> tokenChanges) {
     Map<String, double> changes = {};
     Map<String, SplTokenAccountDataInfo> updatedAccounts = {};
+    Map<String, Map<String, dynamic>> tokens = {};
     int solOffset = 0;
     for (int i = 0; i < tokenChanges.length; ++i) {
       if (tokenChanges[i].error) {
@@ -222,9 +289,13 @@ class TokenChanges {
       tokenChanges[i].updatedAccounts.forEach((key, value) {
         updatedAccounts[key] = value;
       });
+      tokenChanges[i].tokens.forEach((key, value) {
+        if (value == null) return;
+        tokens[key] = value;
+      });
       solOffset += tokenChanges[i].solOffset;
     }
-    return TokenChanges(changes, updatedAccounts, solOffset);
+    return TokenChanges(changes, updatedAccounts, tokens, solOffset);
   }
 
   @override

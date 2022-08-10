@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:solana/base58.dart';
@@ -16,6 +15,8 @@ class HomeRoute extends StatefulWidget {
 }
 
 class _HomeRouteState extends State<HomeRoute> {
+  int _page = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +44,11 @@ class _HomeRouteState extends State<HomeRoute> {
                   const PopupMenuItem(
                     value: 'unmock',
                     child: Text('Exit Mock Wallet'),
-                  )
+                  ),
+                const PopupMenuItem(
+                  value: 'balances',
+                  child: Text('Get Balances'),
+                ),
               ];
             },
             onSelected: (s) async {
@@ -148,6 +153,9 @@ class _HomeRouteState extends State<HomeRoute> {
                   KeyManager.instance.mockPubKey = null;
                   setState(() {});
                   break;
+                case 'balances':
+                  Utils.getBalances(KeyManager.instance.pubKey);
+                  break;
               }
             },
           ),
@@ -164,8 +172,8 @@ class _HomeRouteState extends State<HomeRoute> {
                       color: Colors.blue,
                     ),
                     child: Stack(
-                      children: [
-                        const Positioned(
+                      children: const [
+                        Positioned(
                           top: 0,
                           left: 0,
                           child: Text('Wallet'),
@@ -185,15 +193,36 @@ class _HomeRouteState extends State<HomeRoute> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          _createWebsiteListTile("Raydium", "https://raydium.io/pools"),
-          _createWebsiteListTile("Zeta Markets", "https://mainnet.zeta.markets/"),
-          _createWebsiteListTile("Jupiter", "https://jup.ag/"),
-          _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
-          _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
-          _createWebsiteListTile("Mango Markets", "https://trade.mango.markets"),
+      body: _body(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _page,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance_wallet),
+            label: 'Wallet',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
         ],
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              break;
+            case 1:
+              break;
+            case 2:
+              break;
+          }
+          setState(() {
+            _page = index;
+          });
+        },
       ),
     );
   }
@@ -269,5 +298,27 @@ class _HomeRouteState extends State<HomeRoute> {
         },
       ),
     );
+  }
+
+  Widget _dAppList() {
+    return Column(
+      children: [
+        _createWebsiteListTile("Raydium", "https://raydium.io/pools"),
+        _createWebsiteListTile("Zeta Markets", "https://mainnet.zeta.markets/"),
+        _createWebsiteListTile("Jupiter", "https://jup.ag/"),
+        _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
+        _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
+        _createWebsiteListTile("Mango Markets", "https://trade.mango.markets"),
+      ],
+    );
+  }
+
+  Widget _body() {
+    switch (_page) {
+      case 0:
+        return _dAppList();
+      default:
+        return const Text("lol");
+    }
   }
 }
