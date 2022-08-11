@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/dto.dart';
 import 'package:solana/encoder.dart';
+import 'package:solana/metaplex.dart';
 import 'package:solana/solana.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -38,20 +39,56 @@ class Utils {
   }
 
   static Future<Map<String, dynamic>?> getToken(String token) async {
-    return await _db!.query("token", where: "mint = ?", whereArgs: [token]).then((List<Map<String, dynamic>> tokens) {
-      if (tokens.isEmpty) return null;
-      return tokens.first;
-    });
+    return (await getTokens([token]))[token];
   }
 
   static Future<Map<String, Map<String, dynamic>?>> getTokens(List<String> tokens) async {
-    return await _db!.query("token", where: "mint IN (${tokens.map((token) => '?').join(',')})", whereArgs: tokens).then((List<Map<String, dynamic>> tokens) {
+    Map<String, Map<String, dynamic>?> tokenInfos = await _db!.query("token", where: "mint IN (${tokens.map((token) => '?').join(',')})", whereArgs: tokens).then((List<Map<String, dynamic>> tokens) {
       Map<String, Map<String, dynamic>?> result = {};
       for (Map<String, dynamic> token in tokens) {
         result[token['mint']] = token;
       }
       return result;
     });
+    List<String> remainingTokens = List.of(tokens)..removeWhere((element) => tokenInfos[element] != null);
+    List<int> metaplexSeed = base58decode(metaplexMetadataProgramId);
+    List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
+      Ed25519HDPublicKey pda = await Ed25519HDPublicKey.findProgramAddress(seeds: ["metadata".codeUnits, metaplexSeed, base58decode(token)], programId: Ed25519HDPublicKey(metaplexSeed));
+      Account? acct = await _solanaClient.rpcClient.getAccountInfo(pda.toBase58(), encoding: Encoding.base64);
+      if (acct != null) {
+        if (acct.data is BinaryAccountData) {
+          Metadata metadata = Metadata.fromBinary((acct.data as BinaryAccountData).data);
+          Map<String, dynamic> result = {
+            "mint": token,
+            "name": metadata.name,
+            "symbol": metadata.symbol,
+            // "standard": metadata.,
+          };
+          try {
+            Mint mint = await _solanaClient.getMint(address: Ed25519HDPublicKey.fromBase58(token));
+            result["decimals"] = mint.decimals;
+            result["totalSupply"] = mint.supply;
+          } catch (_) {}
+          try {
+            OffChainMetadata offChainMetadata = await metadata.getExternalJson();
+            result["name"] = offChainMetadata.name;
+            result["symbol"] = offChainMetadata.symbol;
+            result["image"] = offChainMetadata.image;
+          } catch (_) {}
+          return [token, result];
+        } else {
+          return [token, null];
+        }
+      }
+      return [token, null];
+    }).toList();
+    List<List> metadatas = await Future.wait(futures);
+    for (List<Object?> metadata in metadatas) {
+      if (metadata[1] != null) {
+        tokenInfos[metadata[0] as String] = metadata[1] as Map<String, dynamic>;
+      }
+    }
+    return tokenInfos;
   }
 
   static Future<SplTokenAccountDataInfo> parseTokenAccount(List<int> data) async {
@@ -108,7 +145,7 @@ class Utils {
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
         .expand((e) => e).toSet().toList();
     List<String> tokenProgramAddresses = message.instructions
-        .where((e) => e.programId.toBase58() == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" || e.programId.toBase58() == "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+        .where((e) => e.programId.toBase58() == TokenProgram.programId || e.programId.toBase58() == AssociatedTokenAccountProgram.programId)
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
         .expand((e) => e).where((e) => !e.contains("111111111")).toSet().toList();
     List<Account?> accounts = await batchGetAccounts(addresses);
@@ -214,18 +251,22 @@ class Utils {
   static Future<List<SplTokenAccountDataInfo>> getBalances(String pubKey) async {
     List<SplTokenAccountDataInfo> results = [];
     List<ProgramAccount> accounts = await _solanaClient.rpcClient.getTokenAccountsByOwner(pubKey,
-        const TokenAccountsFilter.byProgramId("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"), encoding: Encoding.jsonParsed);
+        const TokenAccountsFilter.byProgramId(TokenProgram.programId), encoding: Encoding.jsonParsed);
     for (final ProgramAccount value in accounts) {
       if (value.account.data is ParsedSplTokenProgramAccountData) {
         ParsedSplTokenProgramAccountData data = value.account.data as ParsedSplTokenProgramAccountData;
         if (data.parsed is TokenAccountData) {
           TokenAccountData tokenAccountData = data.parsed as TokenAccountData;
-          print(tokenAccountData.info.mint);
-          print(tokenAccountData.info.tokenAmount.uiAmountString);
           results.add(tokenAccountData.info);
         }
       }
     }
+    Map<String, Map<String, dynamic>?> tokens = await getTokens(results.map((e) => e.mint).toList());
+    tokens.forEach((key, value) {
+      if (value != null) {
+        print("$key: $value");
+      }
+    });
     return results;
   }
 
