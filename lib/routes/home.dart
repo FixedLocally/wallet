@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:solana/base58.dart';
@@ -16,6 +18,9 @@ class HomeRoute extends StatefulWidget {
 
 class _HomeRouteState extends State<HomeRoute> {
   int _page = 0;
+  final Map<String, Map<String, String>> _balances = {};
+  final Map<String, Completer> _balancesCompleters = {};
+  final Map<String, Map<String, dynamic>> _tokenDetails = {};
 
   @override
   Widget build(BuildContext context) {
@@ -211,14 +216,6 @@ class _HomeRouteState extends State<HomeRoute> {
           ),
         ],
         onTap: (index) {
-          switch (index) {
-            case 0:
-              break;
-            case 1:
-              break;
-            case 2:
-              break;
-          }
           setState(() {
             _page = index;
           });
@@ -313,12 +310,61 @@ class _HomeRouteState extends State<HomeRoute> {
     );
   }
 
+  Widget _balanceList() {
+    String pubKey = KeyManager.instance.pubKey;
+    if (_balances[pubKey] == null) {
+      if (_balancesCompleters[pubKey] == null) {
+        _startLoadingBalances(pubKey);
+      }
+      return CircularProgressIndicator();
+    } else {
+      Map<String, String> balances = _balances[pubKey]!;
+      return RefreshIndicator(
+        onRefresh: () {
+          _startLoadingBalances(pubKey);
+          return _balancesCompleters[pubKey]!.future;
+        },
+        child: ListView(
+          children: balances.keys.map((mint) {
+            String name = _tokenDetails[mint]?["name"] ?? "${mint.substring(0, 5)}...}";
+            return ListTile(
+              title: Text(name),
+              subtitle: Text(balances[mint].toString()),
+            );
+          }).toList(),
+        ),
+      );
+    }
+  }
+
   Widget _body() {
     switch (_page) {
       case 0:
         return _dAppList();
+      case 1:
+        return _balanceList();
       default:
         return const Text("lol");
     }
+  }
+
+  void _startLoadingBalances(String pubKey) {
+    Completer completer = Completer();
+    _balancesCompleters[pubKey] = completer;
+    Utils.getBalances(pubKey).then((value) async {
+      completer.complete();
+      setState(() {
+        _balances[pubKey] = value.asMap().map((key, value) =>
+            MapEntry(value.mint, value.tokenAmount.uiAmountString ?? "0"));
+      });
+      List<String> mints = value.map((e) => e.mint).toList();
+      mints.removeWhere((element) => _tokenDetails.keys.contains(element));
+      Map<String, Map<String, dynamic>?> tokenInfos = await Utils.getTokens(mints);
+      setState(() {
+        tokenInfos.forEach((mint, info) {
+          if (info != null) _tokenDetails[mint] = info;
+        });
+      });
+    });
   }
 }

@@ -68,7 +68,6 @@ class Utils {
           try {
             Mint mint = await _solanaClient.getMint(address: Ed25519HDPublicKey.fromBase58(token));
             result["decimals"] = mint.decimals;
-            print('mint $token supply ${mint.supply}');
             result["nft"] = mint.supply.toInt() == 1 && mint.decimals == 0;
           } catch (_) {}
           try {
@@ -280,12 +279,6 @@ class Utils {
         }
       }
     }
-    Map<String, Map<String, dynamic>?> tokens = await getTokens(results.map((e) => e.mint).toList());
-    tokens.forEach((key, value) {
-      if (value != null) {
-        print("$key: $value");
-      }
-    });
     return results;
   }
 
