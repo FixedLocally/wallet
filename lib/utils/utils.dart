@@ -51,6 +51,7 @@ class Utils {
       return result;
     });
     List<String> remainingTokens = List.of(tokens)..removeWhere((element) => tokenInfos[element] != null);
+    print('fetching $remainingTokens');
     List<int> metaplexSeed = base58decode(metaplexMetadataProgramId);
     List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
       Ed25519HDPublicKey pda = await Ed25519HDPublicKey.findProgramAddress(seeds: ["metadata".codeUnits, metaplexSeed, base58decode(token)], programId: Ed25519HDPublicKey(metaplexSeed));
@@ -67,7 +68,8 @@ class Utils {
           try {
             Mint mint = await _solanaClient.getMint(address: Ed25519HDPublicKey.fromBase58(token));
             result["decimals"] = mint.decimals;
-            result["totalSupply"] = mint.supply;
+            print('mint $token supply ${mint.supply}');
+            result["nft"] = mint.supply.toInt() == 1 && mint.decimals == 0;
           } catch (_) {}
           try {
             OffChainMetadata offChainMetadata = await metadata.getExternalJson();
@@ -83,10 +85,27 @@ class Utils {
       return [token, null];
     }).toList();
     List<List> metadatas = await Future.wait(futures);
-    for (List<Object?> metadata in metadatas) {
-      if (metadata[1] != null) {
-        tokenInfos[metadata[0] as String] = metadata[1] as Map<String, dynamic>;
-      }
+    if (metadatas.isNotEmpty) {
+      await _db!.transaction((txn) async {
+        for (List<Object?> metadata in metadatas) {
+          if (metadata[1] != null) {
+            Map<String, dynamic> metadataMap = metadata[1] as Map<String, dynamic>;
+            tokenInfos[metadata[0] as String] = metadataMap;
+            await txn.insert(
+              "token",
+              {
+                "mint": metadataMap["mint"],
+                "symbol": metadataMap["symbol"],
+                "name": metadataMap["name"],
+                "decimals": metadataMap["decimals"],
+                "image": metadataMap["image"],
+                "nft": metadataMap["nft"],
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
+        }
+      });
     }
     return tokenInfos;
   }
@@ -281,7 +300,9 @@ class Utils {
               "symbol TEXT,"
               "name TEXT,"
               "decimals INTEGER,"
-              "image TEXT)");
+              "image TEXT,"
+              "nft INTEGER DEFAULT 0"
+              ")");
         // load token list into db
         Map<String, Map<String, dynamic>> tokenList = {};
         await rootBundle.load("assets/tokens.json").then((ByteData byteData) {
