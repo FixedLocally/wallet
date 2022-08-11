@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:xml/xml.dart';
 
@@ -31,13 +31,16 @@ class _NetworkSvgState extends State<NetworkSvg> {
     _loadSvg();
   }
 
+  Future<String> _downloadSvg() async {
+    File file = await DefaultCacheManager().getSingleFile(widget.url);
+    return file.readAsString();
+  }
+
   void _loadSvg() {
     setState(() {
       _svg = null;
     });
-    HttpClient().getUrl(Uri.parse(widget.url))
-      .then((HttpClientRequest request) => request.close())
-      .then((HttpClientResponse response) => _readResponse(response))
+    _downloadSvg()
       .then((String data) {
         // we move all <def> section to the top of the svg
         XmlDocument doc = XmlDocument.parse(data);
@@ -51,15 +54,6 @@ class _NetworkSvgState extends State<NetworkSvg> {
           _svg = doc.toString();
         });
       });
-  }
-
-  Future<String> _readResponse(HttpClientResponse response) {
-    final completer = Completer<String>();
-    final contents = StringBuffer();
-    response.transform(utf8.decoder).listen((data) {
-      contents.write(data);
-    }, onDone: () => completer.complete(contents.toString()));
-    return completer.future;
   }
 
   @override
