@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import '../widgets/header.dart';
+import '../widgets/svg.dart';
 import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -334,8 +334,8 @@ class _HomeRouteState extends State<HomeRoute> {
               String? image = _tokenDetails[mint]?["image"];
               if (image != null) {
                 if (image.endsWith(".svg")) {
-                  leading = SvgPicture.network(
-                    image,
+                  leading = NetworkSvg(
+                    url: image,
                     width: 48,
                     height: 48,
                   );
