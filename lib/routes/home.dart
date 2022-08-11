@@ -28,7 +28,16 @@ class _HomeRouteState extends State<HomeRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(KeyManager.instance.walletName),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(KeyManager.instance.walletName),
+            Text(
+              KeyManager.instance.pubKey,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
         actions: [
           PopupMenuButton(
             itemBuilder: (context) {
@@ -328,7 +337,7 @@ class _HomeRouteState extends State<HomeRoute> {
         },
         child: ListView(
           children: balances.keys.map((mint) {
-            String name = _tokenDetails[mint]?["name"] ?? "${mint.substring(0, 5)}...}";
+            String name = _tokenDetails[mint]?["name"] ?? "${mint.substring(0, 5)}...";
             Widget? leading;
             if (_tokenDetails[mint] != null) {
               String? image = _tokenDetails[mint]?["image"];
