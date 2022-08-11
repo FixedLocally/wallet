@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import '../rpc/key_manager.dart';
@@ -316,7 +318,7 @@ class _HomeRouteState extends State<HomeRoute> {
       if (_balancesCompleters[pubKey] == null) {
         _startLoadingBalances(pubKey);
       }
-      return CircularProgressIndicator();
+      return const CircularProgressIndicator();
     } else {
       Map<String, String> balances = _balances[pubKey]!;
       return RefreshIndicator(
@@ -327,7 +329,30 @@ class _HomeRouteState extends State<HomeRoute> {
         child: ListView(
           children: balances.keys.map((mint) {
             String name = _tokenDetails[mint]?["name"] ?? "${mint.substring(0, 5)}...}";
+            Widget? leading;
+            if (_tokenDetails[mint] != null) {
+              String? image = _tokenDetails[mint]?["image"];
+              if (image != null) {
+                if (image.endsWith(".svg")) {
+                  leading = SvgPicture.network(
+                    image,
+                    width: 48,
+                    height: 48,
+                  );
+                } else {
+                  leading = CachedNetworkImage(
+                    imageUrl: image,
+                    height: 48,
+                    width: 48,
+                  );
+                }
+              }
+            }
             return ListTile(
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: leading ?? const SizedBox(width: 48, height: 48),
+              ),
               title: Text(name),
               subtitle: Text(balances[mint].toString()),
             );
