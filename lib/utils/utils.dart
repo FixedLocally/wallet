@@ -79,13 +79,25 @@ class Utils {
             Mint mint = await _solanaClient.getMint(address: Ed25519HDPublicKey.fromBase58(token));
             result["decimals"] = mint.decimals;
             result["nft"] = (mint.supply.toInt() == 1 && mint.decimals == 0) ? 1 : 0;
-          } catch (_) {}
+          } catch (_) {} // no such mint
           try {
-            OffChainMetadata offChainMetadata = await metadata.getExternalJson();
+            String offChainMetadataStr = await _httpGet(metadata.uri);
+            Map<String, dynamic> offChainMetadataMap = json.decode(offChainMetadataStr);
+            offChainMetadataMap = {
+              "name": offChainMetadataMap["name"] ?? "",
+              "description": offChainMetadataMap["description"] ?? "",
+              "symbol": offChainMetadataMap["symbol"] ?? "",
+              "image": offChainMetadataMap["image"] ?? "",
+              "properties": offChainMetadataMap["properties"] ?? <String, dynamic>{},
+              "attributes": offChainMetadataMap["attributes"] ?? [],
+            };
+            OffChainMetadata offChainMetadata = OffChainMetadata.fromJson(offChainMetadataMap);
             result["name"] = offChainMetadata.name;
             result["symbol"] = offChainMetadata.symbol;
             result["image"] = offChainMetadata.image;
-          } catch (_) {}
+          } catch (_, st) {
+            print("$token error $_ $st");
+          } // no offchain metadata
           return [token, result];
         } else {
           return [token, null];
