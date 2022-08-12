@@ -20,7 +20,7 @@ class HomeRoute extends StatefulWidget {
 
 class _HomeRouteState extends State<HomeRoute> {
   int _page = 0;
-  final Map<String, Map<String, String>> _balances = {};
+  final Map<String, Map<String, SplTokenAccountDataInfoWithUsd>> _balances = {};
   final Map<String, Completer> _balancesCompleters = {};
   final Map<String, Map<String, dynamic>> _tokenDetails = {};
 
@@ -61,10 +61,6 @@ class _HomeRouteState extends State<HomeRoute> {
                     value: 'unmock',
                     child: Text('Exit Mock Wallet'),
                   ),
-                const PopupMenuItem(
-                  value: 'balances',
-                  child: Text('Get Balances'),
-                ),
               ];
             },
             onSelected: (s) async {
@@ -168,9 +164,6 @@ class _HomeRouteState extends State<HomeRoute> {
                 case 'unmock':
                   KeyManager.instance.mockPubKey = null;
                   setState(() {});
-                  break;
-                case 'balances':
-                  Utils.getBalances(KeyManager.instance.pubKey);
                   break;
               }
             },
@@ -329,7 +322,7 @@ class _HomeRouteState extends State<HomeRoute> {
       }
       return const CircularProgressIndicator();
     } else {
-      Map<String, String> balances = _balances[pubKey]!;
+      Map<String, SplTokenAccountDataInfoWithUsd> balances = _balances[pubKey]!;
       return RefreshIndicator(
         onRefresh: () {
           _startLoadingBalances(pubKey);
@@ -357,13 +350,17 @@ class _HomeRouteState extends State<HomeRoute> {
                 }
               }
             }
+            String uiAmountString = balances[mint]!.tokenAmount.uiAmountString ?? "0";
+            double amount = double.parse(uiAmountString);
+            double usd = (balances[mint]!.usd ?? -1) * amount - 0.000001; // gets rid of -0
             return ListTile(
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(32),
                 child: leading ?? const SizedBox(width: 48, height: 48),
               ),
               title: Text(name),
-              subtitle: Text(balances[mint].toString()),
+              subtitle: Text(uiAmountString),
+              trailing: usd >= 0 ? Text("\$ ${usd.toStringAsFixed(2)}") : null,
             );
           }).toList(),
         ),
@@ -389,7 +386,7 @@ class _HomeRouteState extends State<HomeRoute> {
       completer.complete();
       setState(() {
         _balances[pubKey] = value.asMap().map((key, value) =>
-            MapEntry(value.mint, value.tokenAmount.uiAmountString ?? "0"));
+            MapEntry(value.mint, value));
       });
       List<String> mints = value.map((e) => e.mint).toList();
       mints.removeWhere((element) => _tokenDetails.keys.contains(element));

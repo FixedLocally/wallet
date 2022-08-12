@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -14,6 +15,8 @@ import 'package:sqflite/sqflite.dart';
 
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
+
+const String _coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/token_price/solana?vs_currencies=usd&contract_addresses=";
 
 class Utils {
   static final SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
@@ -266,19 +269,26 @@ class Utils {
     });
   }
 
-  static Future<List<SplTokenAccountDataInfo>> getBalances(String pubKey) async {
-    List<SplTokenAccountDataInfo> results = [];
-    List<ProgramAccount> accounts = await _solanaClient.rpcClient.getTokenAccountsByOwner(pubKey,
-        const TokenAccountsFilter.byProgramId(TokenProgram.programId), encoding: Encoding.jsonParsed);
+  static Future<List<SplTokenAccountDataInfoWithUsd>> getBalances(String pubKey) async {
+    List<SplTokenAccountDataInfo> rawResults = [];
+    List<ProgramAccount> accounts = await _solanaClient.rpcClient.getTokenAccountsByOwner(
+      pubKey,
+      const TokenAccountsFilter.byProgramId(TokenProgram.programId),
+      encoding: Encoding.jsonParsed,
+    );
     for (final ProgramAccount value in accounts) {
       if (value.account.data is ParsedSplTokenProgramAccountData) {
         ParsedSplTokenProgramAccountData data = value.account.data as ParsedSplTokenProgramAccountData;
         if (data.parsed is TokenAccountData) {
           TokenAccountData tokenAccountData = data.parsed as TokenAccountData;
-          results.add(tokenAccountData.info);
+          rawResults.add(tokenAccountData.info);
         }
       }
     }
+    Map<String, double?> prices = await _getCoinGeckoPrices(rawResults.map((e) => e.mint).toList());
+    List<SplTokenAccountDataInfoWithUsd> results = rawResults.map((e) {
+      return SplTokenAccountDataInfoWithUsd(info: e, usd: prices[e.mint]);
+    }).toList();
     return results;
   }
 
@@ -316,6 +326,24 @@ class Utils {
         }
       },
     );
+  }
+
+  static Future<Map<String, double?>> _getCoinGeckoPrices(List<String> tokens) async {
+    if (tokens.isEmpty) return {};
+    Map<String, double?> results = {};
+    String url = "$_coinGeckoUrl${tokens.join(",")}";
+    Map<String, dynamic> json = jsonDecode(await _httpGet(url));
+    for (String key in json.keys) {
+      results[key] = json[key]!["usd"];
+    }
+    return results;
+  }
+
+  static Future<String> _httpGet(String url) async {
+    HttpClient client = HttpClient();
+    HttpClientRequest request = await client.getUrl(Uri.parse(url));
+    HttpClientResponse response = await request.close();
+    return await response.transform(utf8.decoder).join();
   }
 }
 
@@ -357,4 +385,18 @@ class TokenChanges {
   String toString() {
     return 'TokenChanges{changes: $changes, updatedAccounts: $updatedAccounts, solOffset: $solOffset}';
   }
+}
+
+class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
+  final double? usd;
+  SplTokenAccountDataInfoWithUsd({
+    required SplTokenAccountDataInfo info,
+    required this.usd,
+  }) : super(
+          mint: info.mint,
+          state: info.state,
+          isNative: info.isNative,
+          tokenAmount: info.tokenAmount,
+          owner: info.owner,
+        );
 }
