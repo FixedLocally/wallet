@@ -354,6 +354,7 @@ class _HomeRouteState extends State<HomeRoute> {
             // double amount = double.parse(uiAmountString);
             // double unitPrice = balances[mint]!.usd ?? -1;
             double usd = balances[mint]!.usd;
+            double usdChange = balances[mint]!.usdChange;
             return ListTile(
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(32),
@@ -361,7 +362,19 @@ class _HomeRouteState extends State<HomeRoute> {
               ),
               title: Text(name),
               subtitle: Text(uiAmountString),
-              trailing: usd >= 0 ? Text("\$ ${usd.toStringAsFixed(2)}") : null,
+              trailing: usd >= 0 ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("\$ ${usd.toStringAsFixed(2)}"),
+                  if (usdChange > 0)
+                    Text("+\$ ${usdChange.toStringAsFixed(2)}", style: const TextStyle(color: Colors.green))
+                  else if (usdChange < 0)
+                    Text("-\$ ${(-usdChange).toStringAsFixed(2)}", style: const TextStyle(color: Colors.red))
+                  else
+                    Text("\$ -"),
+                ],
+              ) : null,
             );
           }).toList(),
         ),

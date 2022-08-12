@@ -16,8 +16,15 @@ import 'package:sqflite/sqflite.dart';
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
 
-const String _coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/token_price/solana?vs_currencies=usd&contract_addresses=";
-
+const String _coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/token_price/solana?vs_currencies=usd&include_24hr_change=true&contract_addresses=";
+const nativeSol = "native-sol";
+const nativeSolMint = "So11111111111111111111111111111111111111112";
+const Map<String, dynamic> _hardCodedPrices = {
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
+    "usd": 1.0,
+    "usd_24h_change": 0.0,
+  }, // usdc
+};
 class Utils {
   static final SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
 
@@ -275,6 +282,7 @@ class Utils {
       pubKey,
       const TokenAccountsFilter.byProgramId(TokenProgram.programId),
       encoding: Encoding.jsonParsed,
+      commitment: Commitment.confirmed,
     );
     for (final ProgramAccount value in accounts) {
       if (value.account.data is ParsedSplTokenProgramAccountData) {
@@ -285,13 +293,36 @@ class Utils {
         }
       }
     }
-    Map<String, double?> prices = await _getCoinGeckoPrices(rawResults.map((e) => e.mint).toList());
+    int lamports = await _solanaClient.rpcClient.getBalance(pubKey, commitment: Commitment.confirmed);
+    rawResults.add(SplTokenAccountDataInfo(
+      tokenAmount: TokenAmount(
+        amount: "$lamports",
+        decimals: 9,
+        uiAmountString: (lamports / lamportsPerSol).toStringAsFixed(9),
+      ),
+      state: "",
+      isNative: false,
+      mint: nativeSol,
+      owner: pubKey,
+    ));
+    Set<String> mints = rawResults.map((e) => e.mint).toSet();
+    mints.add(nativeSolMint);
+    Map<String, dynamic> prices = await _getCoinGeckoPrices(mints.toList());
     List<SplTokenAccountDataInfoWithUsd> results = rawResults.map((e) {
       String uiAmountString = e.tokenAmount.uiAmountString ?? "0";
       double amount = double.parse(uiAmountString);
-      double unitPrice = prices[e.mint] ?? -1;
+      double unitPrice = prices[e.mint]?["usd"] ?? -1;
+      double dailyChangePercent = prices[e.mint]?["usd_24h_change"] ?? 0;
+      if (e.mint == nativeSol) {
+        unitPrice = prices[nativeSolMint]?["usd"] ?? -1;
+        dailyChangePercent = prices[nativeSolMint]?["usd_24h_change"] ?? 0;
+      }
       double usd = unitPrice >= 0 ? unitPrice * amount : -1;
-      return SplTokenAccountDataInfoWithUsd(info: e, usd: usd);
+      return SplTokenAccountDataInfoWithUsd(
+        info: e,
+        usd: usd,
+        usdChange: usd * (1 - 1 / (1 + dailyChangePercent / 100)),
+      );
     }).toList();
     results.sort((a, b) => b.usd.compareTo(a.usd));
     return results;
@@ -333,16 +364,11 @@ class Utils {
     );
   }
 
-  static Future<Map<String, double?>> _getCoinGeckoPrices(List<String> tokens) async {
+  static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
     if (tokens.isEmpty) return {};
-    Map<String, double?> results = {};
     String url = "$_coinGeckoUrl${tokens.join(",")}";
-    print('url: $url');
     Map<String, dynamic> json = jsonDecode(await _httpGet(url));
-    for (String key in json.keys) {
-      results[key] = json[key]!["usd"];
-    }
-    return results;
+    return Map.of(_hardCodedPrices)..addAll(json);
   }
 
   static Future<String> _httpGet(String url) async {
@@ -395,9 +421,12 @@ class TokenChanges {
 
 class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
   final double usd;
+  final double usdChange;
+
   SplTokenAccountDataInfoWithUsd({
     required SplTokenAccountDataInfo info,
     required this.usd,
+    required this.usdChange,
   }) : super(
           mint: info.mint,
           state: info.state,
