@@ -78,7 +78,7 @@ class Utils {
           try {
             Mint mint = await _solanaClient.getMint(address: Ed25519HDPublicKey.fromBase58(token));
             result["decimals"] = mint.decimals;
-            result["nft"] = mint.supply.toInt() == 1 && mint.decimals == 0;
+            result["nft"] = (mint.supply.toInt() == 1 && mint.decimals == 0) ? 1 : 0;
           } catch (_) {}
           try {
             OffChainMetadata offChainMetadata = await metadata.getExternalJson();
@@ -311,13 +311,13 @@ class Utils {
     List<SplTokenAccountDataInfoWithUsd> results = rawResults.map((e) {
       String uiAmountString = e.tokenAmount.uiAmountString ?? "0";
       double amount = double.parse(uiAmountString);
-      double unitPrice = prices[e.mint]?["usd"] ?? -1;
-      double dailyChangePercent = prices[e.mint]?["usd_24h_change"] ?? 0;
+      num unitPrice = prices[e.mint]?["usd"] ?? -1.0;
+      num dailyChangePercent = prices[e.mint]?["usd_24h_change"] ?? 0.0;
       if (e.mint == nativeSol) {
-        unitPrice = prices[nativeSolMint]?["usd"] ?? -1;
-        dailyChangePercent = prices[nativeSolMint]?["usd_24h_change"] ?? 0;
+        unitPrice = prices[nativeSolMint]?["usd"] ?? -1.0;
+        dailyChangePercent = prices[nativeSolMint]?["usd_24h_change"] ?? 0.0;
       }
-      double usd = unitPrice >= 0 ? unitPrice * amount : -1;
+      double usd = unitPrice >= 0 ? unitPrice * amount : -1.0;
       return SplTokenAccountDataInfoWithUsd(
         info: e,
         usd: usd,
