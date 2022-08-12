@@ -287,8 +287,13 @@ class Utils {
     }
     Map<String, double?> prices = await _getCoinGeckoPrices(rawResults.map((e) => e.mint).toList());
     List<SplTokenAccountDataInfoWithUsd> results = rawResults.map((e) {
-      return SplTokenAccountDataInfoWithUsd(info: e, usd: prices[e.mint]);
+      String uiAmountString = e.tokenAmount.uiAmountString ?? "0";
+      double amount = double.parse(uiAmountString);
+      double unitPrice = prices[e.mint] ?? -1;
+      double usd = unitPrice >= 0 ? unitPrice * amount : -1;
+      return SplTokenAccountDataInfoWithUsd(info: e, usd: usd);
     }).toList();
+    results.sort((a, b) => b.usd.compareTo(a.usd));
     return results;
   }
 
@@ -332,6 +337,7 @@ class Utils {
     if (tokens.isEmpty) return {};
     Map<String, double?> results = {};
     String url = "$_coinGeckoUrl${tokens.join(",")}";
+    print('url: $url');
     Map<String, dynamic> json = jsonDecode(await _httpGet(url));
     for (String key in json.keys) {
       results[key] = json[key]!["usd"];
@@ -388,7 +394,7 @@ class TokenChanges {
 }
 
 class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
-  final double? usd;
+  final double usd;
   SplTokenAccountDataInfoWithUsd({
     required SplTokenAccountDataInfo info,
     required this.usd,

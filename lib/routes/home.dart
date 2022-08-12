@@ -351,8 +351,9 @@ class _HomeRouteState extends State<HomeRoute> {
               }
             }
             String uiAmountString = balances[mint]!.tokenAmount.uiAmountString ?? "0";
-            double amount = double.parse(uiAmountString);
-            double usd = (balances[mint]!.usd ?? -1) * amount - 0.000001; // gets rid of -0
+            // double amount = double.parse(uiAmountString);
+            // double unitPrice = balances[mint]!.usd ?? -1;
+            double usd = balances[mint]!.usd;
             return ListTile(
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(32),
