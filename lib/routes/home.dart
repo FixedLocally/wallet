@@ -335,7 +335,14 @@ class _HomeRouteState extends State<HomeRoute> {
             if (_tokenDetails[mint] != null) {
               String? image = _tokenDetails[mint]?["image"];
               if (image != null) {
-                if (image.endsWith(".svg")) {
+                Uri? uri = Uri.tryParse(image);
+                if (uri?.data?.mimeType.startsWith("image/svg") == true) {
+                  leading = StringSvg(
+                    svg: uri!.data!.contentAsString(),
+                    width: 48,
+                    height: 48,
+                  );
+                } else if (image.endsWith(".svg")) {
                   leading = NetworkSvg(
                     url: image,
                     width: 48,

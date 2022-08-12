@@ -15,6 +15,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
+import '../widgets/svg.dart';
 
 const String _coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/token_price/solana?vs_currencies=usd&include_24hr_change=true&contract_addresses=";
 const nativeSol = "native-sol";
@@ -94,7 +95,15 @@ class Utils {
             OffChainMetadata offChainMetadata = OffChainMetadata.fromJson(offChainMetadataMap);
             result["name"] = offChainMetadata.name;
             result["symbol"] = offChainMetadata.symbol;
-            result["image"] = offChainMetadata.image;
+            String image = offChainMetadata.image;
+            Uri? uri = Uri.tryParse(image);
+            if (uri?.data?.mimeType.startsWith("image/svg") == true) {
+              String svg = fixSvg(uri!.data!.contentAsString());
+              uri = Uri.dataFromString(svg, mimeType: uri.data?.mimeType);
+              image = uri.toString();
+            }
+            result["image"] = image;
+
           } catch (_, st) {
             print("$token error $_ $st");
           } // no offchain metadata
