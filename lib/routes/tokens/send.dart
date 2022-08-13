@@ -137,70 +137,83 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                   ),
                 ),
                 const Spacer(),
-                TextButton(
-                  onPressed: () async {
-                    ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
-                    NavigatorState navigator = Navigator.of(context);
-                    if (_formKey.currentState!.validate()) {
-                      bool confirm = await Utils.showConfirmDialog(
-                        context: context,
-                        title: "Send $symbol",
-                        content: "You are about to send $_amount $symbol to $_recipient.",
-                      );
-                      if (confirm) {
-                        Completer completer = Completer();
-                        List<Instruction> ixs = [];
-                        if (widget.balance.mint == nativeSol) {
-                          ixs.add(SystemInstruction.transfer(
-                            fundingAccount: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
-                            recipientAccount: Ed25519HDPublicKey.fromBase58(_recipient),
-                            lamports: (double.parse(_amount) * lamportsPerSol).floor(),
-                          ));
-                        } else {
-                          // check if destination exists
-                          Ed25519HDPublicKey recipient = Ed25519HDPublicKey.fromBase58(_recipient);
-                          Ed25519HDPublicKey mint = Ed25519HDPublicKey.fromBase58(widget.balance.mint);
-                          Ed25519HDPublicKey destTokenAcct = await findAssociatedTokenAddress(
-                            owner: recipient,
-                            mint: mint,
-                          );
-                          Account? acct = await Utils.getAccount(destTokenAcct.toBase58());
-                          if (acct == null) {
-                            ixs.add(AssociatedTokenAccountInstruction.createAccount(
-                              funder: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
-                              address: destTokenAcct,
-                              owner: recipient,
-                              mint: mint,
-                            ));
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        // style: ButtonStyle(
+                        //   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        //     RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(18.0),
+                        //     ),
+                        //   ),
+                        // ),
+                        onPressed: () async {
+                          ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
+                          NavigatorState navigator = Navigator.of(context);
+                          if (_formKey.currentState!.validate()) {
+                            bool confirm = await Utils.showConfirmDialog(
+                              context: context,
+                              title: "Send $symbol",
+                              content: "You are about to send $_amount $symbol to $_recipient.",
+                            );
+                            if (confirm) {
+                              Completer completer = Completer();
+                              List<Instruction> ixs = [];
+                              if (widget.balance.mint == nativeSol) {
+                                ixs.add(SystemInstruction.transfer(
+                                  fundingAccount: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                                  recipientAccount: Ed25519HDPublicKey.fromBase58(_recipient),
+                                  lamports: (double.parse(_amount) * lamportsPerSol).floor(),
+                                ));
+                              } else {
+                                // check if destination exists
+                                Ed25519HDPublicKey recipient = Ed25519HDPublicKey.fromBase58(_recipient);
+                                Ed25519HDPublicKey mint = Ed25519HDPublicKey.fromBase58(widget.balance.mint);
+                                Ed25519HDPublicKey destTokenAcct = await findAssociatedTokenAddress(
+                                  owner: recipient,
+                                  mint: mint,
+                                );
+                                Account? acct = await Utils.getAccount(destTokenAcct.toBase58());
+                                if (acct == null) {
+                                  ixs.add(AssociatedTokenAccountInstruction.createAccount(
+                                    funder: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                                    address: destTokenAcct,
+                                    owner: recipient,
+                                    mint: mint,
+                                  ));
+                                }
+                                ixs.add(TokenInstruction.transfer(
+                                  owner: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                                  destination: destTokenAcct,
+                                  amount: (double.parse(_amount) * pow(10, _tokenDetails["decimals"])).floor(),
+                                  source: Ed25519HDPublicKey.fromBase58(widget.balance.account),
+                                ));
+                              }
+                              if (mounted) {
+                                Utils.sendInstructions(ixs).then((value) => completer.complete(value));
+                                await Utils.showLoadingDialog(
+                                  context: context,
+                                  future: completer.future,
+                                  text: "Sending...",
+                                );
+                                navigator.pop(true);
+                                scaffold.showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Transaction sent"),
+                                  ),
+                                );
+                              }
+                            }
                           }
-                          ixs.add(TokenInstruction.transfer(
-                            owner: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
-                            destination: destTokenAcct,
-                            amount: (double.parse(_amount) * pow(10, _tokenDetails["decimals"])).floor(),
-                            source: Ed25519HDPublicKey.fromBase58(widget.balance.account),
-                          ));
-                        }
-                        if (mounted) {
-                          Utils.sendInstructions(ixs).then((value) => completer.complete(value));
-                          await Utils.showLoadingDialog(
-                            context: context,
-                            future: completer.future,
-                            text: "Sending...",
-                          );
-                          navigator.pop(true);
-                          scaffold.showSnackBar(
-                            const SnackBar(
-                              content: Text("Transaction sent"),
-                            ),
-                          );
-                        }
-                      }
-                    }
-                  },
-                  child: Text(
-                    "Send",
-                    style: themeData.textTheme.button,
-                  ),
+                        },
+                        child: Text(
+                          "Send",
+                          style: themeData.textTheme.button,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

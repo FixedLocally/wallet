@@ -11,15 +11,26 @@ class WalletApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    ElevatedButtonThemeData elevatedButtonThemeData = ElevatedButtonThemeData(
+      style: ButtonStyle(
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.0),
+          ),
+        ),
+      ),
+    );
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        fontFamily: "NotoSans"
+        fontFamily: "NotoSans",
+        elevatedButtonTheme: elevatedButtonThemeData,
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        fontFamily: "NotoSans"
+        fontFamily: "NotoSans",
+        elevatedButtonTheme: elevatedButtonThemeData,
       ),
       home: const EntryPointRoute(),
     );
