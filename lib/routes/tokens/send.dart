@@ -63,7 +63,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
           child: Form(
             key: _formKey,
             child: Column(
