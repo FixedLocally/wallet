@@ -76,7 +76,7 @@ class KeyManager {
       value: "${seed.join(",")};0",
     );
     ManagedKey newKey = ManagedKey(
-      name: "Wallet ${_wallets.length + 1}",
+      name: "Wallet 0",
       pubKey: keypair.publicKey.toBase58(),
       keyType: "seed",
       keyHash: seedHash,
@@ -142,7 +142,7 @@ class KeyManager {
     mockPubKey = null;
     return await _db.transaction((txn) async {
       ManagedKey newKey = ManagedKey(
-        name: "Wallet ${_wallets.length + 1}",
+        name: "Wallet $index",
         pubKey: wallet.publicKey.toBase58(),
         keyType: "seed",
         keyHash: seedHash,
