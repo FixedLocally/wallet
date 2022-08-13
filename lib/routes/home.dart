@@ -254,30 +254,12 @@ class _HomeRouteState extends State<HomeRoute> {
           SlidableAction(
             backgroundColor: Colors.red,
             onPressed: (ctx) async {
-              bool confirm = await showDialog(
+              bool confirm = await Utils.showConfirmDialog(
                 context: context,
-                barrierDismissible: false,
-                builder: (ctx) {
-                  return AlertDialog(
-                    title: const Text('Are you sure?'),
-                    content: const Text('This will delete the wallet.'),
-                    actions: [
-                      TextButton(
-                        child: const Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(ctx).pop(false);
-                        },
-                      ),
-                      TextButton(
-                        child: const Text('Delete'),
-                        onPressed: () {
-                          Navigator.of(ctx).pop(true);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ) ?? false;
+                title: "Remove wallet",
+                content: "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase.",
+                confirmText: "Delete",
+              );
               if (!confirm) {
                 return;
               }
@@ -423,7 +405,7 @@ class _HomeRouteState extends State<HomeRoute> {
     // double unitPrice = entry.value.usd ?? -1;
     double usd = entry.value.usd;
     double usdChange = entry.value.usdChange;
-    return ListTile(
+    Widget listTile = ListTile(
       onTap: () {
         _showTokenMenu(entry.value);
       },
@@ -457,6 +439,31 @@ class _HomeRouteState extends State<HomeRoute> {
             const Text("\$ -"),
         ],
       ) : null,
+    );
+    return Slidable(
+      endActionPane: entry.value.tokenAmount.amount == "0" ? ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            backgroundColor: Colors.red,
+            onPressed: (ctx) async {
+              bool confirm = await Utils.showConfirmDialog(
+                context: context,
+                title: "Close token account",
+                content: "Another contract interaction may recreate this account.",
+                confirmText: "Close",
+              );
+              if (!confirm) {
+                return;
+              }
+              setState(() {});
+            },
+            icon: Icons.close,
+            label: "Close account",
+          ),
+        ],
+      ) : null,
+      child: listTile,
     );
   }
 
