@@ -345,8 +345,15 @@ class Utils {
         usdChange: usd * (1 - 1 / (1 + dailyChangePercent / 100)),
       );
     }).toList();
-    results.sort((a, b) => b.usd.compareTo(a.usd));
+    results.sort(compoundComparator([
+      (a, b) => b.usd.compareTo(a.usd),
+      (a, b) => b.mint.compareTo(a.mint),
+    ]));
     return results;
+  }
+
+  static Comparator<T> compoundComparator<T>(List<Comparator<T>> comparators) {
+    return (a, b) => comparators.fold(0, (prev, cmp) => prev == 0 ? cmp(a, b) : prev);
   }
 
   static Future<Database> _openDatabase() async {

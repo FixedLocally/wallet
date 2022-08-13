@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -335,7 +336,7 @@ class _HomeRouteState extends State<HomeRoute> {
             if (index == 0) {
               double totalUsd = balances.values.fold(
                 0.0,
-                (sum, balance) => sum + balance.usd,
+                (sum, balance) => sum + max(0.0, balance.usd),
               );
               double totalUsdChange = balances.values.fold(
                 0.0,
