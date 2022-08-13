@@ -406,6 +406,42 @@ class Utils {
     });
   }
 
+  static Future<String?> showInputDialog({
+    required BuildContext context,
+    required String prompt,
+    String? label,
+    String confirmText = "OK",
+  }) {
+    TextEditingController controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(prompt),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: label,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(ctx, controller.text);
+              },
+              child: Text(confirmText),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   static Comparator<T> compoundComparator<T>(List<Comparator<T>> comparators) {
     return (a, b) => comparators.fold(0, (prev, cmp) => prev == 0 ? cmp(a, b) : prev);
   }
@@ -476,6 +512,32 @@ class Utils {
             ),
             TextButton(
               child: Text(confirmText ?? 'Confirm'),
+              onPressed: () {
+                Navigator.of(ctx).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+  }
+
+  static Future<bool> showInfoDialog({
+    required BuildContext context,
+    String? title,
+    String? content,
+    String? confirmText,
+  }) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(title ?? "Message"),
+          content: Text(content ?? ""),
+          actions: [
+            TextButton(
+              child: Text(confirmText ?? "OK"),
               onPressed: () {
                 Navigator.of(ctx).pop(true);
               },

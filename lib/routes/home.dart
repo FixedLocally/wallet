@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -70,64 +71,43 @@ class _HomeRouteState extends State<HomeRoute> {
             onSelected: (s) async {
               switch (s) {
                 case 'sign':
-                  TextEditingController controller = TextEditingController();
-                  await showDialog<String>(
+                  String? message = await Utils.showInputDialog(
                     context: context,
-                    builder: (ctx) {
-                      return AlertDialog(
-                        title: const Text("Enter the message to sign:"),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              controller: controller,
-                              decoration: const InputDecoration(
-                                labelText: 'Message to sign',
-                              ),
+                    prompt: "Enter the message to sign:",
+                    label: "Message to sign",
+                  );
+                  if (message != null) {
+                    Future<Signature> sigFuture = KeyManager.instance.sign(message.codeUnits);
+                    showDialog(
+                      context: context,
+                      builder: (ctx) {
+                        return AlertDialog(
+                          title: const Text('Signature'),
+                          content: FutureBuilder<Signature>(
+                            future: sigFuture,
+                            builder: (ctx, snapshot) {
+                              if (snapshot.hasData) {
+                                return Text(
+                                  "Base58: ${base58encode(snapshot.data!.bytes)}\n\n"
+                                      "Hex: ${snapshot.data!.bytes.map((e) => e.toRadixString(16).padLeft(2, '0')).join()}",
+                                );
+                              } else {
+                                return const Text('Signing...');
+                              }
+                            },
+                          ),
+                          actions: [
+                            TextButton(
+                              child: const Text('OK'),
+                              onPressed: () {
+                                Navigator.of(ctx).pop();
+                              },
                             ),
                           ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () async {
-                              Future<Signature> sigFuture = KeyManager.instance.sign("solana".codeUnits);
-                              Navigator.pop(ctx);
-                              showDialog(
-                                context: context,
-                                builder: (ctx) {
-                                  return AlertDialog(
-                                    title: const Text('Signature'),
-                                    content: FutureBuilder<Signature>(
-                                      future: sigFuture,
-                                      builder: (ctx, snapshot) {
-                                        if (snapshot.hasData) {
-                                          return Text(
-                                            "Base58: ${base58encode(snapshot.data!.bytes)}\n\n"
-                                                "Hex: ${snapshot.data!.bytes.map((e) => e.toRadixString(16).padLeft(2, '0')).join()}",
-                                          );
-                                        } else {
-                                          return const Text('Signing...');
-                                        }
-                                      },
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        child: const Text('OK'),
-                                        onPressed: () {
-                                          Navigator.of(ctx).pop();
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            child: const Text("OK"),
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                        );
+                      },
+                    );
+                  }
                   break;
                 case 'create':
                   await Utils.showLoadingDialog(context: context, future: KeyManager.instance.createWallet(), text: "Creating wallet...");
@@ -465,6 +445,31 @@ class _HomeRouteState extends State<HomeRoute> {
       children: [
         ListTile(
           onTap: () async {
+            String? key = await Utils.showInputDialog(
+              context: context,
+              prompt: "Enter new key",
+            );
+            if (key == null) {
+              return;
+            }
+            List<int>? decodedKey;
+            try {
+              decodedKey = base58decode(key);
+            } catch (_) {
+              try {
+                decodedKey = (jsonDecode(key) as List).cast();
+              } catch (_) {}
+            }
+            if (decodedKey == null || (decodedKey.length != 64 && decodedKey.length != 32)) {
+              Utils.showInfoDialog(
+                context: context,
+                title: "Invalid key",
+                content: "Key must be a base58 encoded string or a JSON array of bytes",
+              );
+              return;
+            }
+            decodedKey = decodedKey.sublist(0, 32);
+            await KeyManager.instance.importWallet(decodedKey);
             setState(() {});
           },
           title: const Text("Import Wallet"),
