@@ -35,6 +35,9 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
   String _recipient = "";
   String _amount = "";
 
+  String? _recipientError;
+  String? _amountError;
+
   @override
   void initState() {
     super.initState();
@@ -76,11 +79,6 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                       Expanded(
                         child: TextFormField(
                           controller: _addressController,
-                          validator: (value) {
-                            List<int> data = base58decode(value ?? "");
-                            if (data.length != 32) return "Invalid address";
-                            return null;
-                          },
                           decoration: const InputDecoration(
                             hintText: "Recipient",
                             border: InputBorder.none,
@@ -108,15 +106,18 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                     ],
                   ),
                 ),
+                if (_recipientError != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _recipientError!,
+                      style: (themeData.textTheme.caption ?? const TextStyle())
+                          .copyWith(color: themeData.colorScheme.error),
+                    ),
+                  ),
                 Utils.wrapField(
                   themeData: themeData,
                   child: TextFormField(
-                    validator: (value) {
-                      double amt = double.tryParse(value ?? "") ?? 0;
-                      if (amt <= 0) return "Invalid amount";
-                      if (amt > double.parse(widget.balance.tokenAmount.uiAmountString!)) return "Insufficient funds";
-                      return null;
-                    },
                     decoration: const InputDecoration(
                       hintText: "Amount",
                       border: InputBorder.none,
@@ -129,6 +130,15 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                     },
                   ),
                 ),
+                if (_amountError != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _amountError!,
+                      style: (themeData.textTheme.caption ?? const TextStyle())
+                          .copyWith(color: themeData.colorScheme.error),
+                    ),
+                  ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: Text(
@@ -141,17 +151,10 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        // style: ButtonStyle(
-                        //   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        //     RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(18.0),
-                        //     ),
-                        //   ),
-                        // ),
                         onPressed: () async {
                           ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
                           NavigatorState navigator = Navigator.of(context);
-                          if (_formKey.currentState!.validate()) {
+                          if (_validate()) {
                             bool confirm = await Utils.showConfirmDialog(
                               context: context,
                               title: "Send $symbol",
@@ -221,5 +224,19 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
         ),
       ),
     );
+  }
+
+  bool _validate() {
+    // validate amount
+    _amountError = null;
+    _recipientError = null;
+    double amt = double.tryParse(_amount) ?? 0;
+    if (amt <= 0) _amountError = "Invalid amount";
+    if (amt > double.parse(widget.balance.tokenAmount.uiAmountString!)) _amountError = "Insufficient funds";
+    // validate recipient
+    List<int> data = base58decode(_recipient);
+    if (data.length != 32) _recipientError = "Invalid address";
+    setState(() {});
+    return _recipientError == null && _amountError == null;
   }
 }
