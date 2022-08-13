@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:solana/base58.dart';
@@ -11,6 +10,7 @@ import 'package:solana/solana.dart';
 
 import '../../rpc/key_manager.dart';
 import '../../utils/utils.dart';
+import '../../widgets/image.dart';
 
 
 class SendTokenRoute extends StatefulWidget {
@@ -67,13 +67,8 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Spacer(),
-                CircleAvatar(
-                  radius: 64,
-                  backgroundColor: Colors.white,
-                  backgroundImage: CachedNetworkImageProvider(
-                    widget.tokenDetails["image"] ?? "",
-                  ),
-                ),
+                MultiImage(image: widget.tokenDetails["image"] ?? "", size: 128),
+                const SizedBox(height: 16),
                 Utils.wrapField(
                   themeData: themeData,
                   child: Row(

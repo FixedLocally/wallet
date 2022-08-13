@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:solana/base58.dart';
@@ -11,7 +10,7 @@ import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import '../widgets/header.dart';
-import '../widgets/svg.dart';
+import '../widgets/image.dart';
 import 'tokens/tokens.dart';
 import 'webview.dart';
 
@@ -381,26 +380,7 @@ class _HomeRouteState extends State<HomeRoute> {
     if (_tokenDetails[entry.key] != null) {
       String? image = _tokenDetails[entry.key]?["image"];
       if (image != null) {
-        Uri? uri = Uri.tryParse(image);
-        if (uri?.data?.mimeType.startsWith("image/svg") == true) {
-          leading = StringSvg(
-            svg: uri!.data!.contentAsString(),
-            width: 48,
-            height: 48,
-          );
-        } else if (image.endsWith(".svg")) {
-          leading = NetworkSvg(
-            url: image,
-            width: 48,
-            height: 48,
-          );
-        } else {
-          leading = CachedNetworkImage(
-            imageUrl: image,
-            height: 48,
-            width: 48,
-          );
-        }
+        leading = MultiImage(image: image, size: 48);
       }
     }
     String uiAmountString = entry.value.tokenAmount.uiAmountString ?? "0";
@@ -412,10 +392,7 @@ class _HomeRouteState extends State<HomeRoute> {
       onTap: () {
         _showTokenMenu(entry.value);
       },
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: leading ?? const SizedBox(width: 48, height: 48),
-      ),
+      leading: leading,
       title: Text.rich(TextSpan(
         text: name,
         children: [
