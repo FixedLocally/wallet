@@ -10,6 +10,7 @@ import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import '../widgets/header.dart';
 import '../widgets/svg.dart';
+import 'tokens/deposit.dart';
 import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -342,7 +343,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 0.0,
                 (sum, balance) => sum + balance.usdChange,
               );
-              double percent = totalUsd > 0 ? (totalUsdChange / totalUsd * 100) : 0;
+              double percent = totalUsd > 0 ? (totalUsdChange / (totalUsd - totalUsdChange) * 100) : 0;
               bool isPositive = totalUsdChange >= 0;
               Color color = isPositive ? Colors.green : Colors.red;
               return Padding(
@@ -453,9 +454,22 @@ class _HomeRouteState extends State<HomeRoute> {
           else if (usdChange < 0)
             Text("-\$ ${(-usdChange).toStringAsFixed(2)}", style: const TextStyle(color: Colors.red))
           else
-            Text("\$ -"),
+            const Text("\$ -"),
         ],
       ) : null,
+    );
+  }
+
+  Widget _settings() {
+    return ListView(
+      children: [
+        ListTile(
+          onTap: () {
+
+          },
+          title: const Text("Import Wallet"),
+        ),
+      ],
     );
   }
 
@@ -465,6 +479,8 @@ class _HomeRouteState extends State<HomeRoute> {
         return _dAppList();
       case 1:
         return _balanceList(themeData);
+      case 2:
+        return _settings();
       default:
         return const Text("lol");
     }
@@ -483,7 +499,12 @@ class _HomeRouteState extends State<HomeRoute> {
                 leading: const Icon(Icons.call_received),
                 title: const Text("Deposit"),
                 onTap: () {
-                  Navigator.pop(ctx, 0);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (ctx) => const DepositRoute(),
+                    ),
+                  );
                 },
               ),
               ListTile(
