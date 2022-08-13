@@ -26,6 +26,7 @@ class _HomeRouteState extends State<HomeRoute> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -202,7 +203,7 @@ class _HomeRouteState extends State<HomeRoute> {
           ],
         ),
       ),
-      body: _body(),
+      body: _body(themeData),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _page,
         items: const [
@@ -314,7 +315,7 @@ class _HomeRouteState extends State<HomeRoute> {
     );
   }
 
-  Widget _balanceList() {
+  Widget _balanceList(ThemeData themeData) {
     String pubKey = KeyManager.instance.pubKey;
     if (_balances[pubKey] == null) {
       if (_balancesCompleters[pubKey] == null) {
@@ -328,73 +329,136 @@ class _HomeRouteState extends State<HomeRoute> {
           _startLoadingBalances(pubKey);
           return _balancesCompleters[pubKey]!.future;
         },
-        child: ListView(
-          children: balances.keys.map((mint) {
-            String name = _tokenDetails[mint]?["name"] ?? "${mint.substring(0, 5)}...";
-            Widget? leading;
-            if (_tokenDetails[mint] != null) {
-              String? image = _tokenDetails[mint]?["image"];
-              if (image != null) {
-                Uri? uri = Uri.tryParse(image);
-                if (uri?.data?.mimeType.startsWith("image/svg") == true) {
-                  leading = StringSvg(
-                    svg: uri!.data!.contentAsString(),
-                    width: 48,
-                    height: 48,
-                  );
-                } else if (image.endsWith(".svg")) {
-                  leading = NetworkSvg(
-                    url: image,
-                    width: 48,
-                    height: 48,
-                  );
-                } else {
-                  leading = CachedNetworkImage(
-                    imageUrl: image,
-                    height: 48,
-                    width: 48,
-                  );
-                }
-              }
+        child: ListView.builder(
+          itemCount: balances.length + 1,
+          itemBuilder: (ctx, index) {
+            if (index == 0) {
+              double totalUsd = balances.values.fold(
+                0.0,
+                (sum, balance) => sum + balance.usd,
+              );
+              double totalUsdChange = balances.values.fold(
+                0.0,
+                (sum, balance) => sum + balance.usdChange,
+              );
+              bool isPositive = totalUsdChange >= 0;
+              Color color = isPositive ? Colors.green : Colors.red;
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "\$ ${totalUsd.toStringAsFixed(2)}",
+                      style: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "${isPositive ? "+" : ""}\$ ${totalUsdChange.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: color,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "${isPositive ? "+" : ""}${(totalUsdChange / totalUsd * 100).toStringAsFixed(2)}%",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
             }
-            String uiAmountString = balances[mint]!.tokenAmount.uiAmountString ?? "0";
-            // double amount = double.parse(uiAmountString);
-            // double unitPrice = balances[mint]!.usd ?? -1;
-            double usd = balances[mint]!.usd;
-            double usdChange = balances[mint]!.usdChange;
-            return ListTile(
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: leading ?? const SizedBox(width: 48, height: 48),
-              ),
-              title: Text(name),
-              subtitle: Text(uiAmountString),
-              trailing: usd >= 0 ? Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text("\$ ${usd.toStringAsFixed(2)}"),
-                  if (usdChange > 0)
-                    Text("+\$ ${usdChange.toStringAsFixed(2)}", style: const TextStyle(color: Colors.green))
-                  else if (usdChange < 0)
-                    Text("-\$ ${(-usdChange).toStringAsFixed(2)}", style: const TextStyle(color: Colors.red))
-                  else
-                    Text("\$ -"),
-                ],
-              ) : null,
-            );
-          }).toList(),
+            return _balanceListTile(balances.entries.elementAt(index - 1), themeData);
+          },
         ),
       );
     }
   }
 
-  Widget _body() {
+  Widget _balanceListTile(MapEntry<String, SplTokenAccountDataInfoWithUsd> entry, ThemeData themeData) {
+    String name = _tokenDetails[entry.key]?["name"] ?? "";
+    String symbol = _tokenDetails[entry.key]?["symbol"] ?? "";
+    name = name.isNotEmpty ? name : "${entry.key.substring(0, 5)}...";
+    Widget? leading;
+    if (_tokenDetails[entry.key] != null) {
+      String? image = _tokenDetails[entry.key]?["image"];
+      if (image != null) {
+        Uri? uri = Uri.tryParse(image);
+        if (uri?.data?.mimeType.startsWith("image/svg") == true) {
+          leading = StringSvg(
+            svg: uri!.data!.contentAsString(),
+            width: 48,
+            height: 48,
+          );
+        } else if (image.endsWith(".svg")) {
+          leading = NetworkSvg(
+            url: image,
+            width: 48,
+            height: 48,
+          );
+        } else {
+          leading = CachedNetworkImage(
+            imageUrl: image,
+            height: 48,
+            width: 48,
+          );
+        }
+      }
+    }
+    String uiAmountString = entry.value.tokenAmount.uiAmountString ?? "0";
+    // double amount = double.parse(uiAmountString);
+    // double unitPrice = entry.value.usd ?? -1;
+    double usd = entry.value.usd;
+    double usdChange = entry.value.usdChange;
+    return ListTile(
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: leading ?? const SizedBox(width: 48, height: 48),
+      ),
+      title: Text.rich(TextSpan(
+        text: name,
+        children: [
+          TextSpan(
+            text: " ($symbol)",
+            style: TextStyle(
+              color: themeData.colorScheme.onBackground.withOpacity(0.8),
+            ),
+          ),
+        ],
+      )),
+      subtitle: Text(uiAmountString),
+      trailing: usd >= 0 ? Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text("\$ ${usd.toStringAsFixed(2)}"),
+          if (usdChange > 0)
+            Text("+\$ ${usdChange.toStringAsFixed(2)}", style: const TextStyle(color: Colors.green))
+          else if (usdChange < 0)
+            Text("-\$ ${(-usdChange).toStringAsFixed(2)}", style: const TextStyle(color: Colors.red))
+          else
+            Text("\$ -"),
+        ],
+      ) : null,
+    );
+  }
+
+  Widget _body(ThemeData themeData) {
     switch (_page) {
       case 0:
         return _dAppList();
       case 1:
-        return _balanceList();
+        return _balanceList(themeData);
       default:
         return const Text("lol");
     }
