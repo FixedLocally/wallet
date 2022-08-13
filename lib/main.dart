@@ -15,8 +15,12 @@ class WalletApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: "NotoSans"
       ),
-      darkTheme: ThemeData.dark(),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        fontFamily: "NotoSans"
+      ),
       home: const EntryPointRoute(),
     );
   }

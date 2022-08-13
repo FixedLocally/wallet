@@ -341,6 +341,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 0.0,
                 (sum, balance) => sum + balance.usdChange,
               );
+              double percent = totalUsd > 0 ? (totalUsdChange / totalUsd * 100) : 0;
               bool isPositive = totalUsdChange >= 0;
               Color color = isPositive ? Colors.green : Colors.red;
               return Padding(
@@ -366,7 +367,7 @@ class _HomeRouteState extends State<HomeRoute> {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          "${isPositive ? "+" : ""}${(totalUsdChange / totalUsd * 100).toStringAsFixed(2)}%",
+                          "${isPositive ? "+" : ""}${percent.toStringAsFixed(2)}%",
                           style: TextStyle(
                             fontSize: 20,
                             color: color,
