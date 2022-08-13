@@ -111,14 +111,14 @@ class KeyManager {
     assert(_ready);
     if (mockPubKey != null) throw SignatureError("Cannot sign with mock wallet");
     Wallet wallet = await _activeWallet!.getWallet();
-    return wallet.sign(message);
+    return compute(_sign, [wallet, message]);
   }
 
   Future<SignedTx> signMessage(Message message, String recentBlockhash) async {
     assert(_ready);
     if (mockPubKey != null) throw SignatureError("Cannot sign with mock wallet");
     Wallet? wallet = await _activeWallet!.getWallet();
-    return wallet.signMessage(message: message, recentBlockhash: recentBlockhash);
+    return compute(_signTx, [wallet, message, recentBlockhash]);
   }
 
   Future<ManagedKey> createWallet() async {
@@ -296,4 +296,17 @@ class ManagedKey {
 
 Future<Ed25519HDKeyPair> _generateKey(List args) async {
   return Ed25519HDKeyPair.fromSeedWithHdPath(seed: args[0], hdPath: args[1]);
+}
+
+Future<Signature> _sign(List args) async {
+  Wallet wallet = args[0];
+  List<int> message = args[1];
+  return await wallet.sign(message);
+}
+
+Future<SignedTx> _signTx(List args) async {
+  Wallet wallet = args[0];
+  Message message = args[1];
+  String recentBlockhash = args[2];
+  return await wallet.signMessage(message: message, recentBlockhash: recentBlockhash);
 }
