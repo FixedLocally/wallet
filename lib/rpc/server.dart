@@ -116,10 +116,6 @@ class RpcServer {
     if (args["tx"] == null) {
       return RpcResponse.error(RpcConstants.kInvalidInput);
     }
-    // auto reject mocked requests
-    if (KeyManager.instance.mockPubKey != null) {
-      return RpcResponse.error(RpcConstants.kUserRejected);
-    }
 
     List<int> payload = args["tx"].cast<int>();
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
@@ -132,6 +128,10 @@ class RpcServer {
         return ApproveTransactionWidget(simulation: simulation);
       },
     );
+    // auto reject mocked requests
+    if (KeyManager.instance.mockPubKey != null) {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
     if (approved) {
       String recentBlockhash = args["recentBlockhash"];
       SignedTx signedTx = await KeyManager.instance.signMessage(message, recentBlockhash);
@@ -172,10 +172,6 @@ class RpcServer {
     if (error != null) {
       return error;
     }
-    // auto reject mocked requests
-    if (KeyManager.instance.mockPubKey != null) {
-      return RpcResponse.error(RpcConstants.kUserRejected);
-    }
     if (args["txs"] == null) return RpcResponse.error(RpcConstants.kInvalidInput);
     List<Map<String, dynamic>> txs = args["txs"]!.cast<Map<String, dynamic>>();
 
@@ -200,6 +196,10 @@ class RpcServer {
         return ApproveTransactionWidget(simulation: simulation);
       },
     );
+    // auto reject mocked requests
+    if (KeyManager.instance.mockPubKey != null) {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
     if (approved) {
       List<SignedTx> signedTxs = [];
       List<Signature> signatures = [];
