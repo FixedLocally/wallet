@@ -5,7 +5,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:solana/base58.dart';
+import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
+import 'package:solana/solana.dart';
+import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import '../widgets/header.dart';
@@ -447,6 +450,7 @@ class _HomeRouteState extends State<HomeRoute> {
           SlidableAction(
             backgroundColor: Colors.red,
             onPressed: (ctx) async {
+              ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
               bool confirm = await Utils.showConfirmDialog(
                 context: context,
                 title: "Close token account",
@@ -456,7 +460,20 @@ class _HomeRouteState extends State<HomeRoute> {
               if (!confirm) {
                 return;
               }
-              setState(() {});
+              Instruction ix = TokenInstruction.closeAccount(
+                accountToClose: Ed25519HDPublicKey(base58decode(entry.value.account)),
+                destination: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
+                owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
+              );
+              Message msg = Message(instructions: [ix]);
+              RecentBlockhash blockhash = await Utils.getBlockhash();
+              try {
+                SignedTx tx = await KeyManager.instance.signMessage(msg, blockhash.blockhash);
+                await Utils.sendTransaction(tx);
+              } on BaseError catch (e) {
+                scaffold.showSnackBar(SnackBar(content: Text(e.message.toString())));
+                return;
+              }
             },
             icon: Icons.close,
             label: "Close account",
