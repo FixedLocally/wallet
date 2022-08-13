@@ -6,11 +6,13 @@ import 'svg.dart';
 class MultiImage extends StatefulWidget {
   final String image;
   final double size;
+  final double? borderRadius;
 
   const MultiImage({
     Key? key,
     required this.image,
     required this.size,
+    this.borderRadius,
   }) : super(key: key);
 
   @override
@@ -61,7 +63,7 @@ class _MultiImageState extends State<MultiImage> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(widget.size / 2),
+      borderRadius: BorderRadius.circular(widget.borderRadius ?? (widget.size / 2)),
       child: _builder(context),
     );
   }

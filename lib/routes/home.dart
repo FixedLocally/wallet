@@ -31,9 +31,6 @@ class _HomeRouteState extends State<HomeRoute> {
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
-    final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
-    print(bottomTheme.unselectedIconTheme?.color);
-    print(themeData.unselectedWidgetColor);
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -458,58 +455,49 @@ class _HomeRouteState extends State<HomeRoute> {
           _startLoadingBalances(pubKey);
           return _balancesCompleters[pubKey]!.future;
         },
-        child: ListView.builder(
-          itemCount: balances.length + 1,
-          itemBuilder: (ctx, index) {
-            if (index == 0) {
-              double totalUsd = balances.values.fold(
-                0.0,
-                    (sum, balance) => sum + max(0.0, balance.usd),
-              );
-              double totalUsdChange = balances.values.fold(
-                0.0,
-                    (sum, balance) => sum + balance.usdChange,
-              );
-              double percent = totalUsd > 0 ? (totalUsdChange / (totalUsd - totalUsdChange) * 100) : 0;
-              bool isPositive = totalUsdChange >= 0;
-              Color color = isPositive ? Colors.green : Colors.red;
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Text(
-                      "\$ ${totalUsd.toStringAsFixed(2)}",
-                      style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "${isPositive ? "+" : ""}\$ ${totalUsdChange.toStringAsFixed(2)}",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: color,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          "${isPositive ? "+" : ""}${percent.toStringAsFixed(2)}%",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+        child: GridView(
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 280,
+            childAspectRatio: 1,
+            mainAxisSpacing: 16,
+          ),
+          children: balances.entries.map((entry) {
+            String name = _tokenDetails[entry.key]?["name"] ?? "";
+            name = name.isNotEmpty ? name : "${entry.key.substring(0, 5)}...";
+            return Stack(
+              children: [
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: 16,
+                  child: MultiImage(
+                    image: _tokenDetails[entry.value.mint]!["image"],
+                    size: 160,
+                    borderRadius: 24,
+                  ),
                 ),
-              );
-            }
-            return _balanceListTile(balances.entries.elementAt(index - 1), themeData);
-          },
+                Positioned(
+                  bottom: 24,
+                  left: 24,
+                  right: 24,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      color: themeData.colorScheme.surface.withOpacity(0.6),
+                    ),
+                    child: Text(
+                      name.split("").join("\u200b"),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
         ),
       );
     }
