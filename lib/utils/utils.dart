@@ -279,6 +279,14 @@ class Utils {
     );
   }
 
+  static Future<void> confirmTransaction(
+    String sig, {
+    Commitment status = Commitment.confirmed,
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    return _solanaClient.waitForSignatureStatus(sig, status: status, timeout: timeout);
+  }
+
   static Future<TokenAmount?> _getTokenAmountOrNull(String address) async {
     try {
       return await _solanaClient.rpcClient.getTokenAccountBalance(address, commitment: Commitment.confirmed);

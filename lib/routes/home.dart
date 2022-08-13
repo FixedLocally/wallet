@@ -469,7 +469,10 @@ class _HomeRouteState extends State<HomeRoute> {
               RecentBlockhash blockhash = await Utils.getBlockhash();
               try {
                 SignedTx tx = await KeyManager.instance.signMessage(msg, blockhash.blockhash);
-                await Utils.sendTransaction(tx);
+                String sig = await Utils.sendTransaction(tx);
+                await Utils.confirmTransaction(sig);
+                scaffold.showSnackBar(const SnackBar(content: Text("Transaction confirmed")));
+                _startLoadingBalances(KeyManager.instance.pubKey);
               } on BaseError catch (e) {
                 scaffold.showSnackBar(SnackBar(content: Text(e.message.toString())));
                 return;
