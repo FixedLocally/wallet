@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../rpc/key_manager.dart';
+import '../../utils/utils.dart';
 
 class DepositTokenRoute extends StatefulWidget {
   const DepositTokenRoute({Key? key}) : super(key: key);
@@ -37,13 +38,8 @@ class _DepositTokenRouteState extends State<DepositTokenRoute> {
                   padding: EdgeInsets.zero,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 16, bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: themeData.colorScheme.background,
-                ),
+              Utils.wrapField(
+                themeData: themeData,
                 child: Row(
                   children: [
                     Expanded(

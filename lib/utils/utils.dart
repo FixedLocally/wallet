@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:solana/base58.dart';
-import 'package:solana/dto.dart';
+import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
 import 'package:solana/metaplex.dart';
 import 'package:solana/solana.dart';
@@ -279,6 +279,15 @@ class Utils {
     );
   }
 
+  static Future<String> sendInstruction(Instruction ix , {Commitment preflightCommitment = Commitment.confirmed}) async {
+    Message msg = Message(instructions: [ix]);
+    RecentBlockhash blockhash = await Utils.getBlockhash();
+    SignedTx tx = await KeyManager.instance.signMessage(msg, blockhash.blockhash);
+    String sig = await Utils.sendTransaction(tx);
+    await Utils.confirmTransaction(sig);
+    return sig;
+  }
+
   static Future<void> confirmTransaction(
     String sig, {
     Commitment status = Commitment.confirmed,
@@ -467,6 +476,18 @@ class Utils {
         );
       },
     ) ?? false;
+  }
+
+  static Widget wrapField({required ThemeData themeData, required Widget child}) {
+    return Container(
+      margin: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: themeData.colorScheme.background,
+      ),
+      child: child,
+    );
   }
 }
 

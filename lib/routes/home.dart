@@ -5,7 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:solana/base58.dart';
-import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import '../rpc/errors/errors.dart';
@@ -465,12 +464,8 @@ class _HomeRouteState extends State<HomeRoute> {
                 destination: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
                 owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
               );
-              Message msg = Message(instructions: [ix]);
-              RecentBlockhash blockhash = await Utils.getBlockhash();
               try {
-                SignedTx tx = await KeyManager.instance.signMessage(msg, blockhash.blockhash);
-                String sig = await Utils.sendTransaction(tx);
-                await Utils.confirmTransaction(sig);
+                await Utils.sendInstruction(ix);
                 scaffold.showSnackBar(const SnackBar(content: Text("Transaction confirmed")));
                 _startLoadingBalances(KeyManager.instance.pubKey);
               } on BaseError catch (e) {
