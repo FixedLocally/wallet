@@ -289,7 +289,7 @@ class Utils {
   }
 
   static Future<Account?> getAccount(String pubkey) {
-    return _solanaClient.rpcClient.getAccountInfo(pubkey, commitment: Commitment.confirmed);
+    return _solanaClient.rpcClient.getAccountInfo(pubkey, commitment: Commitment.confirmed, encoding: Encoding.base64);
   }
 
   static Future<void> confirmTransaction(
