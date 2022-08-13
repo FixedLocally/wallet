@@ -131,7 +131,7 @@ class _HomeRouteState extends State<HomeRoute> {
                   );
                   break;
                 case 'create':
-                  await Utils.showLoadingDialog(context, KeyManager.instance.createWallet());
+                  await Utils.showLoadingDialog(context: context, future: KeyManager.instance.createWallet(), text: "Creating wallet...");
                   setState(() {});
                   break;
                 case 'mock':
@@ -297,6 +297,7 @@ class _HomeRouteState extends State<HomeRoute> {
         _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
         _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
         _createWebsiteListTile("Mango Markets", "https://trade.mango.markets"),
+        _createWebsiteListTile("Orca", "https://orca.so"),
       ],
     );
   }
@@ -307,7 +308,7 @@ class _HomeRouteState extends State<HomeRoute> {
       if (_balancesCompleters[pubKey] == null) {
         _startLoadingBalances(pubKey);
       }
-      return const CircularProgressIndicator();
+      return const Center(child: CircularProgressIndicator());
     } else {
       Map<String, SplTokenAccountDataInfoWithUsd> balances = _balances[pubKey]!;
       return RefreshIndicator(
@@ -532,13 +533,19 @@ class _HomeRouteState extends State<HomeRoute> {
               ListTile(
                 leading: const Icon(Icons.call_made),
                 title: const Text("Send"),
-                onTap: () {
-                  Navigator.pushReplacement(
+                onTap: () async {
+                  bool sent = await Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (ctx) => const SendTokenRoute(),
+                      builder: (ctx) => SendTokenRoute(
+                        balance: balance,
+                        tokenDetails: _tokenDetails[balance.mint] ?? {},
+                      ),
                     ),
-                  );
+                  ) ?? false;
+                  if (sent) {
+                    _startLoadingBalances(KeyManager.instance.pubKey);
+                  }
                 },
               ),
               if (balance.mint == nativeSol)

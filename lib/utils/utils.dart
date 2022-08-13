@@ -377,7 +377,11 @@ class Utils {
     return results;
   }
 
-  static Future<T> showLoadingDialog<T>(BuildContext context, Future<T> future) async {
+  static Future<T> showLoadingDialog<T>({
+    required BuildContext context,
+    required Future<T> future,
+    String text = "Loading...",
+  }) async {
     showDialog<T>(
       context: context,
       barrierDismissible: false,
