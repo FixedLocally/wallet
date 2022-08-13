@@ -423,6 +423,9 @@ class _HomeRouteState extends State<HomeRoute> {
     double usd = entry.value.usd;
     double usdChange = entry.value.usdChange;
     return ListTile(
+      onTap: () {
+        _showTokenMenu(entry.value);
+      },
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(32),
         child: leading ?? const SizedBox(width: 48, height: 48),
@@ -430,12 +433,13 @@ class _HomeRouteState extends State<HomeRoute> {
       title: Text.rich(TextSpan(
         text: name,
         children: [
-          TextSpan(
-            text: " ($symbol)",
-            style: TextStyle(
-              color: themeData.colorScheme.onBackground.withOpacity(0.8),
+          if (symbol.isNotEmpty)
+            TextSpan(
+              text: " ($symbol)",
+              style: TextStyle(
+                color: themeData.colorScheme.onBackground.withOpacity(0.8),
+              ),
             ),
-          ),
         ],
       )),
       subtitle: Text(uiAmountString),
@@ -464,6 +468,44 @@ class _HomeRouteState extends State<HomeRoute> {
       default:
         return const Text("lol");
     }
+  }
+
+  Future _showTokenMenu(SplTokenAccountDataInfoWithUsd balance) {
+    return showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.call_received),
+                title: const Text("Deposit"),
+                onTap: () {
+                  Navigator.pop(ctx, 0);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.call_made),
+                title: const Text("Send"),
+                onTap: () {
+                  Navigator.pop(ctx, 1);
+                },
+              ),
+              if (balance.mint == nativeSol)
+                ListTile(
+                  leading: const Icon(Icons.star),
+                  title: const Text("Stake"),
+                  onTap: () {
+                    Navigator.pop(ctx, 2);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _startLoadingBalances(String pubKey) {
