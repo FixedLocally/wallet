@@ -13,7 +13,7 @@ import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import '../widgets/header.dart';
 import '../widgets/svg.dart';
-import 'tokens/deposit.dart';
+import 'tokens/tokens.dart';
 import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -526,7 +526,7 @@ class _HomeRouteState extends State<HomeRoute> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (ctx) => const DepositRoute(),
+                      builder: (ctx) => const DepositTokenRoute(),
                     ),
                   );
                 },
@@ -535,7 +535,12 @@ class _HomeRouteState extends State<HomeRoute> {
                 leading: const Icon(Icons.call_made),
                 title: const Text("Send"),
                 onTap: () {
-                  Navigator.pop(ctx, 1);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (ctx) => const SendTokenRoute(),
+                    ),
+                  );
                 },
               ),
               if (balance.mint == nativeSol)

@@ -4,14 +4,14 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../rpc/key_manager.dart';
 
-class DepositRoute extends StatefulWidget {
-  const DepositRoute({Key? key}) : super(key: key);
+class DepositTokenRoute extends StatefulWidget {
+  const DepositTokenRoute({Key? key}) : super(key: key);
 
   @override
-  State<DepositRoute> createState() => _DepositRouteState();
+  State<DepositTokenRoute> createState() => _DepositTokenRouteState();
 }
 
-class _DepositRouteState extends State<DepositRoute> {
+class _DepositTokenRouteState extends State<DepositTokenRoute> {
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
