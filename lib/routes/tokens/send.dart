@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:solana/base58.dart';
+import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 
@@ -149,17 +153,43 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                         content: "You are about to send $_amount $symbol to $_recipient.",
                       );
                       if (confirm) {
-                        Instruction ix = SystemInstruction.transfer(
-                          fundingAccount: Ed25519HDPublicKey.fromBase58(
-                                KeyManager.instance.pubKey),
-                          recipientAccount: Ed25519HDPublicKey.fromBase58(
-                                _recipient),
-                          lamports: (double.parse(_amount) * lamportsPerSol).floor(),
-                        );
+                        Completer completer = Completer();
+                        List<Instruction> ixs = [];
+                        if (widget.balance.mint == nativeSol) {
+                          ixs.add(SystemInstruction.transfer(
+                            fundingAccount: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                            recipientAccount: Ed25519HDPublicKey.fromBase58(_recipient),
+                            lamports: (double.parse(_amount) * lamportsPerSol).floor(),
+                          ));
+                        } else {
+                          // check if destination exists
+                          Ed25519HDPublicKey recipient = Ed25519HDPublicKey.fromBase58(_recipient);
+                          Ed25519HDPublicKey mint = Ed25519HDPublicKey.fromBase58(widget.balance.mint);
+                          Ed25519HDPublicKey destTokenAcct = await findAssociatedTokenAddress(
+                            owner: recipient,
+                            mint: mint,
+                          );
+                          Account? acct = await Utils.getAccount(destTokenAcct.toBase58());
+                          if (acct == null) {
+                            ixs.add(AssociatedTokenAccountInstruction.createAccount(
+                              funder: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                              address: destTokenAcct,
+                              owner: recipient,
+                              mint: mint,
+                            ));
+                          }
+                          ixs.add(TokenInstruction.transfer(
+                            owner: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                            destination: destTokenAcct,
+                            amount: (double.parse(_amount) * pow(10, _tokenDetails["decimals"])).floor(),
+                            source: Ed25519HDPublicKey.fromBase58(widget.balance.account),
+                          ));
+                        }
                         if (mounted) {
+                          Utils.sendInstructions(ixs).then((value) => completer.complete(value));
                           await Utils.showLoadingDialog(
                             context: context,
-                            future: Utils.sendInstruction(ix),
+                            future: completer.future,
                             text: "Sending...",
                           );
                           navigator.pop(true);

@@ -279,13 +279,17 @@ class Utils {
     );
   }
 
-  static Future<String> sendInstruction(Instruction ix , {Commitment preflightCommitment = Commitment.confirmed}) async {
-    Message msg = Message(instructions: [ix]);
+  static Future<String> sendInstructions(List<Instruction> ixs , {Commitment preflightCommitment = Commitment.confirmed}) async {
+    Message msg = Message(instructions: ixs);
     RecentBlockhash blockhash = await Utils.getBlockhash();
     SignedTx tx = await KeyManager.instance.signMessage(msg, blockhash.blockhash);
     String sig = await Utils.sendTransaction(tx);
     await Utils.confirmTransaction(sig);
     return sig;
+  }
+
+  static Future<Account?> getAccount(String pubkey) {
+    return _solanaClient.rpcClient.getAccountInfo(pubkey, commitment: Commitment.confirmed);
   }
 
   static Future<void> confirmTransaction(

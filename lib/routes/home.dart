@@ -466,7 +466,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
               );
               try {
-                await Utils.sendInstruction(ix);
+                await Utils.sendInstructions([ix]);
                 scaffold.showSnackBar(const SnackBar(content: Text("Transaction confirmed")));
                 _startLoadingBalances(KeyManager.instance.pubKey);
               } on BaseError catch (e) {
