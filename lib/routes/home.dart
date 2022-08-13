@@ -31,6 +31,9 @@ class _HomeRouteState extends State<HomeRoute> {
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
+    final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
+    print(bottomTheme.unselectedIconTheme?.color);
+    print(themeData.unselectedWidgetColor);
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -180,6 +183,9 @@ class _HomeRouteState extends State<HomeRoute> {
       ),
       body: _body(themeData),
       bottomNavigationBar: BottomNavigationBar(
+        // type: BottomNavigationBarType.fixed,
+        selectedItemColor: themeData.colorScheme.secondary,
+        unselectedItemColor: themeData.unselectedWidgetColor,
         currentIndex: _page,
         items: const [
           BottomNavigationBarItem(
@@ -189,6 +195,10 @@ class _HomeRouteState extends State<HomeRoute> {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),
             label: 'Wallet',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.collections),
+            label: 'Collectibles',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
@@ -281,7 +291,8 @@ class _HomeRouteState extends State<HomeRoute> {
       }
       return const Center(child: CircularProgressIndicator());
     } else {
-      Map<String, SplTokenAccountDataInfoWithUsd> balances = _balances[pubKey]!;
+      Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
+      balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] == 1);
       return RefreshIndicator(
         onRefresh: () {
           _startLoadingBalances(pubKey);
@@ -432,6 +443,78 @@ class _HomeRouteState extends State<HomeRoute> {
     );
   }
 
+  Widget _nftList(ThemeData themeData) {
+    String pubKey = KeyManager.instance.pubKey;
+    if (_balances[pubKey] == null) {
+      if (_balancesCompleters[pubKey] == null) {
+        _startLoadingBalances(pubKey);
+      }
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
+      balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] != 1);
+      return RefreshIndicator(
+        onRefresh: () {
+          _startLoadingBalances(pubKey);
+          return _balancesCompleters[pubKey]!.future;
+        },
+        child: ListView.builder(
+          itemCount: balances.length + 1,
+          itemBuilder: (ctx, index) {
+            if (index == 0) {
+              double totalUsd = balances.values.fold(
+                0.0,
+                    (sum, balance) => sum + max(0.0, balance.usd),
+              );
+              double totalUsdChange = balances.values.fold(
+                0.0,
+                    (sum, balance) => sum + balance.usdChange,
+              );
+              double percent = totalUsd > 0 ? (totalUsdChange / (totalUsd - totalUsdChange) * 100) : 0;
+              bool isPositive = totalUsdChange >= 0;
+              Color color = isPositive ? Colors.green : Colors.red;
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "\$ ${totalUsd.toStringAsFixed(2)}",
+                      style: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "${isPositive ? "+" : ""}\$ ${totalUsdChange.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: color,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "${isPositive ? "+" : ""}${percent.toStringAsFixed(2)}%",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }
+            return _balanceListTile(balances.entries.elementAt(index - 1), themeData);
+          },
+        ),
+      );
+    }
+  }
+
   Widget _settings() {
     return ListView(
       children: [
@@ -484,6 +567,8 @@ class _HomeRouteState extends State<HomeRoute> {
       case 1:
         return _balanceList(themeData);
       case 2:
+        return _nftList(themeData);
+      case 3:
         return _settings();
       default:
         return const Text("lol");

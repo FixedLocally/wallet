@@ -79,7 +79,7 @@ class Utils {
           try {
             Mint mint = await _solanaClient.getMint(address: Ed25519HDPublicKey.fromBase58(token));
             result["decimals"] = mint.decimals;
-            result["nft"] = (mint.supply.toInt() == 1 && mint.decimals == 0) ? 1 : 0;
+            result["nft"] = (mint.decimals == 0) ? 1 : 0;
           } catch (_) {} // no such mint
           try {
             String offChainMetadataStr = await _httpGet(metadata.uri);

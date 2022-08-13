@@ -45,6 +45,7 @@ class _MultiImageState extends State<MultiImage> {
         imageUrl: widget.image,
         height: widget.size,
         width: widget.size,
+        fit: BoxFit.cover,
       );
     }
   }
