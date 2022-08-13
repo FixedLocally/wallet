@@ -93,7 +93,10 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                       IconButton(
                         visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
                         padding: EdgeInsets.zero,
-                        icon: Icon(Icons.paste, color: themeData.colorScheme.onBackground,),
+                        icon: Icon(
+                          Icons.paste,
+                          color: themeData.colorScheme.onBackground,
+                        ),
                         onPressed: () {
                           Clipboard.getData(Clipboard.kTextPlain).then((value) {
                             setState(() {
