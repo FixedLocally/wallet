@@ -276,6 +276,79 @@ class Utils {
     }
   }
 
+  static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
+    if (tokens.isEmpty) return {};
+    String url = "$_coinGeckoUrl${tokens.join(",")}";
+    Map<String, dynamic> json = jsonDecode(await _httpGet(url));
+    return Map.of(_hardCodedPrices)..addAll(json);
+  }
+
+  static Future<List<SplTokenAccountDataInfoWithUsd>> getBalances(String pubKey) async {
+    List<SplTokenAccountDataInfoWithUsd> rawResults = [];
+    List<ProgramAccount> accounts = await _solanaClient.rpcClient.getTokenAccountsByOwner(
+      pubKey,
+      const TokenAccountsFilter.byProgramId(TokenProgram.programId),
+      encoding: Encoding.jsonParsed,
+      commitment: Commitment.confirmed,
+    );
+    for (final ProgramAccount value in accounts) {
+      if (value.account.data is ParsedSplTokenProgramAccountData) {
+        ParsedSplTokenProgramAccountData data = value.account.data as ParsedSplTokenProgramAccountData;
+        if (data.parsed is TokenAccountData) {
+          TokenAccountData tokenAccountData = data.parsed as TokenAccountData;
+          rawResults.add(SplTokenAccountDataInfoWithUsd(
+            info: tokenAccountData.info,
+            usd: -1,
+            usdChange: 0,
+            account: value.pubkey,
+          ));
+        }
+      }
+    }
+    int lamports = await _solanaClient.rpcClient.getBalance(pubKey, commitment: Commitment.confirmed);
+    rawResults.add(SplTokenAccountDataInfoWithUsd(
+      info: SplTokenAccountDataInfo(
+        tokenAmount: TokenAmount(
+          amount: "$lamports",
+          decimals: 9,
+          uiAmountString: (lamports / lamportsPerSol).toStringAsFixed(9),
+        ),
+        state: "",
+        isNative: false,
+        mint: nativeSol,
+        owner: pubKey,
+      ),
+      usd: -1,
+      usdChange: 0,
+      account: pubKey,
+    ));
+    Set<String> mints = rawResults.map((e) => e.mint).toSet();
+    mints.add(nativeSolMint);
+    Map<String, dynamic> prices = await _getCoinGeckoPrices(mints.toList());
+    List<SplTokenAccountDataInfoWithUsd> results = rawResults.map((e) {
+      String uiAmountString = e.tokenAmount.uiAmountString ?? "0";
+      double amount = double.parse(uiAmountString);
+      num unitPrice = prices[e.mint]?["usd"] ?? -1.0;
+      num dailyChangePercent = prices[e.mint]?["usd_24h_change"] ?? 0.0;
+      if (e.mint == nativeSol) {
+        unitPrice = prices[nativeSolMint]?["usd"] ?? -1.0;
+        dailyChangePercent = prices[nativeSolMint]?["usd_24h_change"] ?? 0.0;
+      }
+      double usd = unitPrice >= 0 ? unitPrice * amount : -1.0;
+      return SplTokenAccountDataInfoWithUsd(
+        info: e,
+        usd: usd,
+        account: e.account,
+        usdChange: usd * (1 - 1 / (1 + dailyChangePercent / 100)),
+      );
+    }).toList();
+    results.sort(compoundComparator([
+      (a, b) => b.usd.compareTo(a.usd),
+      (a, b) => b.mint.compareTo(a.mint),
+    ]));
+    return results;
+  }
+
   static Future<T> showLoadingDialog<T>(BuildContext context, Future<T> future) async {
     showDialog<T>(
       context: context,
@@ -295,61 +368,6 @@ class Utils {
     return future.whenComplete(() {
       Navigator.of(context).pop();
     });
-  }
-
-  static Future<List<SplTokenAccountDataInfoWithUsd>> getBalances(String pubKey) async {
-    List<SplTokenAccountDataInfo> rawResults = [];
-    List<ProgramAccount> accounts = await _solanaClient.rpcClient.getTokenAccountsByOwner(
-      pubKey,
-      const TokenAccountsFilter.byProgramId(TokenProgram.programId),
-      encoding: Encoding.jsonParsed,
-      commitment: Commitment.confirmed,
-    );
-    for (final ProgramAccount value in accounts) {
-      if (value.account.data is ParsedSplTokenProgramAccountData) {
-        ParsedSplTokenProgramAccountData data = value.account.data as ParsedSplTokenProgramAccountData;
-        if (data.parsed is TokenAccountData) {
-          TokenAccountData tokenAccountData = data.parsed as TokenAccountData;
-          rawResults.add(tokenAccountData.info);
-        }
-      }
-    }
-    int lamports = await _solanaClient.rpcClient.getBalance(pubKey, commitment: Commitment.confirmed);
-    rawResults.add(SplTokenAccountDataInfo(
-      tokenAmount: TokenAmount(
-        amount: "$lamports",
-        decimals: 9,
-        uiAmountString: (lamports / lamportsPerSol).toStringAsFixed(9),
-      ),
-      state: "",
-      isNative: false,
-      mint: nativeSol,
-      owner: pubKey,
-    ));
-    Set<String> mints = rawResults.map((e) => e.mint).toSet();
-    mints.add(nativeSolMint);
-    Map<String, dynamic> prices = await _getCoinGeckoPrices(mints.toList());
-    List<SplTokenAccountDataInfoWithUsd> results = rawResults.map((e) {
-      String uiAmountString = e.tokenAmount.uiAmountString ?? "0";
-      double amount = double.parse(uiAmountString);
-      num unitPrice = prices[e.mint]?["usd"] ?? -1.0;
-      num dailyChangePercent = prices[e.mint]?["usd_24h_change"] ?? 0.0;
-      if (e.mint == nativeSol) {
-        unitPrice = prices[nativeSolMint]?["usd"] ?? -1.0;
-        dailyChangePercent = prices[nativeSolMint]?["usd_24h_change"] ?? 0.0;
-      }
-      double usd = unitPrice >= 0 ? unitPrice * amount : -1.0;
-      return SplTokenAccountDataInfoWithUsd(
-        info: e,
-        usd: usd,
-        usdChange: usd * (1 - 1 / (1 + dailyChangePercent / 100)),
-      );
-    }).toList();
-    results.sort(compoundComparator([
-      (a, b) => b.usd.compareTo(a.usd),
-      (a, b) => b.mint.compareTo(a.mint),
-    ]));
-    return results;
   }
 
   static Comparator<T> compoundComparator<T>(List<Comparator<T>> comparators) {
@@ -390,13 +408,6 @@ class Utils {
         }
       },
     );
-  }
-
-  static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
-    if (tokens.isEmpty) return {};
-    String url = "$_coinGeckoUrl${tokens.join(",")}";
-    Map<String, dynamic> json = jsonDecode(await _httpGet(url));
-    return Map.of(_hardCodedPrices)..addAll(json);
   }
 
   static Future<String> _httpGet(String url) async {
@@ -483,11 +494,13 @@ class TokenChanges {
 class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
   final double usd;
   final double usdChange;
+  final String account;
 
   SplTokenAccountDataInfoWithUsd({
     required SplTokenAccountDataInfo info,
     required this.usd,
     required this.usdChange,
+    required this.account,
   }) : super(
           mint: info.mint,
           state: info.state,
