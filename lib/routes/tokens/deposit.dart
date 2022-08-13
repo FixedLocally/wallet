@@ -72,7 +72,7 @@ class _DepositRouteState extends State<DepositRoute> {
                   ],
                 ),
               ),
-              Text("This address can only be used to receive SOL or SPL tokens on Solana."),
+              const Text("This address can only be used to receive SOL or SPL tokens on Solana."),
             ],
           ),
         ),

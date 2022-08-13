@@ -44,6 +44,7 @@ flutter:
     - assets/index.html
     - assets/inject.js
     - assets/tokens.json
+    - assets/images/
 
   fonts:
    - family: NotoSans
