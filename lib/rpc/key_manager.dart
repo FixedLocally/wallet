@@ -161,6 +161,36 @@ class KeyManager {
     });
   }
 
+  Future<ManagedKey> importWallet(List<int> privateKey) async {
+    // get seed
+    String keyHash = privateKey.hashCode.toRadixString(16).padLeft(8, "0").substring(0, 8);
+    const FlutterSecureStorage().write(
+      key: "key_$keyHash",
+      value: privateKey.join(","),
+    );
+    mockPubKey = null;
+    Wallet wallet = await Ed25519HDKeyPair.fromPrivateKeyBytes(privateKey: privateKey);
+    return await _db.transaction((txn) async {
+      ManagedKey newKey = ManagedKey(
+        name: "Imported Wallet",
+        pubKey: wallet.publicKey.toBase58(),
+        keyType: "key",
+        keyHash: keyHash,
+        keyPath: "",
+        active: true,
+      );
+      await txn.execute("update wallets set active=0");
+      for (ManagedKey key in _wallets) {
+        key._active = false;
+      }
+      int id = await txn.insert("wallets", newKey.toJSON());
+      newKey._id = id;
+      _wallets.add(newKey);
+      _activeWallet = newKey;
+      return newKey;
+    });
+  }
+
   Future<void> removeWallet(ManagedKey key) async {
     // get seed
     if (_wallets.length <= 1) return;
@@ -229,12 +259,18 @@ class ManagedKey {
       case "seed":
         // get seed
         String? seed = await const FlutterSecureStorage().read(key: "seed_$keyHash");
-        if (seed == null) throw MissingKeyError("keyHash not found");
+        if (seed == null) throw MissingKeyError("Key not found");
         List<String> seedSegments = seed.split(";");
         wallet = await compute(
           _generateKey,
           [seedSegments.first.split(",").map(int.parse).toList(), keyPath],
         );
+        return wallet;
+      case "key":
+        // get key
+        String? key = await const FlutterSecureStorage().read(key: "key_$keyHash");
+        if (key == null) throw MissingKeyError("Key not found");
+        wallet = await Wallet.fromPrivateKeyBytes(privateKey: key.split(",").map(int.parse).toList());
         return wallet;
     }
     throw MissingKeyError("keyType not supported");

@@ -488,8 +488,8 @@ class _HomeRouteState extends State<HomeRoute> {
     return ListView(
       children: [
         ListTile(
-          onTap: () {
-
+          onTap: () async {
+            setState(() {});
           },
           title: const Text("Import Wallet"),
         ),
