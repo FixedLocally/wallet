@@ -176,7 +176,7 @@ class Utils {
   }
 
   // get accounts in batches of 10
-  static Future<List<Account?>> batchGetAccounts(List<String> addresses) async{
+  static Future<List<Account?>> batchGetAccounts(List<String> addresses) async {
     List<Account?> accounts = [];
     for (int i = 0; i < addresses.length; i += 10) {
       List<String> batch = addresses.sublist(i, min(i + 10, addresses.length));
@@ -404,6 +404,39 @@ class Utils {
     HttpClientRequest request = await client.getUrl(Uri.parse(url));
     HttpClientResponse response = await request.close();
     return await response.transform(utf8.decoder).join();
+  }
+
+  static Future<bool> showConfirmDialog({
+    required BuildContext context,
+    String? title,
+    String? content,
+    String? confirmText,
+    String? cancelText,
+  }) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(title ?? "Are you sure?"),
+          content: Text(content ?? ""),
+          actions: [
+            TextButton(
+              child: Text(cancelText ?? 'Cancel'),
+              onPressed: () {
+                Navigator.of(ctx).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text(confirmText ?? 'Confirm'),
+              onPressed: () {
+                Navigator.of(ctx).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false;
   }
 }
 
