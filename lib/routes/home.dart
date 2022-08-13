@@ -52,10 +52,6 @@ class _HomeRouteState extends State<HomeRoute> {
                     value: 'sign',
                     child: Text('Sign Message'),
                   ),
-                const PopupMenuItem(
-                  value: 'create',
-                  child: Text('Create Wallet'),
-                ),
                 if (KeyManager.instance.mockPubKey == null)
                   const PopupMenuItem(
                     value: 'mock',
@@ -108,10 +104,6 @@ class _HomeRouteState extends State<HomeRoute> {
                       },
                     );
                   }
-                  break;
-                case 'create':
-                  await Utils.showLoadingDialog(context: context, future: KeyManager.instance.createWallet(), text: "Creating wallet...");
-                  setState(() {});
                   break;
                 case 'mock':
                   TextEditingController controller = TextEditingController();
@@ -443,6 +435,13 @@ class _HomeRouteState extends State<HomeRoute> {
   Widget _settings() {
     return ListView(
       children: [
+        ListTile(
+          onTap: () async {
+            await Utils.showLoadingDialog(context: context, future: KeyManager.instance.createWallet(), text: "Creating wallet...");
+            setState(() {});
+          },
+          title: const Text("Create Wallet"),
+        ),
         ListTile(
           onTap: () async {
             String? key = await Utils.showInputDialog(
