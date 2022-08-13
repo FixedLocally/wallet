@@ -94,7 +94,7 @@ class KeyManager {
 
   Future<void> setActiveKey(ManagedKey key) async {
     assert(_ready);
-    assert(_wallets.contains(key));
+    if (!_wallets.contains(key)) throw WalletError("Wallet not found");
     mockPubKey = null;
     await _db.transaction((txn) async {
       await txn.execute("update wallets set active=0");
@@ -109,14 +109,14 @@ class KeyManager {
 
   Future<Signature> sign(List<int> message) async {
     assert(_ready);
-    assert(mockPubKey == null, "cannot sign with mock wallet");
+    if (mockPubKey != null) throw SignatureError("Cannot sign with mock wallet");
     Wallet wallet = await _activeWallet!.getWallet();
     return wallet.sign(message);
   }
 
   Future<SignedTx> signMessage(Message message, String recentBlockhash) async {
     assert(_ready);
-    assert(mockPubKey == null, "cannot sign with mock wallet");
+    if (mockPubKey != null) throw SignatureError("Cannot sign with mock wallet");
     Wallet? wallet = await _activeWallet!.getWallet();
     return wallet.signMessage(message: message, recentBlockhash: recentBlockhash);
   }
@@ -125,7 +125,7 @@ class KeyManager {
     // get seed
     String seedHash = _wallets.where((element) => element.keyType == "seed").map((element) => element.keyHash).first;
     String? seed = await const FlutterSecureStorage().read(key: "seed_$seedHash");
-    if (seed == null) throw MissingKeyError("keyHash not found");
+    if (seed == null) throw MissingKeyError("Key not found");
     List<String> seedSegments = seed.split(";");
     int index = 0;
     if (seedSegments.length > 1) index = int.parse(seedSegments[1]);

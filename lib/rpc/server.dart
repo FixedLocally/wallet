@@ -12,8 +12,6 @@ import '../routes/mixins/context_holder.dart';
 import 'constants.dart';
 import '../widgets/approve_tx.dart';
 
-SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
-
 class RpcServer {
   static final StreamController<RpcEvent> _eventStreamController = StreamController.broadcast();
 
@@ -143,8 +141,7 @@ class RpcServer {
       print(signature.toBase58());
       if (send) {
         try {
-          String sig = await _solanaClient.rpcClient.sendTransaction(
-              signedTx.encode(), preflightCommitment: Commitment.confirmed);
+          String sig = await Utils.sendTransaction(signedTx);
           return RpcResponse.primitive({
             "signature": {"type": null, "value": sig},
             "publicKey": {
@@ -221,8 +218,7 @@ class RpcServer {
         try {
           List<String> sigs = [];
           for (SignedTx signedTx in signedTxs) {
-            String sig = await _solanaClient.rpcClient.sendTransaction(
-                signedTx.encode(), preflightCommitment: Commitment.confirmed);
+            String sig = await Utils.sendTransaction(signedTx);
             sigs.add(sig);
           }
           return RpcResponse.primitive(sigs.map((e) => {

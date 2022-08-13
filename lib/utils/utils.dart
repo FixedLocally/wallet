@@ -268,6 +268,17 @@ class Utils {
     return mergedChanges;
   }
 
+  static Future<RecentBlockhash> getBlockhash() async {
+    return await _solanaClient.rpcClient.getRecentBlockhash(commitment: Commitment.confirmed);
+  }
+
+  static Future<String> sendTransaction(SignedTx tx, {Commitment preflightCommitment = Commitment.confirmed}) async {
+    return _solanaClient.rpcClient.sendTransaction(
+      tx.encode(),
+      preflightCommitment: preflightCommitment,
+    );
+  }
+
   static Future<TokenAmount?> _getTokenAmountOrNull(String address) async {
     try {
       return await _solanaClient.rpcClient.getTokenAccountBalance(address, commitment: Commitment.confirmed);
