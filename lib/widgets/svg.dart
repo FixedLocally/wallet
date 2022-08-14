@@ -20,15 +20,15 @@ String fixSvg(String svgStr) {
 }
 
 class StringSvg extends StatelessWidget {
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
   final String svg;
 
   const StringSvg({
     Key? key,
     required this.svg,
-    required this.width,
-    required this.height,
+    this.width,
+    this.height,
   }) : super(key: key);
 
   @override
@@ -44,14 +44,14 @@ class StringSvg extends StatelessWidget {
 
 class NetworkSvg extends StatefulWidget {
   final String url;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
 
   const NetworkSvg({
     Key? key,
     required this.url,
-    required this.width,
-    required this.height,
+    this.width,
+    this.height,
   }) : super(key: key);
 
   @override

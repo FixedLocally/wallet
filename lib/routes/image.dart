@@ -14,17 +14,17 @@ class ImageRoute extends StatefulWidget {
 class _ImageRouteState extends State<ImageRoute> {
   @override
   Widget build(BuildContext context) {
-    MediaQueryData mq = MediaQuery.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Image'),
       ),
-      body: Center(
-        child: InteractiveViewer(
-          minScale: 0.01,
+      body: InteractiveViewer(
+        minScale: 0.01,
+        maxScale: 100,
+        child: Center(
           child: MultiImage(
             image: widget.image,
-            size: mq.size.width,
+            // size: mq.size.width,
             borderRadius: 0,
           ),
         ),
