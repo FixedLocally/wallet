@@ -11,6 +11,7 @@ import 'package:solana/solana.dart';
 import '../../rpc/key_manager.dart';
 import '../../utils/utils.dart';
 import '../../widgets/image.dart';
+import '../image.dart';
 
 
 class SendTokenRoute extends StatefulWidget {
@@ -58,7 +59,28 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
+    MediaQueryData mq = MediaQuery.of(context);
     String symbol = widget.tokenDetails["symbol"] ?? "";
+    Widget img = MultiImage(
+      image: widget.tokenDetails["image"] ?? "",
+      size: widget.nft ? min(mq.size.width * 0.75, 400) : 128,
+      borderRadius: widget.nft ? 16 : null,
+    );
+    if (widget.nft) {
+      img = GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ImageRoute(
+                image: widget.tokenDetails["image"],
+              ),
+            ),
+          );
+        },
+        child: img,
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Send $symbol'),
@@ -72,7 +94,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Spacer(),
-                MultiImage(image: widget.tokenDetails["image"] ?? "", size: 128),
+                img,
                 const SizedBox(height: 16),
                 Utils.wrapField(
                   themeData: themeData,
