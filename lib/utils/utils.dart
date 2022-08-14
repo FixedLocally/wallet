@@ -617,5 +617,7 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
           isNative: info.isNative,
           tokenAmount: info.tokenAmount,
           owner: info.owner,
+          delegate: info.delegate,
+          delegateAmount: info.delegateAmount,
         );
 }
