@@ -12,6 +12,7 @@ String fixSvg(String svgStr) {
   XmlElement svg = doc.childElements.where((element) => element.name.local == "svg").first;
   List<XmlElement> defs = svg.childElements.where((element) => element.name.local == "defs").toList();
   List<XmlElement> others = svg.childElements.where((element) => element.name.local != "defs").toList();
+  // todo style elements
   svg.children.clear();
   svg.children.addAll(defs);
   svg.children.addAll(others);
@@ -72,16 +73,12 @@ class _NetworkSvgState extends State<NetworkSvg> {
   }
 
   void _loadSvg() {
-    setState(() {
-      _svg = null;
-    });
-    _downloadSvg()
-      .then((String data) {
-        String fixedDoc = fixSvg(data);
-        setState(() {
-          _svg = fixedDoc;
-        });
+    _downloadSvg().then((String data) {
+      String fixedDoc = fixSvg(data);
+      setState(() {
+        _svg = fixedDoc;
       });
+    });
   }
 
   @override
