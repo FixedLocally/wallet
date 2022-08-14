@@ -26,6 +26,7 @@ class _HomeRouteState extends State<HomeRoute> {
   int _page = 0;
   final Map<String, Map<String, SplTokenAccountDataInfoWithUsd>> _balances = {};
   final Map<String, Completer> _balancesCompleters = {};
+  final Map<String, Completer> _tokenInfoCompleters = {};
   final Map<String, Map<String, dynamic>> _tokenDetails = {};
 
   @override
@@ -435,7 +436,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
               );
               try {
-                await Utils.sendInstructions([ix]);
+                Utils.showLoadingDialog(context: context, future: Utils.sendInstructions([ix]));
                 scaffold.showSnackBar(const SnackBar(content: Text("Transaction confirmed")));
                 _startLoadingBalances(KeyManager.instance.pubKey);
               } on BaseError catch (e) {
@@ -460,6 +461,9 @@ class _HomeRouteState extends State<HomeRoute> {
       }
       return const Center(child: CircularProgressIndicator());
     } else {
+      if (_tokenInfoCompleters[pubKey]?.isCompleted != true) {
+        return const Center(child: CircularProgressIndicator());
+      }
       Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
       balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] != 1);
       return RefreshIndicator(
@@ -474,9 +478,9 @@ class _HomeRouteState extends State<HomeRoute> {
             mainAxisSpacing: 16,
           ),
           children: balances.entries.map((entry) {
-            String name = _tokenDetails[entry.key]?["name"] ?? "";
+            String name = _tokenDetails[entry.key]?["name"] ?? "Loading...";
             name = name.isNotEmpty ? name : "${entry.key.substring(0, 5)}...";
-            return Stack(
+            Widget child = Stack(
               children: [
                 Positioned(
                   left: 16,
@@ -508,6 +512,24 @@ class _HomeRouteState extends State<HomeRoute> {
                   ),
                 ),
               ],
+            );
+            return GestureDetector(
+              onTap: () async {
+                bool sent = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) => SendTokenRoute(
+                      balance: entry.value,
+                      tokenDetails: _tokenDetails[entry.value.mint] ?? {},
+                      nft: true,
+                    ),
+                  ),
+                ) ?? false;
+                if (sent) {
+                  _startLoadingBalances(KeyManager.instance.pubKey);
+                }
+              },
+              child: child,
             );
           }).toList(),
         ),
@@ -630,10 +652,12 @@ class _HomeRouteState extends State<HomeRoute> {
   }
 
   void _startLoadingBalances(String pubKey) {
-    Completer completer = Completer();
-    _balancesCompleters[pubKey] = completer;
+    Completer balCompleter = Completer();
+    Completer metadataCompleter = Completer();
+    _balancesCompleters[pubKey] = balCompleter;
+    _tokenInfoCompleters[pubKey] = metadataCompleter;
     Utils.getBalances(pubKey).then((value) async {
-      completer.complete();
+      balCompleter.complete();
       setState(() {
         _balances[pubKey] = value.asMap().map((key, value) =>
             MapEntry(value.mint, value));
@@ -641,6 +665,7 @@ class _HomeRouteState extends State<HomeRoute> {
       List<String> mints = value.map((e) => e.mint).toList();
       mints.removeWhere((element) => _tokenDetails.keys.contains(element));
       Map<String, Map<String, dynamic>?> tokenInfos = await Utils.getTokens(mints);
+      metadataCompleter.complete();
       setState(() {
         tokenInfos.forEach((mint, info) {
           if (info != null) _tokenDetails[mint] = info;

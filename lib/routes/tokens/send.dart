@@ -16,11 +16,13 @@ import '../../widgets/image.dart';
 class SendTokenRoute extends StatefulWidget {
   final SplTokenAccountDataInfoWithUsd balance;
   final Map<String, dynamic> tokenDetails;
+  final bool nft;
 
   const SendTokenRoute({
     Key? key,
     required this.balance,
     required this.tokenDetails,
+    this.nft = false,
   }) : super(key: key);
 
   @override
