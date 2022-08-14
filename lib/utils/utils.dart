@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
@@ -54,9 +54,11 @@ class Utils {
   }
 
   static Future<Map<String, Map<String, dynamic>?>> getTokens(List<String> tokens) async {
-    Map<String, Map<String, dynamic>?> tokenInfos = await _db!.query("token", where: "mint IN (${tokens.map((token) => '?').join(',')})", whereArgs: tokens).then((List<Map<String, dynamic>> tokens) {
+    int now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    Map<String, Map<String, dynamic>?> tokenInfos = await _db!.query("token", where: "mint IN (${tokens.map((token) => '?').join(',')}) and (expiry>? or expiry is null)", whereArgs: [...tokens, now]).then((List<Map<String, dynamic>> tokens) async {
       Map<String, Map<String, dynamic>?> result = {};
       for (Map<String, dynamic> token in tokens) {
+        token = Map.of(token);
         result[token['mint']] = token;
       }
       return result;
@@ -91,10 +93,15 @@ class Utils {
               "image": offChainMetadataMap["image"] ?? "",
               "properties": offChainMetadataMap["properties"] ?? <String, dynamic>{},
               "attributes": offChainMetadataMap["attributes"] ?? [],
+              "external_url": offChainMetadataMap["external_url"],
             };
             OffChainMetadata offChainMetadata = OffChainMetadata.fromJson(offChainMetadataMap);
             result["name"] = offChainMetadata.name;
             result["symbol"] = offChainMetadata.symbol;
+            result["ext_url"] = offChainMetadataMap["external_url"];
+            result["attributes"] = jsonEncode(offChainMetadataMap["attributes"]);
+            result["description"] = jsonEncode(offChainMetadataMap["description"]);
+            result["expiry"] = now + 86400;
             String image = offChainMetadata.image;
             Uri? uri = Uri.tryParse(image);
             if (uri?.data?.mimeType.startsWith("image/svg") == true) {
@@ -103,7 +110,6 @@ class Utils {
               image = uri.toString();
             }
             result["image"] = image;
-
           } catch (_, st) {
             print("$token error $_ $st");
           } // no offchain metadata
@@ -130,6 +136,10 @@ class Utils {
                 "decimals": metadataMap["decimals"],
                 "image": metadataMap["image"],
                 "nft": metadataMap["nft"],
+                "ext_url": metadataMap["ext_url"],
+                "attributes": metadataMap["attributes"],
+                "description": metadataMap["description"],
+                "expiry": metadataMap["expiry"],
               },
               conflictAlgorithm: ConflictAlgorithm.replace,
             );
@@ -458,7 +468,11 @@ class Utils {
               "name TEXT,"
               "decimals INTEGER,"
               "image TEXT,"
-              "nft INTEGER DEFAULT 0"
+              "nft INTEGER DEFAULT 0,"
+              "ext_url TEXT,"
+              "attributes TEXT,"
+              "description TEXT,"
+              "expiry INTEGER"
               ")");
         // load token list into db
         Map<String, Map<String, dynamic>> tokenList = {};
@@ -483,10 +497,8 @@ class Utils {
   }
 
   static Future<String> _httpGet(String url) async {
-    HttpClient client = HttpClient();
-    HttpClientRequest request = await client.getUrl(Uri.parse(url));
-    HttpClientResponse response = await request.close();
-    return await response.transform(utf8.decoder).join();
+    print("get $url");
+    return DefaultCacheManager().downloadFile(url).then((value) => value.file.readAsString());
   }
 
   static Future<bool> showConfirmDialog({
