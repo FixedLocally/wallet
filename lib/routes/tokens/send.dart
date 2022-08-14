@@ -164,7 +164,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                               content: "You are about to send $_amount $symbol to $_recipient.",
                             );
                             if (confirm) {
-                              Completer completer = Completer();
+                              Completer<String> completer = Completer();
                               List<Instruction> ixs = [];
                               if (widget.balance.mint == nativeSol) {
                                 ixs.add(SystemInstruction.transfer(
@@ -197,18 +197,26 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                                 ));
                               }
                               if (mounted) {
-                                Utils.sendInstructions(ixs).then((value) => completer.complete(value));
-                                await Utils.showLoadingDialog(
+                                Utils.sendInstructions(ixs).then((value) => completer.complete(value)).catchError((_) => completer.complete(""));
+                                String tx = await Utils.showLoadingDialog(
                                   context: context,
                                   future: completer.future,
                                   text: "Sending...",
                                 );
-                                navigator.pop(true);
-                                scaffold.showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Transaction sent"),
-                                  ),
-                                );
+                                if (tx.isNotEmpty) {
+                                  navigator.pop(true);
+                                  scaffold.showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Transaction sent"),
+                                    ),
+                                  );
+                                } else {
+                                  scaffold.showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Transaction failed"),
+                                    ),
+                                  );
+                                }
                               }
                             }
                           }
