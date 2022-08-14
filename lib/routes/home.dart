@@ -325,7 +325,7 @@ class _HomeRouteState extends State<HomeRoute> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "${isPositive ? "+" : ""}\$ ${totalUsdChange.toStringAsFixed(2)}",
+                          "${isPositive ? "+" : "-"}\$ ${totalUsdChange.abs().toStringAsFixed(2)}",
                           style: TextStyle(
                             fontSize: 20,
                             color: color,
@@ -381,6 +381,18 @@ class _HomeRouteState extends State<HomeRoute> {
               text: " ($symbol)",
               style: TextStyle(
                 color: themeData.colorScheme.onBackground.withOpacity(0.8),
+              ),
+            ),
+          if ((entry.value.delegateAmount?.amount ?? "0") != "0")
+            WidgetSpan(
+              child: GestureDetector(
+                onTap: () async {
+                  String? revokeTx = await entry.value.showDelegationWarning(context, symbol);
+                  if (revokeTx != null) {
+                    _startLoadingBalances(KeyManager.instance.pubKey);
+                  }
+                },
+                child: const Icon(Icons.warning, color: Colors.red),
               ),
             ),
         ],

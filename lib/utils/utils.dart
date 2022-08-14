@@ -392,10 +392,10 @@ class Utils {
       builder: (BuildContext context) {
         return AlertDialog(
           content: Row(
-            children: const [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text("Loading..."),
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text(text),
             ],
           ),
         );
@@ -620,4 +620,27 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
           delegate: info.delegate,
           delegateAmount: info.delegateAmount,
         );
+
+  Future<String?> showDelegationWarning(BuildContext context, String symbol) async {
+    bool approved = await Utils.showConfirmDialog(
+      context: context,
+      title: "Delegation Warning",
+      content: "${delegateAmount?.uiAmountString ?? "0"} $symbol is currently delegated to:\n${delegate ?? "someone"}.\n\n"
+          "Unlike on Ethereum, token delegations beyond the scope of a transaction are "
+          "typically not needed since most contract interactions atomically transfer the necessary tokens, "
+          "and will not need access to your funds at a later time.\n"
+          "Please consider revoking the delegation.",
+      confirmText: "Revoke",
+    );
+    if (!approved) return null;
+    Instruction ix = TokenInstruction.revoke(
+      source: Ed25519HDPublicKey(base58decode(account)),
+      sourceOwner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
+    );
+    return Utils.showLoadingDialog(
+      context: context,
+      future: Utils.sendInstructions([ix]),
+      text: "Revoking delegation...",
+    );
+  }
 }
