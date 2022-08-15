@@ -28,6 +28,8 @@ class _HomeRouteState extends State<HomeRoute> {
   final Map<String, Completer> _balancesCompleters = {};
   final Map<String, Completer> _tokenInfoCompleters = {};
   final Map<String, Map<String, dynamic>> _tokenDetails = {};
+  final GlobalKey<RefreshIndicatorState> _nftRefresherKey = GlobalKey();
+  final GlobalKey<RefreshIndicatorState> _tokenRefresherKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -292,6 +294,7 @@ class _HomeRouteState extends State<HomeRoute> {
       Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
       balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] == 1);
       return RefreshIndicator(
+        key: _tokenRefresherKey,
         onRefresh: () {
           _startLoadingBalances(pubKey);
           return _balancesCompleters[pubKey]!.future;
@@ -390,7 +393,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 onTap: () async {
                   String? revokeTx = await entry.value.showDelegationWarning(context, symbol);
                   if (revokeTx != null) {
-                    _startLoadingBalances(KeyManager.instance.pubKey);
+                    _tokenRefresherKey.currentState?.show();
                   }
                 },
                 child: const Icon(Icons.warning, color: Colors.red),
@@ -438,7 +441,7 @@ class _HomeRouteState extends State<HomeRoute> {
               try {
                 Utils.showLoadingDialog(context: context, future: Utils.sendInstructions([ix]));
                 scaffold.showSnackBar(const SnackBar(content: Text("Transaction confirmed")));
-                _startLoadingBalances(KeyManager.instance.pubKey);
+                _tokenRefresherKey.currentState?.show();
               } on BaseError catch (e) {
                 scaffold.showSnackBar(SnackBar(content: Text(e.message.toString())));
                 return;
@@ -467,6 +470,7 @@ class _HomeRouteState extends State<HomeRoute> {
       Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
       balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] != 1);
       return RefreshIndicator(
+        key: _nftRefresherKey,
         onRefresh: () {
           _startLoadingBalances(pubKey);
           return _balancesCompleters[pubKey]!.future;
@@ -534,7 +538,7 @@ class _HomeRouteState extends State<HomeRoute> {
                           ) ??
                           false;
                       if (sent) {
-                        _startLoadingBalances(KeyManager.instance.pubKey);
+                        _nftRefresherKey.currentState?.show();
                       }
                     },
                     child: child,
@@ -643,7 +647,8 @@ class _HomeRouteState extends State<HomeRoute> {
                     ),
                   ) ?? false;
                   if (sent) {
-                    _startLoadingBalances(KeyManager.instance.pubKey);
+                    if (_page == 2) _nftRefresherKey.currentState?.show();
+                    if (_page == 1) _tokenRefresherKey.currentState?.show();
                   }
                 },
               ),
