@@ -471,68 +471,79 @@ class _HomeRouteState extends State<HomeRoute> {
           _startLoadingBalances(pubKey);
           return _balancesCompleters[pubKey]!.future;
         },
-        child: GridView(
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 280,
-            childAspectRatio: 1,
-            mainAxisSpacing: 16,
-          ),
-          children: balances.entries.map((entry) {
-            String name = _tokenDetails[entry.key]?["name"] ?? "Loading...";
-            name = name.isNotEmpty ? name : "${entry.key.substring(0, 5)}...";
-            Widget child = Stack(
-              children: [
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  top: 16,
-                  bottom: 16,
-                  child: MultiImage(
-                    image: _tokenDetails[entry.value.mint]!["image"],
-                    size: 160,
-                    borderRadius: 24,
-                  ),
+        child: balances.isNotEmpty
+            ? GridView(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 280,
+                  childAspectRatio: 1,
+                  mainAxisSpacing: 16,
                 ),
-                Positioned(
-                  bottom: 24,
-                  left: 24,
-                  right: 24,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      color: themeData.colorScheme.surface.withOpacity(0.6),
-                    ),
-                    child: Text(
-                      name.split("").join("\u200b"),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-              ],
-            );
-            return GestureDetector(
-              onTap: () async {
-                bool sent = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (ctx) => SendTokenRoute(
-                      balance: entry.value,
-                      tokenDetails: _tokenDetails[entry.value.mint] ?? {},
-                      nft: true,
-                    ),
-                  ),
-                ) ?? false;
-                if (sent) {
-                  _startLoadingBalances(KeyManager.instance.pubKey);
-                }
-              },
-              child: child,
-            );
-          }).toList(),
-        ),
+                children: balances.entries.map((entry) {
+                  String name =
+                      _tokenDetails[entry.key]?["name"] ?? "Loading...";
+                  name = name.isNotEmpty
+                      ? name
+                      : "${entry.key.substring(0, 5)}...";
+                  Widget child = Stack(
+                    children: [
+                      Positioned(
+                        left: 16,
+                        right: 16,
+                        top: 16,
+                        bottom: 16,
+                        child: MultiImage(
+                          image: _tokenDetails[entry.value.mint]!["image"],
+                          size: 160,
+                          borderRadius: 24,
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 24,
+                        left: 24,
+                        right: 24,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            color:
+                                themeData.colorScheme.surface.withOpacity(0.6),
+                          ),
+                          child: Text(
+                            name.split("").join("\u200b"),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                  return GestureDetector(
+                    onTap: () async {
+                      bool sent = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (ctx) => SendTokenRoute(
+                                balance: entry.value,
+                                tokenDetails:
+                                    _tokenDetails[entry.value.mint] ?? {},
+                                nft: true,
+                              ),
+                            ),
+                          ) ??
+                          false;
+                      if (sent) {
+                        _startLoadingBalances(KeyManager.instance.pubKey);
+                      }
+                    },
+                    child: child,
+                  );
+                }).toList(),
+              )
+            : const Center(
+                child: Text("No Collectibles"),
+              ),
       );
     }
   }
