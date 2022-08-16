@@ -597,7 +597,7 @@ class _HomeRouteState extends State<HomeRoute> {
         ),
         ListTile(
           onTap: () {
-            _removeWallet(KeyManager.instance.activeWallet);
+            _removeWallet(null);
           },
           title: const Text("Remove Wallet"),
         ),
@@ -704,7 +704,7 @@ class _HomeRouteState extends State<HomeRoute> {
     });
   }
 
-  Future _removeWallet(ManagedKey key) async {
+  Future _removeWallet(ManagedKey? key) async {
     bool confirm = await Utils.showConfirmDialog(
       context: context,
       title: "Remove wallet",

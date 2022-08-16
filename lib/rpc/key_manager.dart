@@ -32,7 +32,6 @@ class KeyManager {
   bool get isEmpty => _wallets.isEmpty;
   bool get isNotEmpty => _wallets.isNotEmpty;
   String get pubKey => mockPubKey ?? _activeWallet!.pubKey;
-  ManagedKey get activeWallet => _activeWallet!;
   String get walletName => mockPubKey != null ? "Mocked ${mockPubKey!.substring(0, 4)}...${mockPubKey!.substring(mockPubKey!.length - 4)}" : _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 
@@ -202,11 +201,12 @@ class KeyManager {
     });
   }
 
-  Future<void> removeWallet(ManagedKey key) async {
+  Future<void> removeWallet([ManagedKey? key]) async {
     // get seed
+    key ??= _activeWallet;
     if (_wallets.length <= 1) return;
     return await _db.transaction((txn) async {
-      await txn.execute("delete from wallets where id=?", [key.id]);
+      await txn.execute("delete from wallets where id=?", [key!.id]);
       _wallets.remove(key);
       if (key.active) {
         if (_wallets.isNotEmpty) {
