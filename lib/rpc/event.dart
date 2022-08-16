@@ -22,6 +22,6 @@ class RpcEvent {
 
   @override
   String toString() {
-    return 'RpcEvent._(trigger: $trigger, response: $response)';
+    return 'RpcEvent._(trigger: $trigger, response: $response, updates: $updates)';
   }
 }

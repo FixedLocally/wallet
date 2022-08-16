@@ -237,17 +237,7 @@ class _HomeRouteState extends State<HomeRoute> {
           SlidableAction(
             backgroundColor: Colors.red,
             onPressed: (ctx) async {
-              bool confirm = await Utils.showConfirmDialog(
-                context: context,
-                title: "Remove wallet",
-                content: "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase.",
-                confirmText: "Delete",
-              );
-              if (!confirm) {
-                return;
-              }
-              await KeyManager.instance.removeWallet(key);
-              setState(() {});
+              _removeWallet(key);
             },
             icon: Icons.delete_forever,
             label: "Remove Wallet",
@@ -593,6 +583,30 @@ class _HomeRouteState extends State<HomeRoute> {
           },
           title: const Text("Import Wallet"),
         ),
+        ListTile(
+          onTap: () {
+            // todo export priv key
+          },
+          title: const Text("Export Private Key"),
+        ),
+        ListTile(
+          onTap: () {
+            KeyManager.instance.requestShowRecoveryPhrase(context);
+          },
+          title: const Text("Export Secret Recovery Phrase"),
+        ),
+        ListTile(
+          onTap: () {
+            _removeWallet(KeyManager.instance.activeWallet);
+          },
+          title: const Text("Remove Wallet"),
+        ),
+        ListTile(
+          onTap: () {
+            // todo reset seed
+          },
+          title: const Text("Reset Secret Recovery Phrase"),
+        ),
       ],
     );
   }
@@ -688,5 +702,19 @@ class _HomeRouteState extends State<HomeRoute> {
         });
       });
     });
+  }
+
+  Future _removeWallet(ManagedKey key) async {
+    bool confirm = await Utils.showConfirmDialog(
+      context: context,
+      title: "Remove wallet",
+      content: "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase.",
+      confirmText: "Delete",
+    );
+    if (!confirm) {
+      return;
+    }
+    await KeyManager.instance.removeWallet(key);
+    setState(() {});
   }
 }

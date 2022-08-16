@@ -1,10 +1,15 @@
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../utils/utils.dart';
+import '../widgets/show_seed.dart';
 import 'errors/errors.dart';
 
 const String derivationPathTemplate = "m/44'/501'/%s'/0'";
@@ -27,6 +32,7 @@ class KeyManager {
   bool get isEmpty => _wallets.isEmpty;
   bool get isNotEmpty => _wallets.isNotEmpty;
   String get pubKey => mockPubKey ?? _activeWallet!.pubKey;
+  ManagedKey get activeWallet => _activeWallet!;
   String get walletName => mockPubKey != null ? "Mocked ${mockPubKey!.substring(0, 4)}...${mockPubKey!.substring(mockPubKey!.length - 4)}" : _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 
@@ -64,8 +70,9 @@ class KeyManager {
     _ready = true;
   }
 
-  Future<void> insertSeed(List<int> seed) async {
+  Future<void> insertSeed(String mnemonic) async {
     assert(_ready);
+    List<int> seed = bip39.mnemonicToSeed(mnemonic);
     String seedHash = sha256.convert(seed).bytes.sublist(0, 4).map((e) => e.toRadixString(16).padLeft(2, "0")).join("");
     Ed25519HDKeyPair keypair = await compute(
       _generateKey,
@@ -74,6 +81,10 @@ class KeyManager {
     const FlutterSecureStorage().write(
       key: "seed_$seedHash",
       value: "${seed.join(",")};0",
+    );
+    const FlutterSecureStorage().write(
+      key: "mnemonic_$seedHash",
+      value: mnemonic,
     );
     ManagedKey newKey = ManagedKey(
       name: "Wallet 0",
@@ -206,6 +217,40 @@ class KeyManager {
         await txn.execute("update wallets set active=1 where id=?", [_activeWallet!.id]);
       }
     });
+  }
+
+  Future<void> requestShowRecoveryPhrase(BuildContext context) async {
+    // todo show authentication
+    String seedHash = _activeWallet!.keyHash;
+    String mnemonic = (await Utils.showLoadingDialog(context: context, future: const FlutterSecureStorage().read(key: "mnemonic_$seedHash"))) ?? List.generate(12, (index) => "??").join(" ");
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text("Show Secret Recovery Phrase"),
+          content: GenerateSeedRoute(
+            mnemonic: mnemonic.split(" "),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Copy'),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Copied secret recovery phrase to clipboard")));
+                Clipboard.setData(ClipboardData(text: mnemonic));
+                Navigator.of(ctx).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
