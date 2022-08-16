@@ -32,6 +32,7 @@ class KeyManager {
   bool get isEmpty => _wallets.isEmpty;
   bool get isNotEmpty => _wallets.isNotEmpty;
   String get pubKey => mockPubKey ?? _activeWallet!.pubKey;
+  bool get isHdWallet => mockPubKey != null ? false : _activeWallet!.keyType == "seed";
   String get walletName => mockPubKey != null ? "Mocked ${mockPubKey!.substring(0, 4)}...${mockPubKey!.substring(mockPubKey!.length - 4)}" : _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 

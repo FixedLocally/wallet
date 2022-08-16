@@ -591,22 +591,25 @@ class _HomeRouteState extends State<HomeRoute> {
         ),
         ListTile(
           onTap: () {
-            KeyManager.instance.requestShowRecoveryPhrase(context);
-          },
-          title: const Text("Export Secret Recovery Phrase"),
-        ),
-        ListTile(
-          onTap: () {
             _removeWallet(null);
           },
           title: const Text("Remove Wallet"),
         ),
-        ListTile(
-          onTap: () {
-            // todo reset seed
-          },
-          title: const Text("Reset Secret Recovery Phrase"),
-        ),
+        if (KeyManager.instance.isHdWallet)
+          ...[
+            ListTile(
+              onTap: () {
+                KeyManager.instance.requestShowRecoveryPhrase(context);
+              },
+              title: const Text("Export Secret Recovery Phrase"),
+            ),
+            ListTile(
+              onTap: () {
+                // todo reset seed
+              },
+              title: const Text("Reset Secret Recovery Phrase"),
+            ),
+          ],
       ],
     );
   }
