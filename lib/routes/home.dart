@@ -548,6 +548,24 @@ class _HomeRouteState extends State<HomeRoute> {
       children: [
         ListTile(
           onTap: () async {
+            String? name = await Utils.showInputDialog(
+              context: context,
+              prompt: "New wallet name",
+              initialValue: KeyManager.instance.walletName,
+            );
+            if (name != null) {
+              await Utils.showLoadingDialog(
+                context: context,
+                future: KeyManager.instance.renameWallet(name),
+                text: "Renaming wallet...",
+              );
+              setState(() {});
+            }
+          },
+          title: const Text("Rename Wallet"),
+        ),
+        ListTile(
+          onTap: () async {
             await Utils.showLoadingDialog(context: context, future: KeyManager.instance.createWallet(), text: "Creating wallet...");
             setState(() {});
           },

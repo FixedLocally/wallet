@@ -173,6 +173,21 @@ class KeyManager {
     });
   }
 
+  Future<void> renameWallet(String name) async {
+    return _db.transaction((txn) async {
+      await txn.execute("update wallets set name=? where id=?", [name, _activeWallet!._id]);
+      _activeWallet = ManagedKey._(
+        _activeWallet!._id,
+        name: name,
+        pubKey: _activeWallet!.pubKey,
+        keyType: _activeWallet!.keyType,
+        keyHash: _activeWallet!.keyHash,
+        keyPath: _activeWallet!.keyPath,
+        active: true,
+      );
+    });
+  }
+
   Future<ManagedKey> importWallet(List<int> privateKey) async {
     // get seed
     String keyHash = privateKey.hashCode.toRadixString(16).padLeft(8, "0").substring(0, 8);

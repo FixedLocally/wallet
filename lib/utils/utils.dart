@@ -420,9 +420,10 @@ class Utils {
     required BuildContext context,
     required String prompt,
     String? label,
+    String? initialValue,
     String confirmText = "OK",
   }) {
-    TextEditingController controller = TextEditingController();
+    TextEditingController controller = TextEditingController(text: initialValue);
     return showDialog<String>(
       context: context,
       builder: (ctx) {
