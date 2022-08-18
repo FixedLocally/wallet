@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sqflite/sqflite.dart';
@@ -220,8 +221,13 @@ class KeyManager {
     });
   }
 
-  Future<void> requestShowRecoveryPhrase(BuildContext context) async {
+  Future<bool> authenticateUser(BuildContext context) async {
     // todo show authentication
+    return true;
+  }
+
+  Future<void> requestShowRecoveryPhrase(BuildContext context) async {
+    if (await authenticateUser(context) == false) return;
     String seedHash = _activeWallet!.keyHash;
     String mnemonic = (await Utils.showLoadingDialog(context: context, future: const FlutterSecureStorage().read(key: "mnemonic_$seedHash"))) ?? List.generate(12, (index) => "??").join(" ");
     showDialog(
@@ -240,6 +246,42 @@ class KeyManager {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Copied secret recovery phrase to clipboard")));
                 Clipboard.setData(ClipboardData(text: mnemonic));
                 Navigator.of(ctx).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> requestShowPrivateKey(BuildContext context) async {
+    if (await authenticateUser(context) == false) return;
+    Wallet wallet = await Utils.showLoadingDialog(context: context, future: _activeWallet!.getWallet());
+    List<int> key = (await wallet.extract()).bytes;
+    key += wallet.publicKey.bytes;
+    String keyBase58 = base58encode(key);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        NavigatorState nav = Navigator.of(ctx);
+        ScaffoldMessengerState scaffold = ScaffoldMessenger.of(ctx);
+        return AlertDialog(
+          title: const Text("Show Private Key"),
+          content: Text("Private key:\n$keyBase58\n\nDo NOT share your private key, having access to your private means having access to your funds."),
+          actions: [
+            TextButton(
+              child: const Text('Copy'),
+              onPressed: () async {
+                scaffold.showSnackBar(const SnackBar(content: Text("Copied private key to clipboard")));
+                Clipboard.setData(ClipboardData(text: keyBase58));
+                nav.pop();
               },
             ),
             TextButton(

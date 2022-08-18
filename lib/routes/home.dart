@@ -264,6 +264,7 @@ class _HomeRouteState extends State<HomeRoute> {
       children: [
         _createWebsiteListTile("Raydium", "https://raydium.io/pools"),
         _createWebsiteListTile("Zeta Markets", "https://mainnet.zeta.markets/"),
+        _createWebsiteListTile("Zeta Markets (Multi-Assets)", "https://multi-asset-test.zeta.markets/"),
         _createWebsiteListTile("Jupiter", "https://jup.ag/"),
         _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
         _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
@@ -585,7 +586,7 @@ class _HomeRouteState extends State<HomeRoute> {
         ),
         ListTile(
           onTap: () {
-            // todo export priv key
+            KeyManager.instance.requestShowPrivateKey(context);
           },
           title: const Text("Export Private Key"),
         ),
@@ -708,10 +709,16 @@ class _HomeRouteState extends State<HomeRoute> {
   }
 
   Future _removeWallet(ManagedKey? key) async {
+    late String msg;
+    if (KeyManager.instance.isHdWallet) {
+      msg = "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase.";
+    } else {
+      msg = "This will remove the wallet from this list, make sure you have a backup of your private key.";
+    }
     bool confirm = await Utils.showConfirmDialog(
       context: context,
       title: "Remove wallet",
-      content: "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase.",
+      content: msg,
       confirmText: "Delete",
     );
     if (!confirm) {
