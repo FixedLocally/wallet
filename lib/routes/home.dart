@@ -357,6 +357,8 @@ class _HomeRouteState extends State<HomeRoute> {
       if (image != null) {
         leading = MultiImage(image: image, size: 48);
       }
+    } else {
+      leading = Image.asset("assets/images/unknown.png", width: 48, height: 48,);
     }
     String uiAmountString = entry.value.tokenAmount.uiAmountString ?? "0";
     // double amount = double.parse(uiAmountString);
