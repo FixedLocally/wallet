@@ -1,6 +1,7 @@
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 
+import '../generated/l10n.dart';
 import '../rpc/key_manager.dart';
 import '../widgets/show_seed.dart';
 import 'home.dart';
@@ -18,14 +19,14 @@ class _SetupRouteState extends State<SetupRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Setup Wallet'),
+        title: Text(S.current.setupWallet),
       ),
       body: Center(
         child: Column(
           children: [
-            const Text('Setup Wallet'),
+            Text(S.current.setupWallet),
             TextButton(
-              child: const Text('Import Wallet'),
+              child: Text(S.current.importWallet),
               onPressed: () {
                 // Navigator.pushReplacement(context, MaterialPageRoute(
                 //   builder: (ctx) {
@@ -35,7 +36,7 @@ class _SetupRouteState extends State<SetupRoute> {
               },
             ),
             TextButton(
-              child: const Text('Create Wallet'),
+              child: Text(S.current.createWallet),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -43,19 +44,19 @@ class _SetupRouteState extends State<SetupRoute> {
                   builder: (ctx) {
                     String mnemonic = bip39.generateMnemonic();
                     return AlertDialog(
-                      title: const Text('Create Wallet'),
+                      title: Text(S.current.createWallet),
                       content: GenerateSeedRoute(
                         mnemonic: mnemonic.split(" "),
                       ),
                       actions: [
                         TextButton(
-                          child: const Text('Cancel'),
+                          child: Text(S.current.cancel),
                           onPressed: () {
                             Navigator.of(ctx).pop();
                           },
                         ),
                         TextButton(
-                          child: const Text('Continue'),
+                          child: Text(S.current.continuE),
                           onPressed: () async {
                             await KeyManager.instance.insertSeed(mnemonic);
                             if (mounted) {

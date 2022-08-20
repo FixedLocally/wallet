@@ -589,6 +589,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Cancel`
+  String get cancel {
+    return Intl.message(
+      'Cancel',
+      name: 'cancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue`
+  String get continuE {
+    return Intl.message(
+      'Continue',
+      name: 'continuE',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Setup Wallet`
+  String get setupWallet {
+    return Intl.message(
+      'Setup Wallet',
+      name: 'setupWallet',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

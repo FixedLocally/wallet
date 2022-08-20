@@ -53,5 +53,8 @@
   "recipient": "Recipient",
   "invalidAmount": "Invalid amount",
   "insufficientFunds": "Insufficient funds",
-  "invalidAddress": "Invalid address"
+  "invalidAddress": "Invalid address",
+  "cancel": "Cancel",
+  "continuE": "Continue",
+  "setupWallet": "Setup Wallet"
 }

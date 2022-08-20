@@ -23,11 +23,13 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
+        "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "closeTokenAccount":
             MessageLookupByLibrary.simpleMessage("Close token account"),
         "closeTokenAccountContent": MessageLookupByLibrary.simpleMessage(
             "Another contract interaction may recreate this account."),
+        "continuE": MessageLookupByLibrary.simpleMessage("Continue"),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
         "copyPrivateKeySuccess": MessageLookupByLibrary.simpleMessage(
             "Copied private key to clipboard"),
@@ -85,6 +87,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendingTx":
             MessageLookupByLibrary.simpleMessage("Sending transaction..."),
+        "setupWallet": MessageLookupByLibrary.simpleMessage("Setup Wallet"),
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
             "Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds."),
         "signMessage": MessageLookupByLibrary.simpleMessage("Sign Message"),
