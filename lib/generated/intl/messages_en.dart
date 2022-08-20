@@ -22,7 +22,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "_locale": MessageLookupByLibrary.simpleMessage("en"),
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "closeAccount": MessageLookupByLibrary.simpleMessage("Close account"),

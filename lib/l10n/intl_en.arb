@@ -1,5 +1,5 @@
 {
-  "_locale": "en",
+  "@@locale": "en",
   "receive": "Receive",
   "amount": "Amount",
   "pay": "Pay",

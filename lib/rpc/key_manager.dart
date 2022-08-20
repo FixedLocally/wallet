@@ -9,6 +9,8 @@ import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../generated/l10n.dart';
+import '../utils/extensions.dart';
 import '../utils/utils.dart';
 import '../widgets/show_seed.dart';
 import 'errors/errors.dart';
@@ -34,7 +36,7 @@ class KeyManager {
   bool get isNotEmpty => _wallets.isNotEmpty;
   String get pubKey => mockPubKey ?? _activeWallet!.pubKey;
   bool get isHdWallet => mockPubKey != null ? false : _activeWallet!.keyType == "seed";
-  String get walletName => mockPubKey != null ? "Mocked ${mockPubKey!.substring(0, 4)}...${mockPubKey!.substring(mockPubKey!.length - 4)}" : _activeWallet!.name;
+  String get walletName => mockPubKey != null ? "${S.current.mocked} ${mockPubKey!.shortened}" : _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 
   KeyManager._();
@@ -88,7 +90,7 @@ class KeyManager {
       value: mnemonic,
     );
     ManagedKey newKey = ManagedKey(
-      name: "Wallet 0",
+      name: "${S.current.wallet} 0",
       pubKey: keypair.publicKey.toBase58(),
       keyType: "seed",
       keyHash: seedHash,
@@ -154,7 +156,7 @@ class KeyManager {
     mockPubKey = null;
     return await _db.transaction((txn) async {
       ManagedKey newKey = ManagedKey(
-        name: "Wallet $index",
+        name: "${S.current.wallet} $index",
         pubKey: wallet.publicKey.toBase58(),
         keyType: "seed",
         keyHash: seedHash,
@@ -199,7 +201,7 @@ class KeyManager {
     Wallet wallet = await Ed25519HDKeyPair.fromPrivateKeyBytes(privateKey: privateKey);
     return await _db.transaction((txn) async {
       ManagedKey newKey = ManagedKey(
-        name: "Imported Wallet",
+        name: S.current.importedWallet,
         pubKey: wallet.publicKey.toBase58(),
         keyType: "key",
         keyHash: keyHash,
@@ -250,21 +252,21 @@ class KeyManager {
       barrierDismissible: false,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text("Show Secret Recovery Phrase"),
+          title: Text(S.current.exportSecretRecoveryPhrase),
           content: GenerateSeedRoute(
             mnemonic: mnemonic.split(" "),
           ),
           actions: [
             TextButton(
-              child: const Text('Copy'),
+              child: Text(S.current.copy),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Copied secret recovery phrase to clipboard")));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.copySeedSuccess)));
                 Clipboard.setData(ClipboardData(text: mnemonic));
                 Navigator.of(ctx).pop();
               },
             ),
             TextButton(
-              child: const Text('Close'),
+              child: Text(S.current.close),
               onPressed: () async {
                 Navigator.of(ctx).pop();
               },
@@ -288,19 +290,19 @@ class KeyManager {
         NavigatorState nav = Navigator.of(ctx);
         ScaffoldMessengerState scaffold = ScaffoldMessenger.of(ctx);
         return AlertDialog(
-          title: const Text("Show Private Key"),
-          content: Text("Private key:\n$keyBase58\n\nDo NOT share your private key, having access to your private means having access to your funds."),
+          title: Text(S.current.exportPrivateKey),
+          content: Text(S.current.showPrivateKeyContent.replaceAll("%s", keyBase58)),
           actions: [
             TextButton(
-              child: const Text('Copy'),
+              child: Text(S.current.copy),
               onPressed: () async {
-                scaffold.showSnackBar(const SnackBar(content: Text("Copied private key to clipboard")));
+                scaffold.showSnackBar(SnackBar(content: Text(S.current.copyPrivateKeySuccess)));
                 Clipboard.setData(ClipboardData(text: keyBase58));
                 nav.pop();
               },
             ),
             TextButton(
-              child: const Text('Close'),
+              child: Text(S.current.close),
               onPressed: () async {
                 Navigator.of(ctx).pop();
               },
