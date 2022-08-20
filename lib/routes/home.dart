@@ -4,11 +4,14 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:jupiter_aggregator/jupiter_aggregator.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
+import '../generated/l10n.dart';
 import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
+import '../utils/extensions.dart';
 import '../utils/utils.dart';
 import '../widgets/header.dart';
 import '../widgets/image.dart';
@@ -31,6 +34,26 @@ class _HomeRouteState extends State<HomeRoute> {
   final GlobalKey<RefreshIndicatorState> _nftRefresherKey = GlobalKey();
   final GlobalKey<RefreshIndicatorState> _tokenRefresherKey = GlobalKey();
 
+  late TextEditingController _fromAmtController;
+
+  SplTokenAccountDataInfoWithUsd? _from;
+  SplTokenAccountDataInfoWithUsd? _to;
+  List<JupiterRoute>? _routes;
+
+  @override
+  void initState() {
+    super.initState();
+    _fromAmtController = TextEditingController();
+    _fromAmtController.debounce(Duration(milliseconds: 400), (value) {
+      _loadRoutes();
+    });
+    _fromAmtController.addListener(() {
+      setState(() {
+        _routes = null;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
@@ -51,19 +74,19 @@ class _HomeRouteState extends State<HomeRoute> {
             itemBuilder: (context) {
               return [
                 if (KeyManager.instance.mockPubKey == null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'sign',
-                    child: Text('Sign Message'),
+                    child: Text(S.current.signMessage),
                   ),
                 if (KeyManager.instance.mockPubKey == null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'mock',
-                    child: Text('Mock Wallet'),
+                    child: Text(S.current.mockWallet),
                   )
                 else
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'unmock',
-                    child: Text('Exit Mock Wallet'),
+                    child: Text(S.current.exitMockWallet),
                   ),
               ];
             },
@@ -72,8 +95,8 @@ class _HomeRouteState extends State<HomeRoute> {
                 case 'sign':
                   String? message = await Utils.showInputDialog(
                     context: context,
-                    prompt: "Enter the message to sign:",
-                    label: "Message to sign",
+                    prompt: S.current.enterTheMessageToSign,
+                    label: S.current.messageToSign,
                   );
                   if (message != null) {
                     Future<Signature> sigFuture = KeyManager.instance.sign(message.codeUnits);
@@ -81,7 +104,7 @@ class _HomeRouteState extends State<HomeRoute> {
                       context: context,
                       builder: (ctx) {
                         return AlertDialog(
-                          title: const Text('Signature'),
+                          title: Text(S.current.signature),
                           content: FutureBuilder<Signature>(
                             future: sigFuture,
                             builder: (ctx, snapshot) {
@@ -91,13 +114,13 @@ class _HomeRouteState extends State<HomeRoute> {
                                       "Hex: ${snapshot.data!.bytes.map((e) => e.toRadixString(16).padLeft(2, '0')).join()}",
                                 );
                               } else {
-                                return const Text('Signing...');
+                                return Text(S.current.signing);
                               }
                             },
                           ),
                           actions: [
                             TextButton(
-                              child: const Text('OK'),
+                              child: Text(S.current.ok),
                               onPressed: () {
                                 Navigator.of(ctx).pop();
                               },
@@ -114,14 +137,14 @@ class _HomeRouteState extends State<HomeRoute> {
                     context: context,
                     builder: (ctx) {
                       return AlertDialog(
-                        title: const Text("Enter wallet address to mock:"),
+                        title: Text(S.current.enterWalletAddressToMock),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             TextField(
                               controller: controller,
-                              decoration: const InputDecoration(
-                                labelText: 'Mock wallet address',
+                              decoration: InputDecoration(
+                                labelText: S.current.mockWalletAddress,
                               ),
                             ),
                           ],
@@ -160,11 +183,11 @@ class _HomeRouteState extends State<HomeRoute> {
                       color: Colors.blue,
                     ),
                     child: Stack(
-                      children: const [
+                      children: [
                         Positioned(
                           top: 0,
                           left: 0,
-                          child: Text('Wallet'),
+                          child: Text(S.current.wallet),
                         ),
                       ],
                     ),
@@ -187,6 +210,7 @@ class _HomeRouteState extends State<HomeRoute> {
         selectedItemColor: themeData.colorScheme.secondary,
         unselectedItemColor: themeData.unselectedWidgetColor,
         currentIndex: _page,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -195,6 +219,10 @@ class _HomeRouteState extends State<HomeRoute> {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),
             label: 'Wallet',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sync_alt),
+            label: 'Swap',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.collections),
@@ -240,7 +268,7 @@ class _HomeRouteState extends State<HomeRoute> {
               _removeWallet(key);
             },
             icon: Icons.delete_forever,
-            label: "Remove Wallet",
+            label: S.current.removeWallet,
           ),
         ],
       ),
@@ -264,7 +292,7 @@ class _HomeRouteState extends State<HomeRoute> {
       children: [
         _createWebsiteListTile("Raydium", "https://raydium.io/pools"),
         _createWebsiteListTile("Zeta Markets", "https://mainnet.zeta.markets/"),
-        _createWebsiteListTile("Zeta Markets (Multi-Assets)", "https://multi-asset-test.zeta.markets/"),
+        _createWebsiteListTile("Zeta Markets (Multi-Assets)", "https://mainnet.zeta.markets/referral"),
         _createWebsiteListTile("Jupiter", "https://jup.ag/"),
         _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
         _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
@@ -347,10 +375,110 @@ class _HomeRouteState extends State<HomeRoute> {
     }
   }
 
+  Widget _swap(ThemeData themeData) {
+    String pubKey = KeyManager.instance.pubKey;
+    if (_balances[pubKey] == null) {
+      if (_balancesCompleters[pubKey] == null) {
+        _startLoadingBalances(pubKey);
+      }
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
+      balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] == 1);
+      balances.removeWhere((key, value) => _tokenDetails[key] == null);
+      return DropdownButtonHideUnderline(
+        child: Column(
+          children: [
+            // input
+            Row(
+              children: [
+                SizedBox(width: 16),
+                SizedBox(
+                  width: 96,
+                  child: Text(S.current.pay),
+                ),
+                DropdownButton(
+                  // isExpanded: true,
+                  value: _from,
+                  items: balances.entries.map((entry) {
+                    Map<String, dynamic> tokenDetail = _tokenDetails[entry.key] ?? {};
+                    return DropdownMenuItem(
+                      value: entry.value,
+                      child: Text(tokenDetail["symbol"] ?? entry.key.shortened),
+                    );
+                  }).toList(),
+                  onChanged: (SplTokenAccountDataInfoWithUsd? acct) {
+                    setState(() {
+                      _from = acct;
+                      _loadRoutes();
+                    });
+                  },
+                ),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.only(left: 8, bottom: 8),
+                      hintText: "0.00",
+                    ),
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    controller: _fromAmtController,
+                  ),
+                ),
+                SizedBox(width: 16),
+              ],
+            ),
+            // output
+            Row(
+              children: [
+                SizedBox(width: 16),
+                SizedBox(
+                  width: 96,
+                  child: Text(S.current.receive),
+                ),
+                DropdownButton(
+                  // isExpanded: true,
+                  value: _to,
+                  items: balances.entries.map((entry) {
+                    Map<String, dynamic> tokenDetail = _tokenDetails[entry.key] ?? {};
+                    return DropdownMenuItem(
+                      value: entry.value,
+                      child: Text(tokenDetail["symbol"] ?? entry.key.shortened),
+                    );
+                  }).toList(),
+                  onChanged: (SplTokenAccountDataInfoWithUsd? acct) {
+                    setState(() {
+                      _to = acct;
+                      _loadRoutes();
+                    });
+                  },
+                ),
+                Spacer(),
+              ],
+            ),
+            if (_fromAmtController.text.isNotEmpty)
+              if (_routes != null)
+                ..._routes!.map((e) {
+                  String path = e.marketInfos.map((e) => e.label).join(" > ");
+                  return ListTile(
+                    title: Text(path),
+                    subtitle: Text("${e.outAmount / pow(10, _tokenDetails[_to!.mint]!["decimals"])}"),
+                  );
+                })
+              else
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
+          ],
+        ),
+      );
+    }
+  }
+
   Widget _balanceListTile(MapEntry<String, SplTokenAccountDataInfoWithUsd> entry, ThemeData themeData) {
     String name = _tokenDetails[entry.key]?["name"] ?? "";
     String symbol = _tokenDetails[entry.key]?["symbol"] ?? "";
-    name = name.isNotEmpty ? name : "${entry.key.substring(0, 5)}...";
+    name = name.isNotEmpty ? name : entry.key.shortened;
     Widget? leading;
     if (_tokenDetails[entry.key] != null) {
       String? image = _tokenDetails[entry.key]?["image"];
@@ -419,8 +547,8 @@ class _HomeRouteState extends State<HomeRoute> {
               ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
               bool confirm = await Utils.showConfirmDialog(
                 context: context,
-                title: "Close token account",
-                content: "Another contract interaction may recreate this account.",
+                title: S.current.closeTokenAccount,
+                content: S.current.closeTokenAccountContent,
                 confirmText: "Close",
               );
               if (!confirm) {
@@ -433,7 +561,7 @@ class _HomeRouteState extends State<HomeRoute> {
               );
               try {
                 Utils.showLoadingDialog(context: context, future: Utils.sendInstructions([ix]));
-                scaffold.showSnackBar(const SnackBar(content: Text("Transaction confirmed")));
+                scaffold.showSnackBar(SnackBar(content: Text(S.current.txConfirmed)));
                 _tokenRefresherKey.currentState?.show();
               } on BaseError catch (e) {
                 scaffold.showSnackBar(SnackBar(content: Text(e.message.toString())));
@@ -441,7 +569,7 @@ class _HomeRouteState extends State<HomeRoute> {
               }
             },
             icon: Icons.close,
-            label: "Close account",
+            label: S.current.closeAccount,
           ),
         ],
       ) : null,
@@ -477,7 +605,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 ),
                 children: balances.entries.map((entry) {
                   String name =
-                      _tokenDetails[entry.key]?["name"] ?? "Loading...";
+                      _tokenDetails[entry.key]?["name"] ?? S.current.loading;
                   name = name.isNotEmpty
                       ? name
                       : "${entry.key.substring(0, 5)}...";
@@ -538,8 +666,8 @@ class _HomeRouteState extends State<HomeRoute> {
                   );
                 }).toList(),
               )
-            : const Center(
-                child: Text("No Collectibles"),
+            : Center(
+                child: Text(S.current.noCollectibles),
               ),
       );
     }
@@ -552,32 +680,32 @@ class _HomeRouteState extends State<HomeRoute> {
           onTap: () async {
             String? name = await Utils.showInputDialog(
               context: context,
-              prompt: "New wallet name",
+              prompt: S.current.newWalletName,
               initialValue: KeyManager.instance.walletName,
             );
             if (name != null) {
               await Utils.showLoadingDialog(
                 context: context,
                 future: KeyManager.instance.renameWallet(name),
-                text: "Renaming wallet...",
+                text: S.current.renamingWallet,
               );
               setState(() {});
             }
           },
-          title: const Text("Rename Wallet"),
+          title: Text(S.current.renameWallet),
         ),
         ListTile(
           onTap: () async {
             await Utils.showLoadingDialog(context: context, future: KeyManager.instance.createWallet(), text: "Creating wallet...");
             setState(() {});
           },
-          title: const Text("Create Wallet"),
+          title: Text(S.current.createWallet),
         ),
         ListTile(
           onTap: () async {
             String? key = await Utils.showInputDialog(
               context: context,
-              prompt: "Enter new key",
+              prompt: S.current.enterNewKey,
             );
             if (key == null) {
               return;
@@ -593,8 +721,8 @@ class _HomeRouteState extends State<HomeRoute> {
             if (decodedKey == null || (decodedKey.length != 64 && decodedKey.length != 32)) {
               Utils.showInfoDialog(
                 context: context,
-                title: "Invalid key",
-                content: "Key must be a base58 encoded string or a JSON array of bytes",
+                title: S.current.invalidKey,
+                content: S.current.invalidKeyContent,
               );
               return;
             }
@@ -602,19 +730,19 @@ class _HomeRouteState extends State<HomeRoute> {
             await KeyManager.instance.importWallet(decodedKey);
             setState(() {});
           },
-          title: const Text("Import Wallet"),
+          title: Text(S.current.importWallet),
         ),
         ListTile(
           onTap: () {
             KeyManager.instance.requestShowPrivateKey(context);
           },
-          title: const Text("Export Private Key"),
+          title: Text(S.current.exportPrivateKey),
         ),
         ListTile(
           onTap: () {
             _removeWallet(null);
           },
-          title: const Text("Remove Wallet"),
+          title: Text(S.current.removeWallet),
         ),
         if (KeyManager.instance.isHdWallet)
           ...[
@@ -622,13 +750,13 @@ class _HomeRouteState extends State<HomeRoute> {
               onTap: () {
                 KeyManager.instance.requestShowRecoveryPhrase(context);
               },
-              title: const Text("Export Secret Recovery Phrase"),
+              title: Text(S.current.exportSecretRecoveryPhrase),
             ),
             ListTile(
               onTap: () {
                 // todo reset seed
               },
-              title: const Text("Reset Secret Recovery Phrase"),
+              title: Text(S.current.resetSecretRecoveryPhrase),
             ),
           ],
       ],
@@ -642,8 +770,10 @@ class _HomeRouteState extends State<HomeRoute> {
       case 1:
         return _balanceList(themeData);
       case 2:
-        return _nftList(themeData);
+        return _swap(themeData);
       case 3:
+        return _nftList(themeData);
+      case 4:
         return _settings();
       default:
         return const Text("lol");
@@ -661,7 +791,7 @@ class _HomeRouteState extends State<HomeRoute> {
             children: [
               ListTile(
                 leading: const Icon(Icons.call_received),
-                title: const Text("Deposit"),
+                title: Text(S.current.deposit),
                 onTap: () {
                   Navigator.pushReplacement(
                     context,
@@ -693,7 +823,7 @@ class _HomeRouteState extends State<HomeRoute> {
               if (balance.mint == nativeSol)
                 ListTile(
                   leading: const Icon(Icons.star),
-                  title: const Text("Stake"),
+                  title: Text(S.current.stake),
                   onTap: () {
                     Navigator.pop(ctx, 2);
                   },
@@ -731,20 +861,52 @@ class _HomeRouteState extends State<HomeRoute> {
   Future _removeWallet(ManagedKey? key) async {
     late String msg;
     if (KeyManager.instance.isHdWallet) {
-      msg = "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase.";
+      msg = S.current.removeHdWalletContent;
     } else {
-      msg = "This will remove the wallet from this list, make sure you have a backup of your private key.";
+      msg = S.current.removeKeyWalletContent;
     }
     bool confirm = await Utils.showConfirmDialog(
       context: context,
-      title: "Remove wallet",
+      title: S.current.removeWallet,
       content: msg,
-      confirmText: "Delete",
+      confirmText: S.current.delete,
     );
     if (!confirm) {
       return;
     }
     await KeyManager.instance.removeWallet(key);
     setState(() {});
+  }
+
+  Future<void> _loadRoutes() async {
+    if (_from == null || _to == null) {
+      return;
+    }
+    setState(() {
+      _routes = null;
+    });
+    String fromMint = _from!.mint;
+    String toMint = _to!.mint;
+    fromMint = fromMint == nativeSol ? nativeSolMint : fromMint;
+    toMint = toMint == nativeSol ? nativeSolMint : toMint;
+    double amt = double.tryParse(_fromAmtController.text) ?? 0.0;
+    int decimals = _tokenDetails[_from!.mint]!["decimals"]!;
+    double amtIn = amt * pow(10, decimals);
+    JupiterAggregatorClient client = JupiterAggregatorClient();
+    List<JupiterRoute> routes = await client.getQuote(
+      inputMint: fromMint,
+      outputMint: toMint,
+      amount: amtIn.floor(),
+      feeBps: 10,
+    );
+    setState(() {
+      _routes = routes;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _fromAmtController.dispose();
   }
 }
