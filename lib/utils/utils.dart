@@ -65,7 +65,7 @@ class Utils {
       return result;
     });
     List<String> remainingTokens = List.of(tokens)..removeWhere((element) => tokenInfos[element] != null);
-    print('fetching $remainingTokens');
+    debugPrint('fetching $remainingTokens');
     List<int> metaplexSeed = base58decode(metaplexMetadataProgramId);
     List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
       Ed25519HDPublicKey pda = await Ed25519HDPublicKey.findProgramAddress(seeds: ["metadata".codeUnits, metaplexSeed, base58decode(token)], programId: Ed25519HDPublicKey(metaplexSeed));
@@ -112,7 +112,7 @@ class Utils {
             }
             result["image"] = image;
           } catch (_, st) {
-            print("$token error $_ $st");
+            debugPrint("$token error $_ $st");
           } // no offchain metadata
           return [token, result];
         } else {
@@ -211,6 +211,10 @@ class Utils {
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
         .expand((e) => e).where((e) => !e.contains("111111111")).toSet().toList();
     List<Account?> accounts = await batchGetAccounts(addresses);
+    Map<String, Account?> accountMap = {};
+    for (int i = 0; i < addresses.length; ++i) {
+      accountMap[addresses[i]] = accounts[i];
+    }
     // remove accounts that are not token accts and not null
     for (int i = 0; i < addresses.length; i++) {
       if (accounts[i] != null) {
@@ -236,13 +240,13 @@ class Utils {
     );
     Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed);
     List results = await Future.wait([statusFuture, solBalanceFuture]).catchError((_) => <Object>[]);
-    if (results.isEmpty) return TokenChanges.error();
+    if (results.isEmpty) return TokenChanges.error("cannot get results");
     TransactionStatus status = results[0];
     int preSolBalance = results[1];
 
     List<String> tokenAccounts = [];
     List<Future<SplTokenAccountDataInfo>> updatedAcctFutures = [];
-    List<Future<TokenAmount?>> preBalanceFutures = [];
+    List<Future<SplTokenAccountDataInfo?>> preBalanceFutures = [];
     int count = 0;
     for (int i = 0; i < addresses.length - 1; ++i) {
       Account? element = status.accounts?[i];
@@ -251,7 +255,11 @@ class Utils {
         if (data.length == RpcConstants.kTokenAccountLength) {
           tokenAccounts.add(addresses[i]);
           updatedAcctFutures.add(Utils.parseTokenAccount(data));
-          preBalanceFutures.add(_getTokenAmountOrNull(addresses[i])); // fixme: don't we already have the balance from above?
+          if (accountMap[addresses[i]] != null) {
+            preBalanceFutures.add(Utils.parseTokenAccount((accountMap[addresses[i]]!.data as BinaryAccountData).data));
+          } else {
+            preBalanceFutures.add(Future.value(null));
+          }
           ++count;
         }
       }
@@ -259,14 +267,19 @@ class Utils {
     int postSolBalance = status.accounts?.last.lamports ?? 0;
     List result = await Future.wait([Future.wait(updatedAcctFutures), Future.wait(preBalanceFutures)]);
     List<SplTokenAccountDataInfo> updatedAccts = result[0];
-    List<TokenAmount?> preBalances = result[1];
+    List<SplTokenAccountDataInfo?> preBalances = result[1];
     Map<String, SplTokenAccountDataInfo> updatedAcctsMap = {};
     Map<String, double> changes = {};
     for (int i = 0; i < count; ++i) {
-      double oldAmt = double.parse(preBalances[i]?.uiAmountString ?? "0");
+      double oldAmt = double.parse(preBalances[i]?.tokenAmount.uiAmountString ?? "0");
       double newAmt = double.parse(updatedAccts[i].tokenAmount.uiAmountString!);
-      if (updatedAccts[i].owner == owner) { // fixme: what if acct got setAuthority'd?
-        changes[tokenAccounts[i]] = newAmt - oldAmt;
+      if (preBalances[i]?.owner == owner) {
+        if (updatedAccts[i].owner == preBalances[i]?.owner) {
+          changes[tokenAccounts[i]] = newAmt - oldAmt;
+        } else {
+          // setAuthority'd - new balance is 0
+          changes[tokenAccounts[i]] = -oldAmt;
+        }
         updatedAcctsMap[tokenAccounts[i]] = updatedAccts[i];
       }
     }
@@ -312,14 +325,6 @@ class Utils {
     Duration timeout = const Duration(seconds: 30),
   }) async {
     return _solanaClient.waitForSignatureStatus(sig, status: status, timeout: timeout);
-  }
-
-  static Future<TokenAmount?> _getTokenAmountOrNull(String address) async {
-    try {
-      return await _solanaClient.rpcClient.getTokenAccountBalance(address, commitment: Commitment.confirmed);
-    } catch (e) {
-      return null;
-    }
   }
 
   static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
@@ -502,7 +507,7 @@ class Utils {
   }
 
   static Future<String> _httpGet(String url) async {
-    print("get $url");
+    debugPrint("get $url");
     return DefaultCacheManager().downloadFile(url).then((value) => value.file.readAsString());
   }
 
@@ -626,9 +631,10 @@ class TokenChanges {
   final Map<String, Map<String, dynamic>?> tokens;
   final int solOffset;
   final bool error;
+  final String? errorMessage;
 
-  TokenChanges(this.changes, this.updatedAccounts, this.tokens, this.solOffset) : error = false;
-  TokenChanges.error() : changes = {}, updatedAccounts = {}, tokens = {}, solOffset = 0, error = true;
+  TokenChanges(this.changes, this.updatedAccounts, this.tokens, this.solOffset) : error = false, errorMessage = null;
+  TokenChanges.error([this.errorMessage]) : changes = {}, updatedAccounts = {}, tokens = {}, solOffset = 0, error = true;
 
   static TokenChanges merge(List<TokenChanges> tokenChanges) {
     Map<String, double> changes = {};
@@ -636,9 +642,8 @@ class TokenChanges {
     Map<String, Map<String, dynamic>> tokens = {};
     int solOffset = 0;
     for (int i = 0; i < tokenChanges.length; ++i) {
-      print(tokenChanges[i]);
       if (tokenChanges[i].error) {
-        return TokenChanges.error();
+        return TokenChanges.error(tokenChanges[i].errorMessage);
       }
       tokenChanges[i].changes.forEach((key, value) {
         changes[key] = (changes[key] ?? 0) + value;
@@ -657,7 +662,7 @@ class TokenChanges {
 
   @override
   String toString() {
-    return 'TokenChanges{changes: $changes, updatedAccounts: $updatedAccounts, solOffset: $solOffset}';
+    return 'TokenChanges{changes: $changes, updatedAccounts: $updatedAccounts, solOffset: $solOffset, errorMessage: $errorMessage}';
   }
 }
 
