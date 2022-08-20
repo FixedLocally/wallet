@@ -519,6 +519,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Swap`
+  String get swap {
+    return Intl.message(
+      'Swap',
+      name: 'swap',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

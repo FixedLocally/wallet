@@ -88,6 +88,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "signature": MessageLookupByLibrary.simpleMessage("Signature"),
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
+        "swap": MessageLookupByLibrary.simpleMessage("Swap"),
         "txConfirmed":
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),

@@ -46,5 +46,6 @@
   "yes": "Yes",
   "no": "No",
   "sendingTx": "Sending transaction...",
-  "errorSendingTxs": "Error sending transactions"
+  "errorSendingTxs": "Error sending transactions",
+  "swap": "Swap"
 }
