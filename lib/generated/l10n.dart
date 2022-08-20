@@ -529,6 +529,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Transaction failed`
+  String get txFailed {
+    return Intl.message(
+      'Transaction failed',
+      name: 'txFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send`
+  String get send {
+    return Intl.message(
+      'Send',
+      name: 'send',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recipient`
+  String get recipient {
+    return Intl.message(
+      'Recipient',
+      name: 'recipient',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid amount`
+  String get invalidAmount {
+    return Intl.message(
+      'Invalid amount',
+      name: 'invalidAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Insufficient funds`
+  String get insufficientFunds {
+    return Intl.message(
+      'Insufficient funds',
+      name: 'insufficientFunds',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid address`
+  String get invalidAddress {
+    return Intl.message(
+      'Invalid address',
+      name: 'invalidAddress',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

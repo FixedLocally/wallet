@@ -8,6 +8,7 @@ import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 
+import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
 import '../../utils/utils.dart';
 import '../../widgets/image.dart';
@@ -103,8 +104,8 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                       Expanded(
                         child: TextFormField(
                           controller: _addressController,
-                          decoration: const InputDecoration(
-                            hintText: "Recipient",
+                          decoration: InputDecoration(
+                            hintText: S.current.recipient,
                             border: InputBorder.none,
                           ),
                           onChanged: (value) {
@@ -145,8 +146,8 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                 Utils.wrapField(
                   themeData: themeData,
                   child: TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: "Amount",
+                    decoration: InputDecoration(
+                      hintText: S.current.amount,
                       border: InputBorder.none,
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -184,8 +185,8 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                           if (_validate()) {
                             bool confirm = await Utils.showConfirmDialog(
                               context: context,
-                              title: "Send $symbol",
-                              content: "You are about to send $_amount $symbol to $_recipient.",
+                              title: "${S.current.send} $symbol",
+                              content: "You are about to send $_amount $symbol to $_recipient.", // todo
                             );
                             if (confirm) {
                               Completer<String> completer = Completer();
@@ -230,14 +231,14 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                                 if (tx.isNotEmpty) {
                                   navigator.pop(true);
                                   scaffold.showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Transaction sent"),
+                                    SnackBar(
+                                      content: Text(S.current.txConfirmed),
                                     ),
                                   );
                                 } else {
                                   scaffold.showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Transaction failed"),
+                                    SnackBar(
+                                      content: Text(S.current.txFailed),
                                     ),
                                   );
                                 }
@@ -246,7 +247,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                           }
                         },
                         child: Text(
-                          "Send",
+                          S.current.send,
                           style: themeData.textTheme.button,
                         ),
                       ),
@@ -266,11 +267,11 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
     _amountError = null;
     _recipientError = null;
     double amt = double.tryParse(_amount) ?? 0;
-    if (amt <= 0) _amountError = "Invalid amount";
-    if (amt > double.parse(widget.balance.tokenAmount.uiAmountString!)) _amountError = "Insufficient funds";
+    if (amt <= 0) _amountError = S.current.invalidAmount;
+    if (amt > double.parse(widget.balance.tokenAmount.uiAmountString!)) _amountError = S.current.insufficientFunds;
     // validate recipient
     List<int> data = base58decode(_recipient);
-    if (data.length != 32) _recipientError = "Invalid address";
+    if (data.length != 32) _recipientError = S.current.invalidAddress;
     setState(() {});
     return _recipientError == null && _amountError == null;
   }

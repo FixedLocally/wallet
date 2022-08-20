@@ -48,6 +48,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "importWallet": MessageLookupByLibrary.simpleMessage("Import Wallet"),
         "importedWallet":
             MessageLookupByLibrary.simpleMessage("Imported Wallet"),
+        "insufficientFunds":
+            MessageLookupByLibrary.simpleMessage("Insufficient funds"),
+        "invalidAddress":
+            MessageLookupByLibrary.simpleMessage("Invalid address"),
+        "invalidAmount": MessageLookupByLibrary.simpleMessage("Invalid amount"),
         "invalidKey": MessageLookupByLibrary.simpleMessage("Invalid key"),
         "invalidKeyContent": MessageLookupByLibrary.simpleMessage(
             "Key must be a base58 encoded string or a JSON array of bytes"),
@@ -66,6 +71,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "pay": MessageLookupByLibrary.simpleMessage("Pay"),
         "receive": MessageLookupByLibrary.simpleMessage("Receive"),
+        "recipient": MessageLookupByLibrary.simpleMessage("Recipient"),
         "removeHdWalletContent": MessageLookupByLibrary.simpleMessage(
             "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase."),
         "removeKeyWalletContent": MessageLookupByLibrary.simpleMessage(
@@ -76,6 +82,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Renaming wallet..."),
         "resetSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Reset Secret Recovery Phrase"),
+        "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendingTx":
             MessageLookupByLibrary.simpleMessage("Sending transaction..."),
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
@@ -91,6 +98,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "swap": MessageLookupByLibrary.simpleMessage("Swap"),
         "txConfirmed":
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
+        "txFailed": MessageLookupByLibrary.simpleMessage("Transaction failed"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes")
       };

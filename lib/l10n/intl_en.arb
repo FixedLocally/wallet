@@ -47,5 +47,11 @@
   "no": "No",
   "sendingTx": "Sending transaction...",
   "errorSendingTxs": "Error sending transactions",
-  "swap": "Swap"
+  "swap": "Swap",
+  "txFailed": "Transaction failed",
+  "send": "Send",
+  "recipient": "Recipient",
+  "invalidAmount": "Invalid amount",
+  "insufficientFunds": "Insufficient funds",
+  "invalidAddress": "Invalid address"
 }
