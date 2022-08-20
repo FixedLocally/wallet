@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'generated/l10n.dart';
 import 'routes/entry_point.dart';
 
 void main() {
@@ -59,6 +62,11 @@ class WalletApp extends StatelessWidget {
       title: 'Flutter Demo',
       darkTheme: darkTheme,
       themeMode: ThemeMode.dark,
+      localizationsDelegates: [
+        S.delegate,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
       home: const EntryPointRoute(),
     );
   }
