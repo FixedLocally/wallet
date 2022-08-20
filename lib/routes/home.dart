@@ -41,6 +41,7 @@ class _HomeRouteState extends State<HomeRoute> {
 
   SplTokenAccountDataInfoWithUsd? _from;
   SplTokenAccountDataInfoWithUsd? _to;
+  String _amt = "";
   List<JupiterRoute>? _routes;
   int _chosenRoute = -1;
 
@@ -52,9 +53,11 @@ class _HomeRouteState extends State<HomeRoute> {
       _loadRoutes();
     });
     _fromAmtController.addListener(() {
+      if (_amt == _fromAmtController.text) return;
       setState(() {
         _routes = null;
         _chosenRoute = -1;
+        _amt = _fromAmtController.text;
       });
     });
   }
@@ -446,6 +449,22 @@ class _HomeRouteState extends State<HomeRoute> {
                 SizedBox(width: 16),
               ],
             ),
+            IconButton(
+              onPressed: () {
+                int decimals = _tokenDetails[_to!.mint]!["decimals"]!;
+                setState(() {
+                  SplTokenAccountDataInfoWithUsd? from = _from;
+                  _from = _to;
+                  _to = from;
+                  if (_routes != null && _routes!.isNotEmpty) {
+                    _amt = (_routes!.first.outAmount / pow(10, decimals)).toString();
+                    _fromAmtController.text = _amt;
+                  }
+                  _routes = null;
+                });
+              },
+              icon: Icon(Icons.swap_vert),
+            ),
             // output
             Row(
               children: [
@@ -507,6 +526,7 @@ class _HomeRouteState extends State<HomeRoute> {
                   }).values,
                   ListTile(
                     onTap: () async {
+                      FocusScope.of(context).unfocus();
                       JupiterSwapTransactions swapTxs =
                           await _jupClient.getSwapTransactions(
                               userPublicKey: KeyManager.instance.pubKey,
@@ -951,6 +971,9 @@ class _HomeRouteState extends State<HomeRoute> {
     double amt = double.tryParse(_fromAmtController.text) ?? 0.0;
     int decimals = _tokenDetails[_from!.mint]!["decimals"]!;
     double amtIn = amt * pow(10, decimals);
+    if (amtIn == 0) return;
+    // print("loading routes from $amtIn $fromMint to $toMint");
+    // print(StackTrace.current);
     List<JupiterRoute> routes = await _jupClient.getQuote(
       inputMint: fromMint,
       outputMint: toMint,
