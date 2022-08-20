@@ -24,7 +24,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
-        "closeAccount": MessageLookupByLibrary.simpleMessage("Close account"),
         "closeTokenAccount":
             MessageLookupByLibrary.simpleMessage("Close token account"),
         "closeTokenAccountContent": MessageLookupByLibrary.simpleMessage(
@@ -38,10 +37,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
         "enterNewKey": MessageLookupByLibrary.simpleMessage("Enter new key"),
-        "enterTheMessageToSign":
-            MessageLookupByLibrary.simpleMessage("Enter the message to sign:"),
-        "enterWalletAddressToMock": MessageLookupByLibrary.simpleMessage(
-            "Enter wallet address to mock:"),
         "exitMockWallet":
             MessageLookupByLibrary.simpleMessage("Exit Mock Wallet"),
         "exportPrivateKey":
@@ -55,11 +50,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKeyContent": MessageLookupByLibrary.simpleMessage(
             "Key must be a base58 encoded string or a JSON array of bytes"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
-        "messageToSign":
-            MessageLookupByLibrary.simpleMessage("Message to sign"),
         "mockWallet": MessageLookupByLibrary.simpleMessage("Mock Wallet"),
         "mockWalletAddress":
             MessageLookupByLibrary.simpleMessage("Mock wallet address"),
+        "mockWalletPrompt": MessageLookupByLibrary.simpleMessage(
+            "Enter wallet address to mock:"),
         "mocked": MessageLookupByLibrary.simpleMessage("Mocked"),
         "newWalletName":
             MessageLookupByLibrary.simpleMessage("New wallet name"),
@@ -81,6 +76,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
             "Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds."),
         "signMessage": MessageLookupByLibrary.simpleMessage("Sign Message"),
+        "signMessageHint":
+            MessageLookupByLibrary.simpleMessage("Message to sign"),
+        "signMessagePrompt":
+            MessageLookupByLibrary.simpleMessage("Enter the message to sign:"),
         "signature": MessageLookupByLibrary.simpleMessage("Signature"),
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),

@@ -36,6 +36,7 @@ class _HomeRouteState extends State<HomeRoute> {
 
   late TextEditingController _fromAmtController;
 
+  JupiterAggregatorClient jupClient = JupiterAggregatorClient();
   SplTokenAccountDataInfoWithUsd? _from;
   SplTokenAccountDataInfoWithUsd? _to;
   List<JupiterRoute>? _routes;
@@ -95,8 +96,8 @@ class _HomeRouteState extends State<HomeRoute> {
                 case 'sign':
                   String? message = await Utils.showInputDialog(
                     context: context,
-                    prompt: S.current.enterTheMessageToSign,
-                    label: S.current.messageToSign,
+                    prompt: S.current.signMessagePrompt,
+                    label: S.current.signMessageHint,
                   );
                   if (message != null) {
                     Future<Signature> sigFuture = KeyManager.instance.sign(message.codeUnits);
@@ -137,7 +138,7 @@ class _HomeRouteState extends State<HomeRoute> {
                     context: context,
                     builder: (ctx) {
                       return AlertDialog(
-                        title: Text(S.current.enterWalletAddressToMock),
+                        title: Text(S.current.mockWalletPrompt),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -389,40 +390,53 @@ class _HomeRouteState extends State<HomeRoute> {
       return DropdownButtonHideUnderline(
         child: Column(
           children: [
+            SizedBox(height: 8),
             // input
             Row(
               children: [
                 SizedBox(width: 16),
                 SizedBox(
-                  width: 96,
+                  width: 64,
                   child: Text(S.current.pay),
                 ),
-                DropdownButton(
-                  // isExpanded: true,
-                  value: _from,
-                  items: balances.entries.map((entry) {
-                    Map<String, dynamic> tokenDetail = _tokenDetails[entry.key] ?? {};
-                    return DropdownMenuItem(
-                      value: entry.value,
-                      child: Text(tokenDetail["symbol"] ?? entry.key.shortened),
-                    );
-                  }).toList(),
-                  onChanged: (SplTokenAccountDataInfoWithUsd? acct) {
-                    setState(() {
-                      _from = acct;
-                      _loadRoutes();
-                    });
-                  },
-                ),
                 Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.only(left: 8, bottom: 8),
-                      hintText: "0.00",
+                  child: Utils.wrapField(
+                    margin: const EdgeInsets.only(top: 8, bottom: 8),
+                    themeData: themeData,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        DropdownButton(
+                          // isExpanded: true,
+                          value: _from,
+                          items: balances.entries.map((entry) {
+                            Map<String, dynamic> tokenDetail = _tokenDetails[entry.key] ?? {};
+                            return DropdownMenuItem(
+                              value: entry.value,
+                              child: Text(tokenDetail["symbol"] ?? entry.key.shortened),
+                            );
+                          }).toList(),
+                          onChanged: (SplTokenAccountDataInfoWithUsd? acct) {
+                            setState(() {
+                              _from = acct;
+                              _loadRoutes();
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: EdgeInsets.only(left: 8),
+                              hintText: "0.00",
+                              border: InputBorder.none,
+                            ),
+                            keyboardType: TextInputType.numberWithOptions(decimal: true),
+                            controller: _fromAmtController,
+                          ),
+                        ),
+                      ],
                     ),
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    controller: _fromAmtController,
                   ),
                 ),
                 SizedBox(width: 16),
@@ -433,27 +447,39 @@ class _HomeRouteState extends State<HomeRoute> {
               children: [
                 SizedBox(width: 16),
                 SizedBox(
-                  width: 96,
+                  width: 64,
                   child: Text(S.current.receive),
                 ),
-                DropdownButton(
-                  // isExpanded: true,
-                  value: _to,
-                  items: balances.entries.map((entry) {
-                    Map<String, dynamic> tokenDetail = _tokenDetails[entry.key] ?? {};
-                    return DropdownMenuItem(
-                      value: entry.value,
-                      child: Text(tokenDetail["symbol"] ?? entry.key.shortened),
-                    );
-                  }).toList(),
-                  onChanged: (SplTokenAccountDataInfoWithUsd? acct) {
-                    setState(() {
-                      _to = acct;
-                      _loadRoutes();
-                    });
-                  },
+                Expanded(
+                  child: Utils.wrapField(
+                    margin: const EdgeInsets.only(top: 8, bottom: 8),
+                    themeData: themeData,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        DropdownButton(
+                          // isExpanded: true,
+                          value: _to,
+                          items: balances.entries.map((entry) {
+                            Map<String, dynamic> tokenDetail = _tokenDetails[entry.key] ?? {};
+                            return DropdownMenuItem(
+                              value: entry.value,
+                              child: Text(tokenDetail["symbol"] ?? entry.key.shortened),
+                            );
+                          }).toList(),
+                          onChanged: (SplTokenAccountDataInfoWithUsd? acct) {
+                            setState(() {
+                              _to = acct;
+                              _loadRoutes();
+                            });
+                          },
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                  ),
                 ),
-                Spacer(),
+                SizedBox(width: 16),
               ],
             ),
             if (_fromAmtController.text.isNotEmpty)
@@ -463,6 +489,13 @@ class _HomeRouteState extends State<HomeRoute> {
                   return ListTile(
                     title: Text(path),
                     subtitle: Text("${e.outAmount / pow(10, _tokenDetails[_to!.mint]!["decimals"])}"),
+                    onTap: () async {
+                      JupiterSwapTransactions txs = await jupClient.getSwapTransactions(userPublicKey: KeyManager.instance.pubKey, route: e);
+                      print(txs.setupTransaction);
+                      print(txs.swapTransaction);
+                      print(txs.cleanupTransaction);
+
+                    },
                   );
                 })
               else
@@ -569,7 +602,7 @@ class _HomeRouteState extends State<HomeRoute> {
               }
             },
             icon: Icons.close,
-            label: S.current.closeAccount,
+            label: S.current.closeTokenAccount,
           ),
         ],
       ) : null,
@@ -892,8 +925,7 @@ class _HomeRouteState extends State<HomeRoute> {
     double amt = double.tryParse(_fromAmtController.text) ?? 0.0;
     int decimals = _tokenDetails[_from!.mint]!["decimals"]!;
     double amtIn = amt * pow(10, decimals);
-    JupiterAggregatorClient client = JupiterAggregatorClient();
-    List<JupiterRoute> routes = await client.getQuote(
+    List<JupiterRoute> routes = await jupClient.getQuote(
       inputMint: fromMint,
       outputMint: toMint,
       amount: amtIn.floor(),

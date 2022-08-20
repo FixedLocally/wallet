@@ -80,11 +80,11 @@ class S {
     );
   }
 
-  /// `Sign Message`
-  String get signMessage {
+  /// `Mocked`
+  String get mocked {
     return Intl.message(
-      'Sign Message',
-      name: 'signMessage',
+      'Mocked',
+      name: 'mocked',
       desc: '',
       args: [],
     );
@@ -100,11 +100,21 @@ class S {
     );
   }
 
-  /// `Mocked`
-  String get mocked {
+  /// `Enter wallet address to mock:`
+  String get mockWalletPrompt {
     return Intl.message(
-      'Mocked',
-      name: 'mocked',
+      'Enter wallet address to mock:',
+      name: 'mockWalletPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mock wallet address`
+  String get mockWalletAddress {
+    return Intl.message(
+      'Mock wallet address',
+      name: 'mockWalletAddress',
       desc: '',
       args: [],
     );
@@ -130,26 +140,6 @@ class S {
     );
   }
 
-  /// `Enter the message to sign:`
-  String get enterTheMessageToSign {
-    return Intl.message(
-      'Enter the message to sign:',
-      name: 'enterTheMessageToSign',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Message to sign`
-  String get messageToSign {
-    return Intl.message(
-      'Message to sign',
-      name: 'messageToSign',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Signing...`
   String get signing {
     return Intl.message(
@@ -160,31 +150,31 @@ class S {
     );
   }
 
-  /// `OK`
-  String get ok {
+  /// `Sign Message`
+  String get signMessage {
     return Intl.message(
-      'OK',
-      name: 'ok',
+      'Sign Message',
+      name: 'signMessage',
       desc: '',
       args: [],
     );
   }
 
-  /// `Enter wallet address to mock:`
-  String get enterWalletAddressToMock {
+  /// `Enter the message to sign:`
+  String get signMessagePrompt {
     return Intl.message(
-      'Enter wallet address to mock:',
-      name: 'enterWalletAddressToMock',
+      'Enter the message to sign:',
+      name: 'signMessagePrompt',
       desc: '',
       args: [],
     );
   }
 
-  /// `Mock wallet address`
-  String get mockWalletAddress {
+  /// `Message to sign`
+  String get signMessageHint {
     return Intl.message(
-      'Mock wallet address',
-      name: 'mockWalletAddress',
+      'Message to sign',
+      name: 'signMessageHint',
       desc: '',
       args: [],
     );
@@ -205,6 +195,36 @@ class S {
     return Intl.message(
       'Remove Wallet',
       name: 'removeWallet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename Wallet`
+  String get renameWallet {
+    return Intl.message(
+      'Rename Wallet',
+      name: 'renameWallet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create Wallet`
+  String get createWallet {
+    return Intl.message(
+      'Create Wallet',
+      name: 'createWallet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New wallet name`
+  String get newWalletName {
+    return Intl.message(
+      'New wallet name',
+      name: 'newWalletName',
       desc: '',
       args: [],
     );
@@ -240,11 +260,11 @@ class S {
     );
   }
 
-  /// `Close account`
-  String get closeAccount {
+  /// `OK`
+  String get ok {
     return Intl.message(
-      'Close account',
-      name: 'closeAccount',
+      'OK',
+      name: 'ok',
       desc: '',
       args: [],
     );
@@ -270,41 +290,11 @@ class S {
     );
   }
 
-  /// `New wallet name`
-  String get newWalletName {
-    return Intl.message(
-      'New wallet name',
-      name: 'newWalletName',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Renaming wallet...`
   String get renamingWallet {
     return Intl.message(
       'Renaming wallet...',
       name: 'renamingWallet',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Rename Wallet`
-  String get renameWallet {
-    return Intl.message(
-      'Rename Wallet',
-      name: 'renameWallet',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Create Wallet`
-  String get createWallet {
-    return Intl.message(
-      'Create Wallet',
-      name: 'createWallet',
       desc: '',
       args: [],
     );
@@ -390,21 +380,31 @@ class S {
     );
   }
 
-  /// `Deposit`
-  String get deposit {
+  /// `Copied secret recovery phrase to clipboard`
+  String get copySeedSuccess {
     return Intl.message(
-      'Deposit',
-      name: 'deposit',
+      'Copied secret recovery phrase to clipboard',
+      name: 'copySeedSuccess',
       desc: '',
       args: [],
     );
   }
 
-  /// `Stake`
-  String get stake {
+  /// `Copied private key to clipboard`
+  String get copyPrivateKeySuccess {
     return Intl.message(
-      'Stake',
-      name: 'stake',
+      'Copied private key to clipboard',
+      name: 'copyPrivateKeySuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds.`
+  String get showPrivateKeyContent {
+    return Intl.message(
+      'Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds.',
+      name: 'showPrivateKeyContent',
       desc: '',
       args: [],
     );
@@ -450,31 +450,21 @@ class S {
     );
   }
 
-  /// `Copied secret recovery phrase to clipboard`
-  String get copySeedSuccess {
+  /// `Deposit`
+  String get deposit {
     return Intl.message(
-      'Copied secret recovery phrase to clipboard',
-      name: 'copySeedSuccess',
+      'Deposit',
+      name: 'deposit',
       desc: '',
       args: [],
     );
   }
 
-  /// `Copied private key to clipboard`
-  String get copyPrivateKeySuccess {
+  /// `Stake`
+  String get stake {
     return Intl.message(
-      'Copied private key to clipboard',
-      name: 'copyPrivateKeySuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds.`
-  String get showPrivateKeyContent {
-    return Intl.message(
-      'Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds.',
-      name: 'showPrivateKeyContent',
+      'Stake',
+      name: 'stake',
       desc: '',
       args: [],
     );
