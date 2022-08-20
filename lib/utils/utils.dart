@@ -561,10 +561,15 @@ class Utils {
     ) ?? false;
   }
 
-  static Widget wrapField({required ThemeData themeData, required Widget child}) {
+  static Widget wrapField({
+    required ThemeData themeData,
+    required Widget child,
+    EdgeInsetsGeometry margin = const EdgeInsets.only(top: 16, bottom: 8),
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 16),
+  }) {
     return Container(
-      margin: const EdgeInsets.only(top: 16, bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      margin: margin,
+      padding: padding,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: themeData.colorScheme.background,
