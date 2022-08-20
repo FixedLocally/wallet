@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -13,6 +14,7 @@ import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
 import '../utils/extensions.dart';
 import '../utils/utils.dart';
+import '../widgets/approve_tx.dart';
 import '../widgets/header.dart';
 import '../widgets/image.dart';
 import 'tokens/tokens.dart';
@@ -33,13 +35,14 @@ class _HomeRouteState extends State<HomeRoute> {
   final Map<String, Map<String, dynamic>> _tokenDetails = {};
   final GlobalKey<RefreshIndicatorState> _nftRefresherKey = GlobalKey();
   final GlobalKey<RefreshIndicatorState> _tokenRefresherKey = GlobalKey();
+  final JupiterAggregatorClient _jupClient = JupiterAggregatorClient();
 
   late TextEditingController _fromAmtController;
 
-  JupiterAggregatorClient jupClient = JupiterAggregatorClient();
   SplTokenAccountDataInfoWithUsd? _from;
   SplTokenAccountDataInfoWithUsd? _to;
   List<JupiterRoute>? _routes;
+  int _chosenRoute = -1;
 
   @override
   void initState() {
@@ -51,6 +54,7 @@ class _HomeRouteState extends State<HomeRoute> {
     _fromAmtController.addListener(() {
       setState(() {
         _routes = null;
+        _chosenRoute = -1;
       });
     });
   }
@@ -484,20 +488,41 @@ class _HomeRouteState extends State<HomeRoute> {
             ),
             if (_fromAmtController.text.isNotEmpty)
               if (_routes != null)
-                ..._routes!.map((e) {
-                  String path = e.marketInfos.map((e) => e.label).join(" > ");
-                  return ListTile(
-                    title: Text(path),
-                    subtitle: Text("${e.outAmount / pow(10, _tokenDetails[_to!.mint]!["decimals"])}"),
+                ...[
+                  ..._routes!.asMap().map((i, route) {
+                    String path = route.marketInfos.map((e) => e.label).join(" > ");
+                    return MapEntry(
+                      i,
+                      ListTile(
+                        title: Text(path),
+                        subtitle: Text("${route.outAmount / pow(10, _tokenDetails[_to!.mint]!["decimals"])}"),
+                        trailing: i == _chosenRoute ? Icon(Icons.check) : null,
+                        onTap: () async {
+                          setState(() {
+                            _chosenRoute = i;
+                          });
+                        },
+                      ),
+                    );
+                  }).values,
+                  ListTile(
                     onTap: () async {
-                      JupiterSwapTransactions txs = await jupClient.getSwapTransactions(userPublicKey: KeyManager.instance.pubKey, route: e);
-                      print(txs.setupTransaction);
-                      print(txs.swapTransaction);
-                      print(txs.cleanupTransaction);
-
+                      JupiterSwapTransactions swapTxs =
+                          await _jupClient.getSwapTransactions(
+                              userPublicKey: KeyManager.instance.pubKey,
+                              route: _routes![_chosenRoute]);
+                      List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction].whereNotNull.map(base64Decode).toList();
+                      print(txs.length);
+                      Future<TokenChanges> simulation = Utils.simulateTxs(txs.map((e) => e.sublist(65)).toList(), KeyManager.instance.pubKey);
+                      bool approved = await Utils.showConfirmBottomSheet(
+                        context: context,
+                        builder: (context) {
+                          return ApproveTransactionWidget(simulation: simulation);
+                        },
+                      );
                     },
-                  );
-                })
+                  ),
+                ]
               else
                 Center(
                   child: CircularProgressIndicator(),
@@ -917,6 +942,7 @@ class _HomeRouteState extends State<HomeRoute> {
     }
     setState(() {
       _routes = null;
+      _chosenRoute = -1;
     });
     String fromMint = _from!.mint;
     String toMint = _to!.mint;
@@ -925,11 +951,11 @@ class _HomeRouteState extends State<HomeRoute> {
     double amt = double.tryParse(_fromAmtController.text) ?? 0.0;
     int decimals = _tokenDetails[_from!.mint]!["decimals"]!;
     double amtIn = amt * pow(10, decimals);
-    List<JupiterRoute> routes = await jupClient.getQuote(
+    List<JupiterRoute> routes = await _jupClient.getQuote(
       inputMint: fromMint,
       outputMint: toMint,
       amount: amtIn.floor(),
-      feeBps: 10,
+      // feeBps: 10,
     );
     setState(() {
       _routes = routes;

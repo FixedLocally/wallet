@@ -13,6 +13,7 @@ import 'package:solana/metaplex.dart';
 import 'package:solana/solana.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../generated/l10n.dart';
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
 import '../widgets/svg.dart';
@@ -200,14 +201,17 @@ class Utils {
     Message message = Message.decompile(compiledMessage);
     // prepend header
     List<int> simulationPayload = [1, ...List.generate(64, (_) => 0), ...rawMessage];
+    // all addresses involved in the transaction
     List<String> addresses = message.instructions
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
         .expand((e) => e).toSet().toList();
+    // all accounts involved in the transaction while interacting with token programs (must get)
     List<String> tokenProgramAddresses = message.instructions
         .where((e) => e.programId.toBase58() == TokenProgram.programId || e.programId.toBase58() == AssociatedTokenAccountProgram.programId)
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
         .expand((e) => e).where((e) => !e.contains("111111111")).toSet().toList();
     List<Account?> accounts = await batchGetAccounts(addresses);
+    // remove accounts that are not token accts and not null
     for (int i = 0; i < addresses.length; i++) {
       if (accounts[i] != null) {
         if ((accounts[i]!.data as BinaryAccountData).data.length != 165) {
@@ -247,7 +251,7 @@ class Utils {
         if (data.length == RpcConstants.kTokenAccountLength) {
           tokenAccounts.add(addresses[i]);
           updatedAcctFutures.add(Utils.parseTokenAccount(data));
-          preBalanceFutures.add(_getTokenAmountOrNull(addresses[i]));
+          preBalanceFutures.add(_getTokenAmountOrNull(addresses[i])); // fixme: don't we already have the balance from above?
           ++count;
         }
       }
@@ -261,7 +265,7 @@ class Utils {
     for (int i = 0; i < count; ++i) {
       double oldAmt = double.parse(preBalances[i]?.uiAmountString ?? "0");
       double newAmt = double.parse(updatedAccts[i].tokenAmount.uiAmountString!);
-      if (updatedAccts[i].owner == owner) {
+      if (updatedAccts[i].owner == owner) { // fixme: what if acct got setAuthority'd?
         changes[tokenAccounts[i]] = newAmt - oldAmt;
         updatedAcctsMap[tokenAccounts[i]] = updatedAccts[i];
       }
@@ -508,6 +512,7 @@ class Utils {
     String? content,
     String? confirmText,
     String? cancelText,
+    WidgetBuilder? builder,
   }) async {
     return await showDialog(
       context: context,
@@ -515,7 +520,7 @@ class Utils {
       builder: (ctx) {
         return AlertDialog(
           title: Text(title ?? "Are you sure?"),
-          content: Text(content ?? ""),
+          content: builder?.call(ctx) ?? Text(content ?? ""),
           actions: [
             TextButton(
               child: Text(cancelText ?? 'Cancel'),
@@ -533,6 +538,42 @@ class Utils {
         );
       },
     ) ?? false;
+  }
+
+  static Future<bool> showConfirmBottomSheet({
+    required BuildContext context,
+    required WidgetBuilder builder,
+  }) async {
+    bool? result = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              builder(ctx),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: Text(S.current.yes),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text(S.current.no),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    return result ?? false;
   }
 
   static Future<bool> showInfoDialog({
@@ -595,6 +636,7 @@ class TokenChanges {
     Map<String, Map<String, dynamic>> tokens = {};
     int solOffset = 0;
     for (int i = 0; i < tokenChanges.length; ++i) {
+      print(tokenChanges[i]);
       if (tokenChanges[i].error) {
         return TokenChanges.error();
       }

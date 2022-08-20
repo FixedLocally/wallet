@@ -58,7 +58,7 @@ class RpcServer {
   static Future<RpcResponse> _exit(ContextHolder contextHolder, Map args) async {
     bool approved = false;
     if (contextHolder.context != null) {
-      approved = await _showConfirmDialog(
+      approved = await Utils.showConfirmBottomSheet(
         context: contextHolder.context!,
         builder: (ctx) {
           return const Text("Exit?");
@@ -122,7 +122,7 @@ class RpcServer {
     Message message = Message.decompile(compiledMessage);
 
     Future<TokenChanges> simulation = Utils.simulateTx(payload, KeyManager.instance.pubKey);
-    bool approved = await _showConfirmDialog(
+    bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
       builder: (context) {
         return ApproveTransactionWidget(simulation: simulation);
@@ -190,7 +190,7 @@ class RpcServer {
     }
 
     Future<TokenChanges> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey);
-    bool approved = await _showConfirmDialog(
+    bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
       builder: (context) {
         return ApproveTransactionWidget(simulation: simulation);
@@ -253,40 +253,4 @@ class RpcServer {
     }
     return null;
   }
-}
-
-Future<bool> _showConfirmDialog({
-  required BuildContext context,
-  required WidgetBuilder builder,
-}) async {
-  bool? result = await showModalBottomSheet<bool>(
-    context: context,
-    builder: (ctx) {
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            builder(ctx),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                  child: const Text("Yes"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                  child: const Text("No"),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
-  );
-  return result ?? false;
 }
