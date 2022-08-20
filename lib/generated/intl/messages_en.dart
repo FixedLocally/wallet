@@ -58,6 +58,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mocked": MessageLookupByLibrary.simpleMessage("Mocked"),
         "newWalletName":
             MessageLookupByLibrary.simpleMessage("New wallet name"),
+        "no": MessageLookupByLibrary.simpleMessage("No"),
         "noCollectibles":
             MessageLookupByLibrary.simpleMessage("No Collectibles"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
@@ -85,6 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
         "txConfirmed":
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
-        "wallet": MessageLookupByLibrary.simpleMessage("Wallet")
+        "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
+        "yes": MessageLookupByLibrary.simpleMessage("Yes")
       };
 }

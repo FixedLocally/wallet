@@ -42,5 +42,7 @@
   "copy": "Copy",
   "deposit": "Deposit",
   "stake": "Stake",
-  "close": "Close"
+  "close": "Close",
+  "yes": "Yes",
+  "no": "No"
 }
