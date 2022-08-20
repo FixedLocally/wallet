@@ -708,4 +708,14 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
       text: "Revoking delegation...",
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SplTokenAccountDataInfoWithUsd &&
+          runtimeType == other.runtimeType &&
+          account == other.account;
+
+  @override
+  int get hashCode => account.hashCode;
 }

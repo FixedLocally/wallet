@@ -37,6 +37,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
         "enterNewKey": MessageLookupByLibrary.simpleMessage("Enter new key"),
+        "errorSendingTxs":
+            MessageLookupByLibrary.simpleMessage("Error sending transactions"),
         "exitMockWallet":
             MessageLookupByLibrary.simpleMessage("Exit Mock Wallet"),
         "exportPrivateKey":
@@ -74,6 +76,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Renaming wallet..."),
         "resetSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Reset Secret Recovery Phrase"),
+        "sendingTx":
+            MessageLookupByLibrary.simpleMessage("Sending transaction..."),
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
             "Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds."),
         "signMessage": MessageLookupByLibrary.simpleMessage("Sign Message"),

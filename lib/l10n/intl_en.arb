@@ -44,5 +44,7 @@
   "stake": "Stake",
   "close": "Close",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "sendingTx": "Sending transaction...",
+  "errorSendingTxs": "Error sending transactions"
 }

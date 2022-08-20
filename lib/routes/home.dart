@@ -527,19 +527,44 @@ class _HomeRouteState extends State<HomeRoute> {
                   ListTile(
                     onTap: () async {
                       FocusScope.of(context).unfocus();
+                      ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
                       JupiterSwapTransactions swapTxs =
                           await _jupClient.getSwapTransactions(
                               userPublicKey: KeyManager.instance.pubKey,
                               route: _routes![_chosenRoute]);
-                      List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction].whereNotNull.map(base64Decode).toList();
-                      print(txs.length);
-                      Future<TokenChanges> simulation = Utils.simulateTxs(txs.map((e) => e.sublist(65)).toList(), KeyManager.instance.pubKey);
+                      List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction]
+                          .whereNotNull.map(base64Decode).map((x) => x.sublist(65)).toList();
+                      Future<TokenChanges> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey);
                       bool approved = await Utils.showConfirmBottomSheet(
                         context: context,
                         builder: (context) {
                           return ApproveTransactionWidget(simulation: simulation);
                         },
                       );
+                      if (approved) {
+                        // send tx one by one
+                        for (Uint8List tx in txs) {
+                          Completer completer = Completer();
+                          Utils.showLoadingDialog(context: context, future: completer.future, text: S.current.sendingTx);
+                          bool error = false;
+                          try {
+                            final bh = await Utils.getBlockhash();
+                            SignedTx signedTx = await KeyManager.instance
+                                .signMessage(Message.decompile(
+                                CompiledMessage(ByteArray(tx))), bh.blockhash);
+                            String sig = await Utils.sendTransaction(signedTx);
+                            await Utils.confirmTransaction(sig);
+                          } catch (e) {
+                            error = true;
+                          }
+                          completer.complete();
+                          if (error) {
+                            scaffold.showSnackBar(SnackBar(content: Text(S.current.errorSendingTxs)));
+                          }
+                        }
+                        // reload routes after trying to swap
+                        _loadRoutes();
+                      }
                     },
                   ),
                 ]

@@ -499,6 +499,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Sending transaction...`
+  String get sendingTx {
+    return Intl.message(
+      'Sending transaction...',
+      name: 'sendingTx',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error sending transactions`
+  String get errorSendingTxs {
+    return Intl.message(
+      'Error sending transactions',
+      name: 'errorSendingTxs',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
