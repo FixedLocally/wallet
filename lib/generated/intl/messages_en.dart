@@ -23,6 +23,7 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
+        "areYouSure": MessageLookupByLibrary.simpleMessage("Are you sure?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "closeTokenAccount":
@@ -36,6 +37,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "copySeedSuccess": MessageLookupByLibrary.simpleMessage(
             "Copied secret recovery phrase to clipboard"),
         "createWallet": MessageLookupByLibrary.simpleMessage("Create Wallet"),
+        "delegationWarning": MessageLookupByLibrary.simpleMessage(
+            "%s %s is currently delegated to:\n%s.\n\nUnlike on Ethereum, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
         "enterNewKey": MessageLookupByLibrary.simpleMessage("Enter new key"),
@@ -59,6 +62,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKeyContent": MessageLookupByLibrary.simpleMessage(
             "Key must be a base58 encoded string or a JSON array of bytes"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
+        "message": MessageLookupByLibrary.simpleMessage("Message"),
         "mockWallet": MessageLookupByLibrary.simpleMessage("Mock Wallet"),
         "mockWalletAddress":
             MessageLookupByLibrary.simpleMessage("Mock wallet address"),
@@ -84,7 +88,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Renaming wallet..."),
         "resetSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Reset Secret Recovery Phrase"),
+        "revoke": MessageLookupByLibrary.simpleMessage("Revoke"),
+        "revokingDelegation":
+            MessageLookupByLibrary.simpleMessage("Revoking delegation..."),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
+        "sendToken": MessageLookupByLibrary.simpleMessage("Send %s"),
         "sendingTx":
             MessageLookupByLibrary.simpleMessage("Sending transaction..."),
         "setupWallet": MessageLookupByLibrary.simpleMessage("Setup Wallet"),
@@ -103,6 +111,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
         "txFailed": MessageLookupByLibrary.simpleMessage("Transaction failed"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
+        "walletNum": MessageLookupByLibrary.simpleMessage("Wallet %s"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes")
       };
 }

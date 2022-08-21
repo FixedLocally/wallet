@@ -14,6 +14,7 @@
   "signMessagePrompt": "Enter the message to sign:",
   "signMessageHint": "Message to sign",
   "wallet": "Wallet",
+  "walletNum": "Wallet %s",
   "removeWallet": "Remove Wallet",
   "renameWallet": "Rename Wallet",
   "createWallet": "Create Wallet",
@@ -38,6 +39,11 @@
   "showPrivateKeyContent": "Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds.",
   "removeHdWalletContent": "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase.",
   "removeKeyWalletContent": "This will remove the wallet from this list, make sure you have a backup of your private key.",
+  "delegationWarning": "%s %s is currently delegated to:\n%s.\n\nUnlike on Ethereum, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.",
+  "setupWallet": "Setup Wallet",
+  "revoke": "Revoke",
+  "message": "Message",
+  "revokingDelegation": "Revoking delegation...",
   "delete": "Delete",
   "copy": "Copy",
   "deposit": "Deposit",
@@ -50,11 +56,12 @@
   "swap": "Swap",
   "txFailed": "Transaction failed",
   "send": "Send",
+  "sendToken": "Send %s",
   "recipient": "Recipient",
   "invalidAmount": "Invalid amount",
   "insufficientFunds": "Insufficient funds",
   "invalidAddress": "Invalid address",
   "cancel": "Cancel",
   "continuE": "Continue",
-  "setupWallet": "Setup Wallet"
+  "areYouSure": "Are you sure?"
 }

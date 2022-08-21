@@ -190,6 +190,16 @@ class S {
     );
   }
 
+  /// `Wallet %s`
+  String get walletNum {
+    return Intl.message(
+      'Wallet %s',
+      name: 'walletNum',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Remove Wallet`
   String get removeWallet {
     return Intl.message(
@@ -430,6 +440,56 @@ class S {
     );
   }
 
+  /// `%s %s is currently delegated to:\n%s.\n\nUnlike on Ethereum, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.`
+  String get delegationWarning {
+    return Intl.message(
+      '%s %s is currently delegated to:\n%s.\n\nUnlike on Ethereum, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.',
+      name: 'delegationWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Setup Wallet`
+  String get setupWallet {
+    return Intl.message(
+      'Setup Wallet',
+      name: 'setupWallet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Revoke`
+  String get revoke {
+    return Intl.message(
+      'Revoke',
+      name: 'revoke',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Message`
+  String get message {
+    return Intl.message(
+      'Message',
+      name: 'message',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Revoking delegation...`
+  String get revokingDelegation {
+    return Intl.message(
+      'Revoking delegation...',
+      name: 'revokingDelegation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Delete`
   String get delete {
     return Intl.message(
@@ -550,6 +610,16 @@ class S {
     );
   }
 
+  /// `Send %s`
+  String get sendToken {
+    return Intl.message(
+      'Send %s',
+      name: 'sendToken',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Recipient`
   String get recipient {
     return Intl.message(
@@ -610,11 +680,11 @@ class S {
     );
   }
 
-  /// `Setup Wallet`
-  String get setupWallet {
+  /// `Are you sure?`
+  String get areYouSure {
     return Intl.message(
-      'Setup Wallet',
-      name: 'setupWallet',
+      'Are you sure?',
+      name: 'areYouSure',
       desc: '',
       args: [],
     );

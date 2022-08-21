@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
+import 'package:sprintf/sprintf.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../generated/l10n.dart';
@@ -90,7 +91,7 @@ class KeyManager {
       value: mnemonic,
     );
     ManagedKey newKey = ManagedKey(
-      name: "${S.current.wallet} 0",
+      name: sprintf(S.current.walletNum, [0]),
       pubKey: keypair.publicKey.toBase58(),
       keyType: "seed",
       keyHash: seedHash,
@@ -156,7 +157,7 @@ class KeyManager {
     mockPubKey = null;
     return await _db.transaction((txn) async {
       ManagedKey newKey = ManagedKey(
-        name: "${S.current.wallet} $index",
+        name: sprintf(S.current.walletNum, [index]),
         pubKey: wallet.publicKey.toBase58(),
         keyType: "seed",
         keyHash: seedHash,

@@ -7,6 +7,7 @@ import 'package:solana/base58.dart';
 import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
+import 'package:sprintf/sprintf.dart';
 
 import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
@@ -185,7 +186,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                           if (_validate()) {
                             bool confirm = await Utils.showConfirmDialog(
                               context: context,
-                              title: "${S.current.send} $symbol",
+                              title: sprintf(S.current.sendToken, [symbol]),
                               content: "You are about to send $_amount $symbol to $_recipient.", // todo
                             );
                             if (confirm) {

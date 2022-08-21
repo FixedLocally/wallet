@@ -11,6 +11,7 @@ import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
 import 'package:solana/metaplex.dart';
 import 'package:solana/solana.dart';
+import 'package:sprintf/sprintf.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../generated/l10n.dart';
@@ -209,6 +210,7 @@ class Utils {
     List<String> tokenProgramAddresses = message.instructions
         .where((e) => e.programId.toBase58() == TokenProgram.programId || e.programId.toBase58() == AssociatedTokenAccountProgram.programId)
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
+    // normal token accts are unlikely to have that mant 1s, probably system accts
         .expand((e) => e).where((e) => !e.contains("111111111")).toSet().toList();
     List<Account?> accounts = await batchGetAccounts(addresses);
     Map<String, Account?> accountMap = {};
@@ -403,7 +405,7 @@ class Utils {
   static Future<T> showLoadingDialog<T>({
     required BuildContext context,
     required Future<T> future,
-    String text = "Loading...",
+    String? text,
   }) async {
     showDialog<T>(
       context: context,
@@ -414,7 +416,7 @@ class Utils {
             children: [
               const CircularProgressIndicator(),
               const SizedBox(width: 16),
-              Text(text),
+              Text(text ?? S.current.loading),
             ],
           ),
         );
@@ -430,7 +432,7 @@ class Utils {
     required String prompt,
     String? label,
     String? initialValue,
-    String confirmText = "OK",
+    String? confirmText,
   }) {
     TextEditingController controller = TextEditingController(text: initialValue);
     return showDialog<String>(
@@ -454,7 +456,7 @@ class Utils {
               onPressed: () async {
                 Navigator.pop(ctx, controller.text);
               },
-              child: Text(confirmText),
+              child: Text(confirmText ?? S.current.ok),
             ),
           ],
         );
@@ -524,17 +526,17 @@ class Utils {
       barrierDismissible: false,
       builder: (ctx) {
         return AlertDialog(
-          title: Text(title ?? "Are you sure?"),
+          title: Text(title ?? S.of(context).areYouSure),
           content: builder?.call(ctx) ?? Text(content ?? ""),
           actions: [
             TextButton(
-              child: Text(cancelText ?? 'Cancel'),
+              child: Text(cancelText ?? S.current.no),
               onPressed: () {
                 Navigator.of(ctx).pop(false);
               },
             ),
             TextButton(
-              child: Text(confirmText ?? 'Confirm'),
+              child: Text(confirmText ?? S.current.yes),
               onPressed: () {
                 Navigator.of(ctx).pop(true);
               },
@@ -592,11 +594,11 @@ class Utils {
       barrierDismissible: false,
       builder: (ctx) {
         return AlertDialog(
-          title: Text(title ?? "Message"),
+          title: Text(title ?? S.current.message),
           content: Text(content ?? ""),
           actions: [
             TextButton(
-              child: Text(confirmText ?? "OK"),
+              child: Text(confirmText ?? S.current.ok),
               onPressed: () {
                 Navigator.of(ctx).pop(true);
               },
@@ -689,13 +691,9 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
   Future<String?> showDelegationWarning(BuildContext context, String symbol) async {
     bool approved = await Utils.showConfirmDialog(
       context: context,
-      title: "Delegation Warning",
-      content: "${delegateAmount?.uiAmountString ?? "0"} $symbol is currently delegated to:\n${delegate ?? "someone"}.\n\n"
-          "Unlike on Ethereum, token delegations beyond the scope of a transaction are "
-          "typically not needed since most contract interactions atomically transfer the necessary tokens, "
-          "and will not need access to your funds at a later time.\n"
-          "Please consider revoking the delegation.",
-      confirmText: "Revoke",
+      title: S.current.delegationWarning,
+      content: sprintf(S.current.delegationWarning, [delegateAmount?.uiAmountString ?? "0", symbol, delegate ?? "someone"]),
+      confirmText: S.current.revoke,
     );
     if (!approved) return null;
     Instruction ix = TokenInstruction.revoke(
@@ -705,7 +703,7 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
     return Utils.showLoadingDialog(
       context: context,
       future: Utils.sendInstructions([ix]),
-      text: "Revoking delegation...",
+      text: S.current.revokingDelegation,
     );
   }
 
