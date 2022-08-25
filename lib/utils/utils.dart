@@ -20,6 +20,7 @@ import '../rpc/key_manager.dart';
 import '../widgets/svg.dart';
 
 const String _coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/token_price/solana?vs_currencies=usd&include_24hr_change=true&contract_addresses=";
+const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
 const nativeSol = "native-sol";
 const nativeSolMint = "So11111111111111111111111111111111111111112";
 const Map<String, dynamic> _hardCodedPrices = {
@@ -68,7 +69,11 @@ class Utils {
     List<String> remainingTokens = List.of(tokens)..removeWhere((element) => tokenInfos[element] != null);
     debugPrint('fetching $remainingTokens');
     List<int> metaplexSeed = base58decode(metaplexMetadataProgramId);
+    int i = 0;
     List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
+      // todo replace with custom api to serve such data
+      // artificial delay to avoid hitting the rate limit
+      await Future.delayed(Duration(milliseconds: i++ * 200));
       Ed25519HDPublicKey pda = await Ed25519HDPublicKey.findProgramAddress(seeds: ["metadata".codeUnits, metaplexSeed, base58decode(token)], programId: Ed25519HDPublicKey(metaplexSeed));
       Account? acct = await _solanaClient.rpcClient.getAccountInfo(pda.toBase58(), encoding: Encoding.base64);
       if (acct != null) {
@@ -123,6 +128,7 @@ class Utils {
       return [token, null];
     }).toList();
     List<List> metadatas = await Future.wait(futures);
+    print("got metadatas ${metadatas.length}");
     if (metadatas.isNotEmpty) {
       await _db!.transaction((txn) async {
         for (List<Object?> metadata in metadatas) {
@@ -400,6 +406,10 @@ class Utils {
       (a, b) => b.mint.compareTo(a.mint),
     ]));
     return results;
+  }
+
+  static Future<List<String>> getTopTokens() async {
+    return jsonDecode((await _httpGet(_topTokensUrl))).cast<String>();
   }
 
   static Future<T> showLoadingDialog<T>({

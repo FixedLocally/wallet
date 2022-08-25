@@ -35,12 +35,16 @@ class _HomeRouteState extends State<HomeRoute> {
   final Map<String, Map<String, dynamic>> _tokenDetails = {};
   final GlobalKey<RefreshIndicatorState> _nftRefresherKey = GlobalKey();
   final GlobalKey<RefreshIndicatorState> _tokenRefresherKey = GlobalKey();
+
   final JupiterAggregatorClient _jupClient = JupiterAggregatorClient();
+  final Map<String, int> _jupTopTokens = {};
+  JupiterIndexedRouteMap? _jupRouteMap;
+  bool _jupRouteMapLoading = false;
 
   late TextEditingController _fromAmtController;
 
-  SplTokenAccountDataInfoWithUsd? _from;
-  SplTokenAccountDataInfoWithUsd? _to;
+  String? _from;
+  String? _to;
   String _amt = "";
   List<JupiterRoute>? _routes;
   int _chosenRoute = -1;
@@ -385,15 +389,22 @@ class _HomeRouteState extends State<HomeRoute> {
 
   Widget _swap(ThemeData themeData) {
     String pubKey = KeyManager.instance.pubKey;
-    if (_balances[pubKey] == null) {
+    if (_balances[pubKey] == null || _jupRouteMap == null || _jupRouteMapLoading) {
       if (_balancesCompleters[pubKey] == null) {
         _startLoadingBalances(pubKey);
+        _loadJupRouteIndex();
       }
       return const Center(child: CircularProgressIndicator());
     } else {
       Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
       balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] == 1);
       balances.removeWhere((key, value) => _tokenDetails[key] == null);
+      List<String> mintKeys = _jupRouteMap!.mintKeys;
+      mintKeys.removeWhere((element) => _tokenDetails[element] == null);
+      mintKeys.sort(Utils.compoundComparator([
+        (a, b) => (balances[b]?.usd ?? 0).compareTo(balances[a]?.usd ?? 0),
+        (a, b) => (_jupTopTokens[a] ?? 6969) - (_jupTopTokens[b] ?? 6969),
+      ]));
       return DropdownButtonHideUnderline(
         child: Column(
           children: [
@@ -416,14 +427,14 @@ class _HomeRouteState extends State<HomeRoute> {
                         DropdownButton(
                           // isExpanded: true,
                           value: _from,
-                          items: balances.entries.map((entry) {
-                            Map<String, dynamic> tokenDetail = _tokenDetails[entry.key] ?? {};
+                          items: mintKeys.map((entry) {
+                            Map<String, dynamic> tokenDetail = _tokenDetails[entry] ?? {};
                             return DropdownMenuItem(
-                              value: entry.value,
-                              child: Text(tokenDetail["symbol"] ?? entry.key.shortened),
+                              value: entry,
+                              child: Text(tokenDetail["symbol"] ?? entry.shortened),
                             );
                           }).toList(),
-                          onChanged: (SplTokenAccountDataInfoWithUsd? acct) {
+                          onChanged: (String? acct) {
                             setState(() {
                               _from = acct;
                               _loadRoutes();
@@ -449,11 +460,20 @@ class _HomeRouteState extends State<HomeRoute> {
                 SizedBox(width: 16),
               ],
             ),
+            // todo: handle native sol balances correctly
+            if (_from != null)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 20.0),
+                  child: Text("${balances[_from]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                ),
+              ),
             IconButton(
               onPressed: () {
-                int decimals = _tokenDetails[_to!.mint]!["decimals"]!;
+                int decimals = _tokenDetails[_to!]!["decimals"]!;
                 setState(() {
-                  SplTokenAccountDataInfoWithUsd? from = _from;
+                  String? from = _from;
                   _from = _to;
                   _to = from;
                   if (_routes != null && _routes!.isNotEmpty) {
@@ -483,14 +503,14 @@ class _HomeRouteState extends State<HomeRoute> {
                         DropdownButton(
                           // isExpanded: true,
                           value: _to,
-                          items: balances.entries.map((entry) {
-                            Map<String, dynamic> tokenDetail = _tokenDetails[entry.key] ?? {};
+                          items: mintKeys.map((entry) {
+                            Map<String, dynamic> tokenDetail = _tokenDetails[entry] ?? {};
                             return DropdownMenuItem(
-                              value: entry.value,
-                              child: Text(tokenDetail["symbol"] ?? entry.key.shortened),
+                              value: entry,
+                              child: Text(tokenDetail["symbol"] ?? entry.shortened),
                             );
                           }).toList(),
-                          onChanged: (SplTokenAccountDataInfoWithUsd? acct) {
+                          onChanged: (String? acct) {
                             setState(() {
                               _to = acct;
                               _loadRoutes();
@@ -505,6 +525,14 @@ class _HomeRouteState extends State<HomeRoute> {
                 SizedBox(width: 16),
               ],
             ),
+            if (_to != null)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 20.0),
+                  child: Text("${balances[_to]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
+                ),
+              ),
             if (_fromAmtController.text.isNotEmpty)
               if (_routes != null)
                 ...[
@@ -514,7 +542,7 @@ class _HomeRouteState extends State<HomeRoute> {
                       i,
                       ListTile(
                         title: Text(path),
-                        subtitle: Text("${route.outAmount / pow(10, _tokenDetails[_to!.mint]!["decimals"])}"),
+                        subtitle: Text("${route.outAmount / pow(10, _tokenDetails[_to!]!["decimals"])}"),
                         trailing: i == _chosenRoute ? Icon(Icons.check) : null,
                         onTap: () async {
                           setState(() {
@@ -1002,12 +1030,12 @@ class _HomeRouteState extends State<HomeRoute> {
       _routes = null;
       _chosenRoute = -1;
     });
-    String fromMint = _from!.mint;
-    String toMint = _to!.mint;
+    String fromMint = _from!;
+    String toMint = _to!;
     fromMint = fromMint == nativeSol ? nativeSolMint : fromMint;
     toMint = toMint == nativeSol ? nativeSolMint : toMint;
     double amt = double.tryParse(_fromAmtController.text) ?? 0.0;
-    int decimals = _tokenDetails[_from!.mint]!["decimals"]!;
+    int decimals = _tokenDetails[_from!]!["decimals"]!;
     double amtIn = amt * pow(10, decimals);
     if (amtIn == 0) return;
     // print("loading routes from $amtIn $fromMint to $toMint");
@@ -1021,6 +1049,30 @@ class _HomeRouteState extends State<HomeRoute> {
     setState(() {
       _routes = routes;
       _chosenRoute = 0;
+    });
+  }
+
+  Future<void> _loadJupRouteIndex() async {
+    if (_jupRouteMap != null || _jupRouteMapLoading) return;
+    _jupRouteMapLoading = true;
+    JupiterIndexedRouteMap routeMap = await _jupClient.getIndexedRouteMap();
+    _jupRouteMap = routeMap;
+    print("got jup map");
+    List<String> topTokens = await Utils.getTopTokens();
+    topTokens.asMap().forEach((key, value) {
+      _jupTopTokens[value] = key;
+    });
+    List<String> mints = routeMap.mintKeys.toList();
+    mints.removeWhere((element) => _tokenDetails.keys.contains(element));
+    print(mints);
+    Utils.getTokens(mints).then((value) {
+      print("got ${value.length} tokens");
+      setState(() {
+        value.forEach((mint, info) {
+          if (info != null) _tokenDetails[mint] = info;
+        });
+        _jupRouteMapLoading = false;
+      });
     });
   }
 
