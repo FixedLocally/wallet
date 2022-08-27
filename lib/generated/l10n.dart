@@ -80,10 +80,10 @@ class S {
     );
   }
 
-  /// `Mocked`
+  /// `Mocked %s`
   String get mocked {
     return Intl.message(
-      'Mocked',
+      'Mocked %s',
       name: 'mocked',
       desc: '',
       args: [],
@@ -590,16 +590,6 @@ class S {
     );
   }
 
-  /// `Transaction failed`
-  String get txFailed {
-    return Intl.message(
-      'Transaction failed',
-      name: 'txFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Send`
   String get send {
     return Intl.message(
@@ -660,16 +650,6 @@ class S {
     );
   }
 
-  /// `Cancel`
-  String get cancel {
-    return Intl.message(
-      'Cancel',
-      name: 'cancel',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Continue`
   String get continuE {
     return Intl.message(
@@ -685,6 +665,46 @@ class S {
     return Intl.message(
       'Are you sure?',
       name: 'areYouSure',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Burn and close`
+  String get burn {
+    return Intl.message(
+      'Burn and close',
+      name: 'burn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Burn tokens`
+  String get burnConfirm {
+    return Intl.message(
+      'Burn tokens',
+      name: 'burnConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action is irreversible, make sure you've selected the correct token.`
+  String get burnConfirmContent {
+    return Intl.message(
+      'This action is irreversible, make sure you\'ve selected the correct token.',
+      name: 'burnConfirmContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Burning tokens...`
+  String get burningTokens {
+    return Intl.message(
+      'Burning tokens...',
+      name: 'burningTokens',
       desc: '',
       args: [],
     );

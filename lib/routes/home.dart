@@ -693,7 +693,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 context: context,
                 title: S.current.closeTokenAccount,
                 content: S.current.closeTokenAccountContent,
-                confirmText: "Close",
+                confirmText: S.current.close,
               );
               if (!confirm) {
                 return;
@@ -971,7 +971,35 @@ class _HomeRouteState extends State<HomeRoute> {
                   onTap: () {
                     Navigator.pop(ctx, 2);
                   },
-                ),
+                )
+              else
+                ListTile(
+                  leading: const Icon(Icons.star),
+                  title: Text(S.of(context).burn),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    bool burn = await Utils.showConfirmDialog(
+                      context: context,
+                      title: S.current.burnConfirm,
+                      content: S.current.burnConfirmContent,
+                    );
+                    if (!burn) return;
+                    List<Instruction> ixs = [];
+                    ixs.add(TokenInstruction.burn(
+                      amount: int.parse(balance.tokenAmount.amount),
+                      accountToBurnFrom: Ed25519HDPublicKey(base58decode(balance.account)),
+                      mint: Ed25519HDPublicKey(base58decode(balance.mint)),
+                      owner: Ed25519HDPublicKey(base58decode(balance.owner)),
+                    ));
+                    ixs.add(TokenInstruction.closeAccount(
+                      accountToClose: Ed25519HDPublicKey(base58decode(balance.account)),
+                      destination: Ed25519HDPublicKey(base58decode(balance.owner)),
+                      owner: Ed25519HDPublicKey(base58decode(balance.owner)),
+                    ));
+                    await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
+                    _startLoadingBalances(KeyManager.instance.pubKey);
+                  },
+                )
             ],
           ),
         );

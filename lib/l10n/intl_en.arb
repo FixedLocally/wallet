@@ -3,7 +3,7 @@
   "receive": "Receive",
   "amount": "Amount",
   "pay": "Pay",
-  "mocked": "Mocked",
+  "mocked": "Mocked %s",
   "mockWallet": "Mock Wallet",
   "mockWalletPrompt": "Enter wallet address to mock:",
   "mockWalletAddress": "Mock wallet address",
@@ -54,14 +54,16 @@
   "sendingTx": "Sending transaction...",
   "errorSendingTxs": "Error sending transactions",
   "swap": "Swap",
-  "txFailed": "Transaction failed",
   "send": "Send",
   "sendToken": "Send %s",
   "recipient": "Recipient",
   "invalidAmount": "Invalid amount",
   "insufficientFunds": "Insufficient funds",
   "invalidAddress": "Invalid address",
-  "cancel": "Cancel",
   "continuE": "Continue",
-  "areYouSure": "Are you sure?"
+  "areYouSure": "Are you sure?",
+  "burn": "Burn and close",
+  "burnConfirm": "Burn tokens",
+  "burnConfirmContent": "This action is irreversible, make sure you've selected the correct token.",
+  "burningTokens": "Burning tokens..."
 }

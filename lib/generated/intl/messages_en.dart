@@ -24,7 +24,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "areYouSure": MessageLookupByLibrary.simpleMessage("Are you sure?"),
-        "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "burn": MessageLookupByLibrary.simpleMessage("Burn and close"),
+        "burnConfirm": MessageLookupByLibrary.simpleMessage("Burn tokens"),
+        "burnConfirmContent": MessageLookupByLibrary.simpleMessage(
+            "This action is irreversible, make sure you\'ve selected the correct token."),
+        "burningTokens":
+            MessageLookupByLibrary.simpleMessage("Burning tokens..."),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "closeTokenAccount":
             MessageLookupByLibrary.simpleMessage("Close token account"),
@@ -68,7 +73,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mock wallet address"),
         "mockWalletPrompt": MessageLookupByLibrary.simpleMessage(
             "Enter wallet address to mock:"),
-        "mocked": MessageLookupByLibrary.simpleMessage("Mocked"),
+        "mocked": MessageLookupByLibrary.simpleMessage("Mocked %s"),
         "newWalletName":
             MessageLookupByLibrary.simpleMessage("New wallet name"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
@@ -109,7 +114,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "swap": MessageLookupByLibrary.simpleMessage("Swap"),
         "txConfirmed":
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
-        "txFailed": MessageLookupByLibrary.simpleMessage("Transaction failed"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
         "walletNum": MessageLookupByLibrary.simpleMessage("Wallet %s"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes")

@@ -50,7 +50,7 @@ class _SetupRouteState extends State<SetupRoute> {
                       ),
                       actions: [
                         TextButton(
-                          child: Text(S.current.cancel),
+                          child: Text(S.current.close),
                           onPressed: () {
                             Navigator.of(ctx).pop();
                           },

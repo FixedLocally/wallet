@@ -239,7 +239,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                                 } else {
                                   scaffold.showSnackBar(
                                     SnackBar(
-                                      content: Text(S.current.txFailed),
+                                      content: Text(S.current.errorSendingTxs),
                                     ),
                                   );
                                 }
