@@ -63,7 +63,7 @@
   "continuE": "Continue",
   "areYouSure": "Are you sure?",
   "burn": "Burn and close",
-  "burnConfirm": "Burn tokens",
+  "burnConfirm": "Burn %s",
   "burnConfirmContent": "This action is irreversible, make sure you've selected the correct token.",
   "burningTokens": "Burning tokens..."
 }

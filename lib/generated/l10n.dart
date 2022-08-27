@@ -680,10 +680,10 @@ class S {
     );
   }
 
-  /// `Burn tokens`
+  /// `Burn %s`
   String get burnConfirm {
     return Intl.message(
-      'Burn tokens',
+      'Burn %s',
       name: 'burnConfirm',
       desc: '',
       args: [],

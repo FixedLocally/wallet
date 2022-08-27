@@ -9,6 +9,7 @@ import 'package:jupiter_aggregator/jupiter_aggregator.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
+import 'package:sprintf/sprintf.dart';
 import '../generated/l10n.dart';
 import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
@@ -973,33 +974,62 @@ class _HomeRouteState extends State<HomeRoute> {
                   },
                 )
               else
-                ListTile(
-                  leading: const Icon(Icons.star),
-                  title: Text(S.of(context).burn),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    bool burn = await Utils.showConfirmDialog(
-                      context: context,
-                      title: S.current.burnConfirm,
-                      content: S.current.burnConfirmContent,
-                    );
-                    if (!burn) return;
-                    List<Instruction> ixs = [];
-                    ixs.add(TokenInstruction.burn(
-                      amount: int.parse(balance.tokenAmount.amount),
-                      accountToBurnFrom: Ed25519HDPublicKey(base58decode(balance.account)),
-                      mint: Ed25519HDPublicKey(base58decode(balance.mint)),
-                      owner: Ed25519HDPublicKey(base58decode(balance.owner)),
-                    ));
-                    ixs.add(TokenInstruction.closeAccount(
-                      accountToClose: Ed25519HDPublicKey(base58decode(balance.account)),
-                      destination: Ed25519HDPublicKey(base58decode(balance.owner)),
-                      owner: Ed25519HDPublicKey(base58decode(balance.owner)),
-                    ));
-                    await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
-                    _startLoadingBalances(KeyManager.instance.pubKey);
-                  },
-                )
+                if (balance.tokenAmount.amount != "0")
+                  ListTile(
+                    leading: const Icon(Icons.close),
+                    title: Text(S.of(context).burn),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      bool burn = await Utils.showConfirmDialog(
+                        context: context,
+                        title: sprintf(S.current.burnConfirm, [_tokenDetails[balance.mint]?["symbol"] ?? balance.mint.shortened]),
+                        content: S.current.burnConfirmContent,
+                      );
+                      if (!burn) return;
+                      List<Instruction> ixs = [];
+                      ixs.add(TokenInstruction.burn(
+                        amount: int.parse(balance.tokenAmount.amount),
+                        accountToBurnFrom: Ed25519HDPublicKey(base58decode(balance.account)),
+                        mint: Ed25519HDPublicKey(base58decode(balance.mint)),
+                        owner: Ed25519HDPublicKey(base58decode(balance.owner)),
+                      ));
+                      ixs.add(TokenInstruction.closeAccount(
+                        accountToClose: Ed25519HDPublicKey(base58decode(balance.account)),
+                        destination: Ed25519HDPublicKey(base58decode(balance.owner)),
+                        owner: Ed25519HDPublicKey(base58decode(balance.owner)),
+                      ));
+                      await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
+                      _startLoadingBalances(KeyManager.instance.pubKey);
+                    },
+                  )
+                else
+                  ListTile(
+                    leading: const Icon(Icons.close),
+                    title: Text(S.of(context).closeTokenAccount),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      bool burn = await Utils.showConfirmDialog(
+                        context: context,
+                        title: S.current.closeTokenAccount,
+                        content: S.current.closeTokenAccountContent,
+                      );
+                      if (!burn) return;
+                      List<Instruction> ixs = [];
+                      ixs.add(TokenInstruction.burn(
+                        amount: int.parse(balance.tokenAmount.amount),
+                        accountToBurnFrom: Ed25519HDPublicKey(base58decode(balance.account)),
+                        mint: Ed25519HDPublicKey(base58decode(balance.mint)),
+                        owner: Ed25519HDPublicKey(base58decode(balance.owner)),
+                      ));
+                      ixs.add(TokenInstruction.closeAccount(
+                        accountToClose: Ed25519HDPublicKey(base58decode(balance.account)),
+                        destination: Ed25519HDPublicKey(base58decode(balance.owner)),
+                        owner: Ed25519HDPublicKey(base58decode(balance.owner)),
+                      ));
+                      await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
+                      _startLoadingBalances(KeyManager.instance.pubKey);
+                    },
+                  )
             ],
           ),
         );
