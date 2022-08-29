@@ -25,7 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "areYouSure": MessageLookupByLibrary.simpleMessage("Are you sure?"),
         "burn": MessageLookupByLibrary.simpleMessage("Burn and close"),
-        "burnConfirm": MessageLookupByLibrary.simpleMessage("Burn tokens"),
+        "burnConfirm": MessageLookupByLibrary.simpleMessage("Burn %s"),
         "burnConfirmContent": MessageLookupByLibrary.simpleMessage(
             "This action is irreversible, make sure you\'ve selected the correct token."),
         "burningTokens":
