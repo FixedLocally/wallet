@@ -428,7 +428,7 @@ class _HomeRouteState extends State<HomeRoute> {
                         DropdownButton(
                           // isExpanded: true,
                           value: _from,
-                          items: mintKeys.map((entry) {
+                          items: mintKeys.where((element) => _tokenDetails[element]?["symbol"].isNotEmpty == true).map((entry) {
                             Map<String, dynamic> tokenDetail = _tokenDetails[entry] ?? {};
                             return DropdownMenuItem(
                               value: entry,
