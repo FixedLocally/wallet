@@ -9,7 +9,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
-import 'package:solana/metaplex.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:sqflite/sqflite.dart';
@@ -17,7 +16,6 @@ import 'package:sqflite/sqflite.dart';
 import '../generated/l10n.dart';
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
-import '../widgets/svg.dart';
 
 const String _coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/token_price/solana?vs_currencies=usd&include_24hr_change=true&contract_addresses=";
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
@@ -68,91 +66,46 @@ class Utils {
     });
     List<String> remainingTokens = List.of(tokens)..removeWhere((element) => tokenInfos[element] != null);
     debugPrint('fetching $remainingTokens');
-    List<int> metaplexSeed = base58decode(metaplexMetadataProgramId);
     int i = 0;
     List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
       // todo replace with custom api to serve such data
       // artificial delay to avoid hitting the rate limit
-      await Future.delayed(Duration(milliseconds: i++ * 200));
-      Ed25519HDPublicKey pda = await Ed25519HDPublicKey.findProgramAddress(seeds: ["metadata".codeUnits, metaplexSeed, base58decode(token)], programId: Ed25519HDPublicKey(metaplexSeed));
-      Account? acct = await _solanaClient.rpcClient.getAccountInfo(pda.toBase58(), encoding: Encoding.base64);
-      if (acct != null) {
-        if (acct.data is BinaryAccountData) {
-          Metadata metadata = Metadata.fromBinary((acct.data as BinaryAccountData).data);
-          Map<String, dynamic> result = {
-            "mint": token,
-            "name": metadata.name,
-            "symbol": metadata.symbol,
-            // "standard": metadata.,
-          };
-          try {
-            Mint mint = await _solanaClient.getMint(address: Ed25519HDPublicKey.fromBase58(token));
-            result["decimals"] = mint.decimals;
-            result["nft"] = (mint.decimals == 0) ? 1 : 0;
-          } catch (_) {} // no such mint
-          try {
-            String offChainMetadataStr = await _httpGet(metadata.uri);
-            Map<String, dynamic> offChainMetadataMap = json.decode(offChainMetadataStr);
-            offChainMetadataMap = {
-              "name": offChainMetadataMap["name"] ?? "",
-              "description": offChainMetadataMap["description"] ?? "",
-              "symbol": offChainMetadataMap["symbol"] ?? "",
-              "image": offChainMetadataMap["image"] ?? "",
-              "properties": offChainMetadataMap["properties"] ?? <String, dynamic>{},
-              "attributes": offChainMetadataMap["attributes"] ?? [],
-              "external_url": offChainMetadataMap["external_url"],
-            };
-            OffChainMetadata offChainMetadata = OffChainMetadata.fromJson(offChainMetadataMap);
-            result["name"] = offChainMetadata.name;
-            result["symbol"] = offChainMetadata.symbol;
-            result["ext_url"] = offChainMetadataMap["external_url"];
-            result["attributes"] = jsonEncode(offChainMetadataMap["attributes"]);
-            result["description"] = jsonEncode(offChainMetadataMap["description"]);
-            result["expiry"] = now + 86400;
-            String image = offChainMetadata.image;
-            Uri? uri = Uri.tryParse(image);
-            if (uri?.data?.mimeType.startsWith("image/svg") == true) {
-              String svg = fixSvg(uri!.data!.contentAsString());
-              uri = Uri.dataFromString(svg, mimeType: uri.data?.mimeType);
-              image = uri.toString();
-            }
-            result["image"] = image;
-          } catch (_, st) {
-            debugPrint("$token error $_ $st");
-          } // no offchain metadata
-          return [token, result];
-        } else {
-          return [token, null];
-        }
-      }
-      return [token, null];
+      await Future.delayed(Duration(milliseconds: i++ * 100));
+      Map resp = jsonDecode(await _httpGet("https://validator.utopiamint.xyz/token-api/token/$token"));
+      return [token, resp["success"] ? resp["token"] : null];
     }).toList();
     List<List> metadatas = await Future.wait(futures);
     print("got metadatas ${metadatas.length}");
     if (metadatas.isNotEmpty) {
       await _db!.transaction((txn) async {
+        int inserted = 0;
         for (List<Object?> metadata in metadatas) {
           if (metadata[1] != null) {
             Map<String, dynamic> metadataMap = metadata[1] as Map<String, dynamic>;
             tokenInfos[metadata[0] as String] = metadataMap;
-            await txn.insert(
+            debugPrint('inserting ${metadataMap['mint']} $metadataMap');
+            int id = await txn.insert(
               "token",
               {
-                "mint": metadataMap["mint"],
+                "mint": metadataMap["address"],
                 "symbol": metadataMap["symbol"],
                 "name": metadataMap["name"],
                 "decimals": metadataMap["decimals"],
                 "image": metadataMap["image"],
                 "nft": metadataMap["nft"],
                 "ext_url": metadataMap["ext_url"],
-                "attributes": metadataMap["attributes"],
+                "attributes": jsonEncode(metadataMap["attributes"]),
                 "description": metadataMap["description"],
-                "expiry": metadataMap["expiry"],
+                "expiry": DateTime.now().millisecondsSinceEpoch ~/ 1000 + 60 * 60 * 24 * 2,
               },
               conflictAlgorithm: ConflictAlgorithm.replace,
             );
+            if (id > 0) {
+              ++inserted;
+            }
           }
         }
+        debugPrint("inserted $inserted rows");
       });
     }
     return tokenInfos;
