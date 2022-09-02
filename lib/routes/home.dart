@@ -324,7 +324,7 @@ class _HomeRouteState extends State<HomeRoute> {
       return const Center(child: CircularProgressIndicator());
     } else {
       Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
-      balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] == 1);
+      balances.removeWhere((key, value) => _tokenDetails[key]?["decimals"] == 0);
       return RefreshIndicator(
         key: _tokenRefresherKey,
         onRefresh: () {
@@ -398,7 +398,7 @@ class _HomeRouteState extends State<HomeRoute> {
       return const Center(child: CircularProgressIndicator());
     } else {
       Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
-      balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] == 1);
+      balances.removeWhere((key, value) => _tokenDetails[key]?["decimals"] == 0);
       balances.removeWhere((key, value) => _tokenDetails[key] == null);
       List<String> mintKeys = _jupRouteMap!.mintKeys;
       mintKeys.removeWhere((element) => _tokenDetails[element] == null);
@@ -734,7 +734,7 @@ class _HomeRouteState extends State<HomeRoute> {
         return const Center(child: CircularProgressIndicator());
       }
       Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
-      balances.removeWhere((key, value) => _tokenDetails[key]?["nft"] != 1);
+      balances.removeWhere((key, value) => _tokenDetails[key]?["decimals"] != 0);
       return RefreshIndicator(
         key: _nftRefresherKey,
         onRefresh: () {
