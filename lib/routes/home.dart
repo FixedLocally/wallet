@@ -393,8 +393,8 @@ class _HomeRouteState extends State<HomeRoute> {
     if (_balances[pubKey] == null || _jupRouteMap == null || _jupRouteMapLoading) {
       if (_balancesCompleters[pubKey] == null) {
         _startLoadingBalances(pubKey);
-        _loadJupRouteIndex();
       }
+      _loadJupRouteIndex();
       return const Center(child: CircularProgressIndicator());
     } else {
       Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
