@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -66,15 +67,15 @@ class Utils {
     });
     List<String> remainingTokens = List.of(tokens)..removeWhere((element) => tokenInfos[element] != null);
     debugPrint('fetching $remainingTokens');
-    int i = 0;
-    List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
-      // todo replace with custom api to serve such data
-      // artificial delay to avoid hitting the rate limit
-      await Future.delayed(Duration(milliseconds: i++ * 100));
-      Map resp = jsonDecode(await _httpGet("https://validator.utopiamint.xyz/token-api/token/$token"));
-      return [token, resp["success"] ? resp["token"] : null];
-    }).toList();
-    List<List> metadatas = await Future.wait(futures);
+    // int i = 0;
+    // List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
+    //   // artificial delay to avoid hitting the rate limit
+    //   await Future.delayed(Duration(milliseconds: i++ * 100));
+    //   Map resp = jsonDecode(await _httpGet("https://validator.utopiamint.xyz/token-api/token/$token"));
+    //   return [token, resp["success"] ? resp["token"] : null];
+    // }).toList();
+    // List<List> metadatas = await Future.wait(futures);
+    List<List> metadatas = await batchGetMetadata(remainingTokens);
     print("got metadatas ${metadatas.length}");
     if (metadatas.isNotEmpty) {
       await _db!.transaction((txn) async {
@@ -83,7 +84,7 @@ class Utils {
           if (metadata[1] != null) {
             Map<String, dynamic> metadataMap = metadata[1] as Map<String, dynamic>;
             tokenInfos[metadata[0] as String] = metadataMap;
-            debugPrint('inserting ${metadataMap['mint']} $metadataMap');
+            debugPrint('inserting ${metadataMap['address']} $metadataMap');
             int id = await txn.insert(
               "token",
               {
@@ -365,6 +366,24 @@ class Utils {
     return jsonDecode((await _httpGet(_topTokensUrl))).cast<String>();
   }
 
+  static Future<List<List>> batchGetMetadata(List<String> addresses) async {
+    if (addresses.isEmpty) return [];
+    List<String> firstBatch = addresses.sublist(0, min(50, addresses.length));
+    List<String> secondBatch = addresses.length > 50 ? addresses.sublist(50) : [];
+    List<List> metadatas = await _httpPost("https://validator.utopiamint.xyz/token-api/token/", firstBatch).then((value) {
+      Map resp = jsonDecode(value);
+      if (!resp["success"]) {
+        return [];
+      }
+      List tokens = resp["tokens"];
+      return tokens.map((token) => [token["address"], token]).toList();
+    });
+    if (secondBatch.isNotEmpty) {
+      metadatas.addAll(await(batchGetMetadata(secondBatch)));
+    }
+    return metadatas;
+  }
+
   static Future<T> showLoadingDialog<T>({
     required BuildContext context,
     required Future<T> future,
@@ -474,6 +493,17 @@ class Utils {
   static Future<String> _httpGet(String url) async {
     debugPrint("get $url");
     return DefaultCacheManager().downloadFile(url).then((value) => value.file.readAsString());
+  }
+
+  static Future<String> _httpPost(String url, dynamic body) async {
+    debugPrint("post $url");
+    return HttpClient().postUrl(Uri.parse(url)).then((HttpClientRequest request) {
+      request.headers.set(HttpHeaders.contentTypeHeader, "application/json");
+      request.write(jsonEncode(body));
+      return request.close();
+    }).then((HttpClientResponse response) {
+      return response.transform(utf8.decoder).join();
+    });
   }
 
   static Future<bool> showConfirmDialog({

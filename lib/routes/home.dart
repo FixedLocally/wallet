@@ -629,6 +629,8 @@ class _HomeRouteState extends State<HomeRoute> {
       String? image = _tokenDetails[entry.key]?["image"];
       if (image != null) {
         leading = MultiImage(image: image, size: 48);
+      } else {
+        leading = Image.asset("assets/images/unknown.png", width: 48, height: 48,);
       }
     } else {
       leading = Image.asset("assets/images/unknown.png", width: 48, height: 48,);
