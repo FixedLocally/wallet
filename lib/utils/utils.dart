@@ -76,7 +76,7 @@ class Utils {
     // }).toList();
     // List<List> metadatas = await Future.wait(futures);
     List<List> metadatas = await batchGetMetadata(remainingTokens);
-    print("got metadatas ${metadatas.length}");
+    debugPrint("got metadatas ${metadatas.length}");
     if (metadatas.isNotEmpty) {
       await _db!.transaction((txn) async {
         int inserted = 0;
@@ -170,7 +170,7 @@ class Utils {
     List<String> tokenProgramAddresses = message.instructions
         .where((e) => e.programId.toBase58() == TokenProgram.programId || e.programId.toBase58() == AssociatedTokenAccountProgram.programId)
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
-    // normal token accts are unlikely to have that mant 1s, probably system accts
+    // normal token accts are unlikely to have that many 1s, probably system accts
         .expand((e) => e).where((e) => !e.contains("111111111")).toSet().toList();
     List<Account?> accounts = await batchGetAccounts(addresses);
     Map<String, Account?> accountMap = {};
@@ -196,7 +196,7 @@ class Utils {
       replaceRecentBlockhash: true,
       commitment: Commitment.confirmed,
       accounts: SimulateTransactionAccounts(
-        accountEncoding: Encoding.jsonParsed,
+        accountEncoding: Encoding.base64,
         addresses: addresses,
       ),
     );
@@ -657,7 +657,7 @@ class TokenChanges {
 
   Widget widget() {
     if (error) {
-      return Text("Transaction may fail to confirm $error");
+      return Text(S.current.transactionMayFailToConfirm);
     } else {
       return Column(
         children: [

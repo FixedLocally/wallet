@@ -23,6 +23,8 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
+        "approveTransactionTitle":
+            MessageLookupByLibrary.simpleMessage("Approve transaction?"),
         "areYouSure": MessageLookupByLibrary.simpleMessage("Are you sure?"),
         "burn": MessageLookupByLibrary.simpleMessage("Burn and close"),
         "burnConfirm": MessageLookupByLibrary.simpleMessage("Burn %s"),
@@ -112,6 +114,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
         "swap": MessageLookupByLibrary.simpleMessage("Swap"),
+        "transactionMayFailToConfirm": MessageLookupByLibrary.simpleMessage(
+            "Transaction may fail to confirm"),
         "txConfirmed":
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),

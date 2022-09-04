@@ -709,6 +709,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Approve transaction?`
+  String get approveTransactionTitle {
+    return Intl.message(
+      'Approve transaction?',
+      name: 'approveTransactionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transaction may fail to confirm`
+  String get transactionMayFailToConfirm {
+    return Intl.message(
+      'Transaction may fail to confirm',
+      name: 'transactionMayFailToConfirm',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
