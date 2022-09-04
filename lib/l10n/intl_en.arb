@@ -69,5 +69,7 @@
   "approveTransactionTitle": "Approve transaction?",
   "transactionMayFailToConfirm": "Transaction may fail to confirm",
   "chooseToken": "Choose token",
-  "searchTokensOrPasteAddress": "Search tokens or paste address"
+  "searchTokensOrPasteAddress": "Search tokens or paste address",
+  "maxCap": "MAX",
+  "halfCap": "HALF"
 }

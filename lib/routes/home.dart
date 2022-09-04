@@ -484,9 +484,44 @@ class _HomeRouteState extends State<HomeRoute> {
             if (_from != null)
               Align(
                 alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 20.0),
-                  child: Text("${balances[_from]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      style: ButtonStyle(
+                        visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                      ),
+                      onPressed: () {
+                        _fromAmtController.text = ((balances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0) / 2).toString();
+                      },
+                      child: Text(
+                        S.current.halfCap,
+                        style: TextStyle(
+                          fontSize: 12
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    TextButton(
+                      style: ButtonStyle(
+                        visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                      ),
+                      onPressed: () {
+                        _fromAmtController.text = (balances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0).toString();
+                      },
+                      child: Text(
+                        S.current.maxCap,
+                        style: TextStyle(
+                          fontSize: 12
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20.0),
+                      child: Text("${balances[_from]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                    ),
+                  ],
                 ),
               ),
             IconButton(
@@ -625,7 +660,7 @@ class _HomeRouteState extends State<HomeRoute> {
                               }
                             },
                             child: Text(
-                              S.of(context).swap,
+                              S.current.swap,
                               style: themeData.textTheme.button,
                             ),
                           ),
@@ -1003,7 +1038,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 if (balance.tokenAmount.amount != "0")
                   ListTile(
                     leading: const Icon(Icons.close),
-                    title: Text(S.of(context).burn),
+                    title: Text(S.current.burn),
                     onTap: () async {
                       Navigator.pop(context);
                       bool burn = await Utils.showConfirmDialog(
@@ -1031,7 +1066,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 else
                   ListTile(
                     leading: const Icon(Icons.close),
-                    title: Text(S.of(context).closeTokenAccount),
+                    title: Text(S.current.closeTokenAccount),
                     onTap: () async {
                       Navigator.pop(context);
                       bool burn = await Utils.showConfirmDialog(

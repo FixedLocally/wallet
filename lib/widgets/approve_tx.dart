@@ -19,7 +19,7 @@ class ApproveTransactionWidget extends StatelessWidget {
             if (snapshot.hasData)
               ...snapshot.data!.map((e) => e.widget())
             else if (snapshot.hasError)
-              Text(S.of(context).transactionMayFailToConfirm)
+              Text(S.current.transactionMayFailToConfirm)
             else
               Text(S.current.loading),
           ],

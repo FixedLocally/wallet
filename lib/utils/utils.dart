@@ -519,7 +519,7 @@ class Utils {
       barrierDismissible: false,
       builder: (ctx) {
         return AlertDialog(
-          title: Text(title ?? S.of(context).areYouSure),
+          title: Text(title ?? S.current.areYouSure),
           content: builder?.call(ctx) ?? Text(content ?? ""),
           actions: [
             TextButton(

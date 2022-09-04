@@ -58,6 +58,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Export Private Key"),
         "exportSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Export Secret Recovery Phrase"),
+        "halfCap": MessageLookupByLibrary.simpleMessage("HALF"),
         "importWallet": MessageLookupByLibrary.simpleMessage("Import Wallet"),
         "importedWallet":
             MessageLookupByLibrary.simpleMessage("Imported Wallet"),
@@ -70,6 +71,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKeyContent": MessageLookupByLibrary.simpleMessage(
             "Key must be a base58 encoded string or a JSON array of bytes"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
+        "maxCap": MessageLookupByLibrary.simpleMessage("MAX"),
         "message": MessageLookupByLibrary.simpleMessage("Message"),
         "mockWallet": MessageLookupByLibrary.simpleMessage("Mock Wallet"),
         "mockWalletAddress":

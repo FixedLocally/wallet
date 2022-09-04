@@ -749,6 +749,26 @@ class S {
       args: [],
     );
   }
+
+  /// `MAX`
+  String get maxCap {
+    return Intl.message(
+      'MAX',
+      name: 'maxCap',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `HALF`
+  String get halfCap {
+    return Intl.message(
+      'HALF',
+      name: 'halfCap',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
