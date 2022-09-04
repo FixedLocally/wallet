@@ -729,6 +729,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Choose token`
+  String get chooseToken {
+    return Intl.message(
+      'Choose token',
+      name: 'chooseToken',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

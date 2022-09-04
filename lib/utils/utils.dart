@@ -311,7 +311,7 @@ class Utils {
           TokenAccountData tokenAccountData = data.parsed as TokenAccountData;
           rawResults.add(SplTokenAccountDataInfoWithUsd(
             info: tokenAccountData.info,
-            usd: -1,
+            usd: null,
             usdChange: 0,
             account: value.pubkey,
           ));
@@ -331,7 +331,7 @@ class Utils {
         mint: nativeSol,
         owner: pubKey,
       ),
-      usd: -1,
+      usd: null,
       usdChange: 0,
       account: pubKey,
     ));
@@ -347,16 +347,16 @@ class Utils {
         unitPrice = prices[nativeSolMint]?["usd"] ?? -1.0;
         dailyChangePercent = prices[nativeSolMint]?["usd_24h_change"] ?? 0.0;
       }
-      double usd = unitPrice >= 0 ? unitPrice * amount : -1.0;
+      double? usd = unitPrice >= 0 ? unitPrice * amount : null;
       return SplTokenAccountDataInfoWithUsd(
         info: e,
         usd: usd,
         account: e.account,
-        usdChange: usd * (1 - 1 / (1 + dailyChangePercent / 100)),
+        usdChange: usd != null ? usd * (1 - 1 / (1 + dailyChangePercent / 100)) : null,
       );
     }).toList();
     results.sort(compoundComparator([
-      (a, b) => b.usd.compareTo(a.usd),
+      (a, b) => (b.usd ?? -1).compareTo(a.usd ?? -1),
       (a, b) => b.mint.compareTo(a.mint),
     ]));
     return results;
@@ -684,8 +684,8 @@ class TokenChanges {
 }
 
 class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
-  final double usd;
-  final double usdChange;
+  final double? usd;
+  final double? usdChange;
   final String account;
 
   SplTokenAccountDataInfoWithUsd({

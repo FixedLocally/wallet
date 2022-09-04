@@ -46,12 +46,14 @@ class NetworkSvg extends StatefulWidget {
   final String url;
   final double? width;
   final double? height;
+  final bool cleanSvg;
 
   const NetworkSvg({
     Key? key,
     required this.url,
     this.width,
     this.height,
+    this.cleanSvg = false,
   }) : super(key: key);
 
   @override
@@ -74,9 +76,11 @@ class _NetworkSvgState extends State<NetworkSvg> {
 
   void _loadSvg() {
     _downloadSvg().then((String data) {
-      String fixedDoc = fixSvg(data);
+      if (widget.cleanSvg) {
+        data = fixSvg(data);
+      }
       setState(() {
-        _svg = fixedDoc;
+        _svg = data;
       });
     });
   }

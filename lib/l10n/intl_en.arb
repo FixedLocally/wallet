@@ -67,5 +67,6 @@
   "burnConfirmContent": "This action is irreversible, make sure you've selected the correct token.",
   "burningTokens": "Burning tokens...",
   "approveTransactionTitle": "Approve transaction?",
-  "transactionMayFailToConfirm": "Transaction may fail to confirm"
+  "transactionMayFailToConfirm": "Transaction may fail to confirm",
+  "chooseToken": "Choose token"
 }

@@ -337,11 +337,11 @@ class _HomeRouteState extends State<HomeRoute> {
             if (index == 0) {
               double totalUsd = balances.values.fold(
                 0.0,
-                (sum, balance) => sum + max(0.0, balance.usd),
+                (sum, balance) => sum + max(0.0, balance.usd ?? -1),
               );
               double totalUsdChange = balances.values.fold(
                 0.0,
-                (sum, balance) => sum + balance.usdChange,
+                (sum, balance) => sum + (balance.usdChange ?? 0),
               );
               double percent = totalUsd > 0 ? (totalUsdChange / (totalUsd - totalUsdChange) * 100) : 0;
               bool isPositive = totalUsdChange >= 0;
@@ -406,7 +406,22 @@ class _HomeRouteState extends State<HomeRoute> {
         (a, b) => (balances[b]?.usd ?? 0).compareTo(balances[a]?.usd ?? 0),
         (a, b) => (_jupTopTokens[a] ?? 6969) - (_jupTopTokens[b] ?? 6969),
       ]));
-      return DropdownButtonHideUnderline(
+      Map<String, dynamic> fromTokenDetail = _tokenDetails[_from] ?? {};
+      Map<String, dynamic> toTokenDetail = _tokenDetails[_to] ?? {};
+      return TextButtonTheme(
+        data: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            primary: themeData.colorScheme.onPrimary,
+            backgroundColor: themeData.colorScheme.primary,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            textStyle: themeData.textTheme.button?.copyWith(
+              color: themeData.primaryColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
         child: Column(
           children: [
             SizedBox(height: 8),
@@ -421,27 +436,26 @@ class _HomeRouteState extends State<HomeRoute> {
                 Expanded(
                   child: Utils.wrapField(
                     margin: const EdgeInsets.only(top: 8, bottom: 8),
+                    padding: EdgeInsets.only(left: 8, right: 16),
                     themeData: themeData,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // todo show modal instead
-                        DropdownButton(
-                          // isExpanded: true,
-                          value: _from,
-                          items: mintKeys.where((element) => _tokenDetails[element]?["symbol"].isNotEmpty == true).map((entry) {
-                            Map<String, dynamic> tokenDetail = _tokenDetails[entry] ?? {};
-                            return DropdownMenuItem(
-                              value: entry,
-                              child: Text(tokenDetail["symbol"] ?? entry.shortened),
-                            );
-                          }).toList(),
-                          onChanged: (String? acct) {
-                            setState(() {
-                              _from = acct;
-                              _loadRoutes();
+                        TextButton(
+                          onPressed: () {
+                            _chooseSwapToken(mintKeys).then((mintKey) {
+                              if (mintKey == null) return;
+                              setState(() {
+                                _from = mintKey;
+                              });
                             });
                           },
+                          child: Row(
+                            children: [
+                              Text(fromTokenDetail["symbol"] ?? _from?.shortened ?? ""),
+                              Icon(Icons.keyboard_arrow_down_rounded, size: 20,),
+                            ],
+                          ),
                         ),
                         Expanded(
                           child: TextField(
@@ -468,7 +482,10 @@ class _HomeRouteState extends State<HomeRoute> {
                 alignment: Alignment.bottomRight,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 20.0),
-                  child: Text("${balances[_from]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                  child: Container(
+                    constraints: BoxConstraints(minWidth: 48),
+                    child: Text("${balances[_from]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                  ),
                 ),
               ),
             IconButton(
@@ -498,26 +515,29 @@ class _HomeRouteState extends State<HomeRoute> {
                 Expanded(
                   child: Utils.wrapField(
                     margin: const EdgeInsets.only(top: 8, bottom: 8),
+                    padding: EdgeInsets.only(left: 8, right: 16),
                     themeData: themeData,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        DropdownButton(
-                          // isExpanded: true,
-                          value: _to,
-                          items: mintKeys.map((entry) {
-                            Map<String, dynamic> tokenDetail = _tokenDetails[entry] ?? {};
-                            return DropdownMenuItem(
-                              value: entry,
-                              child: Text(tokenDetail["symbol"] ?? entry.shortened),
-                            );
-                          }).toList(),
-                          onChanged: (String? acct) {
-                            setState(() {
-                              _to = acct;
-                              _loadRoutes();
+                        TextButton(
+                          onPressed: () {
+                            _chooseSwapToken(mintKeys).then((mintKey) {
+                              if (mintKey == null) return;
+                              setState(() {
+                                _to = mintKey;
+                              });
                             });
                           },
+                          child: Row(
+                            children: [
+                              Container(
+                                constraints: BoxConstraints(minWidth: 48),
+                                child: Text(toTokenDetail["symbol"] ?? _to?.shortened ?? ""),
+                              ),
+                              Icon(Icons.keyboard_arrow_down_rounded, size: 20,),
+                            ],
+                          ),
                         ),
                         Spacer(),
                       ],
@@ -640,8 +660,8 @@ class _HomeRouteState extends State<HomeRoute> {
     String uiAmountString = entry.value.tokenAmount.uiAmountString ?? "0";
     // double amount = double.parse(uiAmountString);
     // double unitPrice = entry.value.usd ?? -1;
-    double usd = entry.value.usd;
-    double usdChange = entry.value.usdChange;
+    double usd = entry.value.usd ?? -1;
+    double usdChange = (entry.value.usdChange ?? 0);
     Widget listTile = ListTile(
       onTap: () {
         _showTokenMenu(entry.value);
@@ -1136,6 +1156,53 @@ class _HomeRouteState extends State<HomeRoute> {
         _jupRouteMapLoading = false;
       });
     });
+  }
+
+  Future<String?> _chooseSwapToken(List<String> mintKeys) async {
+    MediaQueryData mq = MediaQuery.of(context);
+    String pubKey = KeyManager.instance.pubKey;
+    Map<String, SplTokenAccountDataInfoWithUsd> balances = _balances[pubKey]!;
+    mintKeys.sort(Utils.compoundComparator([
+          (a, b) => (balances[b]?.usd ?? 0).compareTo(balances[a]?.usd ?? 0),
+          (a, b) => (balances[b]?.tokenAmount.uiAmountString?.doubleParsed ?? -9).compareTo(balances[a]?.tokenAmount.uiAmountString?.doubleParsed ?? -9),
+          (a, b) => (_jupTopTokens[a] ?? 6969) - (_jupTopTokens[b] ?? 6969),
+    ]));
+
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(S.current.chooseToken),
+          contentPadding: const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 0.0),
+          content: SizedBox(
+            height: mq.size.height - mq.padding.top - mq.padding.bottom - 200,
+            width: 300,
+            child: ListView.builder(
+              itemBuilder: (ctx, i) {
+                String mint = mintKeys[i];
+                Map<String, dynamic>? info = _tokenDetails[mint];
+                return ListTile(
+                  visualDensity: VisualDensity(horizontal: -4),
+                  contentPadding: EdgeInsets.zero,
+                  leading: info?["image"] != null ? MultiImage(
+                    image: info?["image"],
+                    size: 32,
+                  ) : null,
+                  title: Text(info?["symbol"] ?? mint.shortened),
+                  subtitle: Text(info?["name"] ?? ""),
+                  trailing: _balances[pubKey]?[mint] != null ? Text(_balances[pubKey]?[mint]?.tokenAmount.uiAmountString ?? "0") : null,
+                  onTap: () {
+                    Navigator.pop(context, mint);
+                  },
+                );
+              },
+              itemCount: mintKeys.length,
+              // shrinkWrap: true,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override

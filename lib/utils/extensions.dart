@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-extension PubKeys on String {
+extension StrExt on String {
   String get shortened => "${substring(0, 4)}...${substring(length - 5)}";
+  double get doubleParsed => double.parse(this);
   void printBySegment(int len) {
     for (int i = 0; i < length; i += len) {
       print(substring(i, (i + len).clamp(0, length)));

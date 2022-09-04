@@ -32,6 +32,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "This action is irreversible, make sure you\'ve selected the correct token."),
         "burningTokens":
             MessageLookupByLibrary.simpleMessage("Burning tokens..."),
+        "chooseToken": MessageLookupByLibrary.simpleMessage("Choose token"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "closeTokenAccount":
             MessageLookupByLibrary.simpleMessage("Close token account"),

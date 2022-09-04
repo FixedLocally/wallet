@@ -7,12 +7,14 @@ class MultiImage extends StatefulWidget {
   final String image;
   final double? size;
   final double? borderRadius;
+  final bool cleanSvg;
 
   const MultiImage({
     Key? key,
     required this.image,
     this.size,
     this.borderRadius,
+    this.cleanSvg = true,
   }) : super(key: key);
 
   @override
@@ -41,6 +43,7 @@ class _MultiImageState extends State<MultiImage> {
         url: widget.image,
         width: widget.size,
         height: widget.size,
+        cleanSvg: widget.cleanSvg,
       );
     } else {
       _builder = (_) => CachedNetworkImage(
