@@ -663,8 +663,9 @@ class TokenChanges {
         children: [
           ...changes.map((key, value) {
             String mint = updatedAccounts[key]!.mint;
-            String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
-            String symbol = tokens[mint]?["symbol"] ?? shortMint;
+            // String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
+            String symbol = tokens[mint]?["symbol"] ?? mint;
+            symbol = symbol.isNotEmpty ? symbol : "${mint.substring(0, 5)}...";
             if (value != 0) {
               return MapEntry(key, Text("$symbol: ${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}"));
             } else {

@@ -447,12 +447,16 @@ class _HomeRouteState extends State<HomeRoute> {
                               if (mintKey == null) return;
                               setState(() {
                                 _from = mintKey;
+                                _loadRoutes();
                               });
                             });
                           },
                           child: Row(
                             children: [
-                              Text(fromTokenDetail["symbol"] ?? _from?.shortened ?? ""),
+                              Container(
+                                constraints: BoxConstraints(minWidth: 28),
+                                child: Text(fromTokenDetail["symbol"] ?? _from?.shortened ?? ""),
+                              ),
                               Icon(Icons.keyboard_arrow_down_rounded, size: 20,),
                             ],
                           ),
@@ -482,10 +486,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 alignment: Alignment.bottomRight,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 20.0),
-                  child: Container(
-                    constraints: BoxConstraints(minWidth: 48),
-                    child: Text("${balances[_from]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
-                  ),
+                  child: Text("${balances[_from]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
                 ),
               ),
             IconButton(
@@ -526,13 +527,14 @@ class _HomeRouteState extends State<HomeRoute> {
                               if (mintKey == null) return;
                               setState(() {
                                 _to = mintKey;
+                                _loadRoutes();
                               });
                             });
                           },
                           child: Row(
                             children: [
                               Container(
-                                constraints: BoxConstraints(minWidth: 48),
+                                constraints: BoxConstraints(minWidth: 28),
                                 child: Text(toTokenDetail["symbol"] ?? _to?.shortened ?? ""),
                               ),
                               Icon(Icons.keyboard_arrow_down_rounded, size: 20,),
@@ -1162,6 +1164,7 @@ class _HomeRouteState extends State<HomeRoute> {
     MediaQueryData mq = MediaQuery.of(context);
     String pubKey = KeyManager.instance.pubKey;
     Map<String, SplTokenAccountDataInfoWithUsd> balances = _balances[pubKey]!;
+    mintKeys = [...mintKeys, nativeSol];
     mintKeys.sort(Utils.compoundComparator([
           (a, b) => (balances[b]?.usd ?? 0).compareTo(balances[a]?.usd ?? 0),
           (a, b) => (balances[b]?.tokenAmount.uiAmountString?.doubleParsed ?? -9).compareTo(balances[a]?.tokenAmount.uiAmountString?.doubleParsed ?? -9),
