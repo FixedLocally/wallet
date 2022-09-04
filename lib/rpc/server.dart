@@ -121,7 +121,7 @@ class RpcServer {
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
     Message message = Message.decompile(compiledMessage);
 
-    Future<TokenChanges> simulation = Utils.simulateTx(payload, KeyManager.instance.pubKey);
+    Future<List<TokenChanges>> simulation = Utils.simulateTxs([payload], KeyManager.instance.pubKey);
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
       builder: (context) {
@@ -189,7 +189,7 @@ class RpcServer {
       blockhashes.add(e["recentBlockhash"]);
     }
 
-    Future<TokenChanges> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey);
+    Future<List<TokenChanges>> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey);
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
       builder: (context) {

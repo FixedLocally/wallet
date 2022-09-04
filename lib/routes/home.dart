@@ -425,6 +425,7 @@ class _HomeRouteState extends State<HomeRoute> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // todo show modal instead
                         DropdownButton(
                           // isExpanded: true,
                           value: _from,
@@ -568,7 +569,7 @@ class _HomeRouteState extends State<HomeRoute> {
                                   route: _routes![_chosenRoute]);
                               List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction]
                                   .whereNotNull.map(base64Decode).map((x) => x.sublist(65)).toList();
-                              Future<TokenChanges> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey);
+                              Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey);
                               bool approved = await Utils.showConfirmBottomSheet(
                                 context: context,
                                 builder: (context) {
@@ -598,6 +599,7 @@ class _HomeRouteState extends State<HomeRoute> {
                                 }
                                 // reload routes after trying to swap
                                 _loadRoutes();
+                                _startLoadingBalances(KeyManager.instance.pubKey);
                               }
                             },
                             child: Text(

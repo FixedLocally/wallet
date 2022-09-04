@@ -150,8 +150,8 @@ class Utils {
   // get accounts in batches of 10
   static Future<List<Account?>> batchGetAccounts(List<String> addresses) async {
     List<Account?> accounts = [];
-    for (int i = 0; i < addresses.length; i += 10) {
-      List<String> batch = addresses.sublist(i, min(i + 10, addresses.length));
+    for (int i = 0; i < addresses.length; i += 50) {
+      List<String> batch = addresses.sublist(i, min(i + 50, addresses.length));
       accounts.addAll(await _solanaClient.rpcClient.getMultipleAccounts(batch, commitment: Commitment.confirmed, encoding: Encoding.base64));
     }
     return accounts;
@@ -248,13 +248,13 @@ class Utils {
     return TokenChanges(changes, updatedAcctsMap, await getTokens(updatedAcctsMap.values.map((e) => e.mint).toList()), postSolBalance - preSolBalance);
   }
 
-  static Future<TokenChanges> simulateTxs(List<List<int>> rawMessage, String owner) async {
+  static Future<List<TokenChanges>> simulateTxs(List<List<int>> rawMessage, String owner) async {
     List<TokenChanges> changes = [];
     for (int i = 0; i < rawMessage.length; ++i) {
+      // sequentially
       changes.add(await simulateTx(rawMessage[i], owner));
     }
-    TokenChanges mergedChanges = TokenChanges.merge(changes);
-    return mergedChanges;
+    return changes;
   }
 
   static Future<RecentBlockhash> getBlockhash() async {
@@ -653,6 +653,28 @@ class TokenChanges {
       solOffset += tokenChanges[i].solOffset;
     }
     return TokenChanges(changes, updatedAccounts, tokens, solOffset);
+  }
+
+  Widget widget() {
+    if (error) {
+      return Text("Transaction may fail to confirm $error");
+    } else {
+      return Column(
+        children: [
+          ...changes.map((key, value) {
+            String mint = updatedAccounts[key]!.mint;
+            String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
+            String symbol = tokens[mint]?["symbol"] ?? shortMint;
+            if (value != 0) {
+              return MapEntry(key, Text("$symbol: ${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}"));
+            } else {
+              return MapEntry(key, const SizedBox.shrink());
+            }
+          }).values,
+          Text("SOL: ${solOffset > 0 ? "+" : ""}${(solOffset / lamportsPerSol).toStringAsFixed(6)}"),
+        ],
+      );
+    }
   }
 
   @override

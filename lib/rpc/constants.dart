@@ -10,10 +10,10 @@ class RpcConstants {
 
   static const int kTokenAccountLength = 165;
 
-  // static final Uri kRpcUrl = Uri.parse("https://api.mainnet-beta.solana.com");
-  // static final Uri kWsUrl = Uri.parse("wss://api.mainnet-beta.solana.com");
-  static final Uri kWsUrl = Uri.parse("wss://ssc-dao.genesysgo.net");
-  static final Uri kRpcUrl = Uri.parse("https://ssc-dao.genesysgo.net");
+  static final Uri kRpcUrl = Uri.parse("https://api.mainnet-beta.solana.com");
+  static final Uri kWsUrl = Uri.parse("wss://api.mainnet-beta.solana.com");
+  // static final Uri kWsUrl = Uri.parse("wss://ssc-dao.genesysgo.net");
+  // static final Uri kRpcUrl = Uri.parse("https://ssc-dao.genesysgo.net");
 
   static const Map<int, String> kErrorMessages = {
     kInvalidInput: "Invalid Input",
