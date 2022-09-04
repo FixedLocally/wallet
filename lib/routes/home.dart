@@ -661,7 +661,6 @@ class _HomeRouteState extends State<HomeRoute> {
                             },
                             child: Text(
                               S.current.swap,
-                              style: themeData.textTheme.button,
                             ),
                           ),
                         ),
