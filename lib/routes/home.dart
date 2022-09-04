@@ -1161,48 +1161,16 @@ class _HomeRouteState extends State<HomeRoute> {
   }
 
   Future<String?> _chooseSwapToken(List<String> mintKeys) async {
-    MediaQueryData mq = MediaQuery.of(context);
     String pubKey = KeyManager.instance.pubKey;
-    Map<String, SplTokenAccountDataInfoWithUsd> balances = _balances[pubKey]!;
-    mintKeys = [...mintKeys, nativeSol];
-    mintKeys.sort(Utils.compoundComparator([
-          (a, b) => (balances[b]?.usd ?? 0).compareTo(balances[a]?.usd ?? 0),
-          (a, b) => (balances[b]?.tokenAmount.uiAmountString?.doubleParsed ?? -9).compareTo(balances[a]?.tokenAmount.uiAmountString?.doubleParsed ?? -9),
-          (a, b) => (_jupTopTokens[a] ?? 6969) - (_jupTopTokens[b] ?? 6969),
-    ]));
 
     return await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(S.current.chooseToken),
-          contentPadding: const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 0.0),
-          content: SizedBox(
-            height: mq.size.height - mq.padding.top - mq.padding.bottom - 200,
-            width: 300,
-            child: ListView.builder(
-              itemBuilder: (ctx, i) {
-                String mint = mintKeys[i];
-                Map<String, dynamic>? info = _tokenDetails[mint];
-                return ListTile(
-                  visualDensity: VisualDensity(horizontal: -4),
-                  contentPadding: EdgeInsets.zero,
-                  leading: info?["image"] != null ? MultiImage(
-                    image: info?["image"],
-                    size: 32,
-                  ) : null,
-                  title: Text(info?["symbol"] ?? mint.shortened),
-                  subtitle: Text(info?["name"] ?? ""),
-                  trailing: _balances[pubKey]?[mint] != null ? Text(_balances[pubKey]?[mint]?.tokenAmount.uiAmountString ?? "0") : null,
-                  onTap: () {
-                    Navigator.pop(context, mint);
-                  },
-                );
-              },
-              itemCount: mintKeys.length,
-              // shrinkWrap: true,
-            ),
-          ),
+        return _ChooseTokenDialog(
+          balances: _balances[pubKey] ?? {},
+          jupTopTokens: _jupTopTokens,
+          mintKeys: [nativeSol, ...mintKeys],
+          tokenDetails: _tokenDetails,
         );
       },
     );
@@ -1214,3 +1182,111 @@ class _HomeRouteState extends State<HomeRoute> {
     _fromAmtController.dispose();
   }
 }
+
+class _ChooseTokenDialog extends StatefulWidget {
+  final Map<String, int> jupTopTokens;
+  final List<String> mintKeys;
+  final Map<String, SplTokenAccountDataInfoWithUsd> balances;
+  final Map<String, Map<String, dynamic>?> tokenDetails;
+
+  const _ChooseTokenDialog({
+    Key? key,
+    required this.jupTopTokens,
+    required this.mintKeys,
+    required this.balances,
+    required this.tokenDetails,
+  }) : super(key: key);
+
+  @override
+  State<_ChooseTokenDialog> createState() => _ChooseTokenDialogState();
+}
+
+class _ChooseTokenDialogState extends State<_ChooseTokenDialog> {
+  late List<String> _filteredMints;
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    Map<String, SplTokenAccountDataInfoWithUsd> balances = widget.balances;
+    _filteredMints = widget.mintKeys;
+    _filteredMints.sort(Utils.compoundComparator([
+          (a, b) => (balances[b]?.usd ?? 0).compareTo(balances[a]?.usd ?? 0),
+          (a, b) => (balances[b]?.tokenAmount.uiAmountString?.doubleParsed ?? -9).compareTo(balances[a]?.tokenAmount.uiAmountString?.doubleParsed ?? -9),
+          (a, b) => (widget.jupTopTokens[a] ?? 6969) - (widget.jupTopTokens[b] ?? 6969),
+    ]));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    MediaQueryData mq = MediaQuery.of(context);
+
+    return AlertDialog(
+      titlePadding: const EdgeInsets.fromLTRB(16.0, 20.0, 8.0, 0.0),
+      contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 0.0),
+      title: Row(
+        children: [
+          Icon(
+            Icons.search,
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                isDense: true,
+                // contentPadding: EdgeInsets.zero,
+                hintText: S.current.searchTokensOrPasteAddress,
+                border: InputBorder.none,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _filteredMints = widget.mintKeys.where((element) => (widget.tokenDetails[element]?["symbol"]?.toLowerCase().contains(value.toLowerCase()) ?? false) || element == value).toList();
+                });
+              },
+            ),
+          ),
+          IconButton(
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+            icon: Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              setState(() {
+                _filteredMints = widget.mintKeys;
+              });
+            },
+          ),
+        ],
+      ),
+      content: SizedBox(
+        height: mq.size.height - mq.padding.top - mq.padding.bottom - 200,
+        width: 300,
+        child: ListView.builder(
+          itemBuilder: (ctx, i) {
+            String mint = _filteredMints[i];
+            Map<String, dynamic>? info = widget.tokenDetails[mint];
+            return ListTile(
+              visualDensity: VisualDensity(horizontal: -4),
+              contentPadding: EdgeInsets.zero,
+              leading: info?["image"] != null ? MultiImage(
+                image: info?["image"],
+                size: 32,
+              ) : null,
+              title: Text(info?["symbol"] ?? mint.shortened),
+              subtitle: Text(info?["name"] ?? ""),
+              trailing: widget.balances[mint] != null ? Text(widget.balances[mint]?.tokenAmount.uiAmountString ?? "0") : null,
+              onTap: () {
+                Navigator.pop(context, mint);
+              },
+            );
+          },
+          itemCount: _filteredMints.length,
+          // shrinkWrap: true,
+        ),
+      ),
+    );
+  }
+}
+

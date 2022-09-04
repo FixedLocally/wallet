@@ -99,6 +99,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "revoke": MessageLookupByLibrary.simpleMessage("Revoke"),
         "revokingDelegation":
             MessageLookupByLibrary.simpleMessage("Revoking delegation..."),
+        "searchTokensOrPasteAddress": MessageLookupByLibrary.simpleMessage(
+            "Search tokens or paste address"),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendToken": MessageLookupByLibrary.simpleMessage("Send %s"),
         "sendingTx":

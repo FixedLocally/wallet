@@ -68,5 +68,6 @@
   "burningTokens": "Burning tokens...",
   "approveTransactionTitle": "Approve transaction?",
   "transactionMayFailToConfirm": "Transaction may fail to confirm",
-  "chooseToken": "Choose token"
+  "chooseToken": "Choose token",
+  "searchTokensOrPasteAddress": "Search tokens or paste address"
 }

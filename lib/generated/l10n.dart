@@ -739,6 +739,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Search tokens or paste address`
+  String get searchTokensOrPasteAddress {
+    return Intl.message(
+      'Search tokens or paste address',
+      name: 'searchTokensOrPasteAddress',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
