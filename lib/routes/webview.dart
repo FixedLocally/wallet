@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../generated/l10n.dart';
 import 'mixins/timer.dart';
 import '../utils/utils.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -158,7 +159,8 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
       onPageStarted: (String url) {
         _runInjection();
         setState(() {
-          _title = "Loading...";
+          _title = S.current.loading;
+          _subtitle = url;
         });
       },
       onWebViewCreated: (WebViewController webviewController) {
