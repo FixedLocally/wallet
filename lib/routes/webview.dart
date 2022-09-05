@@ -117,7 +117,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    Widget scaffold = Scaffold(
       appBar: AppBar(
         title: Column(
           children: [
@@ -130,23 +130,34 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
           ],
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _controller?.reload();
+            },
+          ),
+        ],
       ),
       body: _ready ? _webView() : const CircularProgressIndicator(),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.refresh),
-        onPressed: () {
-          // _controller!.runJavascript('document.write(phantom.solana.publicKey)');
-          _controller!.reload();
-          print('reloading');
-        },
-      ),
+    );
+
+    return WillPopScope(
+      onWillPop: () async {
+        if (await _controller?.canGoBack() == true) {
+          _controller?.goBack();
+          return false;
+        }
+        return true;
+      },
+      child: scaffold,
     );
   }
 
   Widget _webView() {
     return WebView(
       // initialUrl: 'https://r3byv.csb.app/',
-      initialUrl: 'about:blank',
+      initialUrl: widget.initialUrl,
       // initialUrl: 'https://tulip.garden/',
       // initialUrl: 'https://mainnet.zeta.markets/',
       // initialUrl: 'https://solend.fi/dashboard',
@@ -165,7 +176,6 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
       },
       onWebViewCreated: (WebViewController webviewController) {
         _controller = webviewController;
-        webviewController.loadUrl(widget.initialUrl);
         // _loadHtmlFromAssets();
       },
       onPageFinished: (String url) async {
