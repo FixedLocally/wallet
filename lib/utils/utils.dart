@@ -506,40 +506,6 @@ class Utils {
     });
   }
 
-  static Future<bool> showConfirmDialog({
-    required BuildContext context,
-    String? title,
-    String? content,
-    String? confirmText,
-    String? cancelText,
-    WidgetBuilder? bodyBuilder,
-  }) async {
-    return await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text(title ?? S.current.areYouSure),
-          content: bodyBuilder?.call(ctx) ?? Text(content ?? ""),
-          actions: [
-            TextButton(
-              child: Text(cancelText ?? S.current.no),
-              onPressed: () {
-                Navigator.of(ctx).pop(false);
-              },
-            ),
-            TextButton(
-              child: Text(confirmText ?? S.current.yes),
-              onPressed: () {
-                Navigator.of(ctx).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false;
-  }
-
   static Future<bool> showConfirmBottomSheet({
     required BuildContext context,
     String? title,
@@ -575,7 +541,10 @@ class Utils {
                     child: Text(title, style: themeData.textTheme.headline6),
                   ),
                 ],
-                bodyBuilder(ctx),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: bodyBuilder(ctx),
+                ),
                 Row(
                   children: [
                     Expanded(
