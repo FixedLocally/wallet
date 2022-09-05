@@ -422,7 +422,7 @@ class _HomeRouteState extends State<HomeRoute> {
             ),
           ),
         ),
-        child: Column(
+        child: ListView(
           children: [
             SizedBox(height: 8),
             // input
@@ -629,7 +629,7 @@ class _HomeRouteState extends State<HomeRoute> {
                               Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey);
                               bool approved = await Utils.showConfirmBottomSheet(
                                 context: context,
-                                builder: (context) {
+                                bodyBuilder: (context) {
                                   return ApproveTransactionWidget(simulation: simulation);
                                 },
                               );
@@ -750,10 +750,10 @@ class _HomeRouteState extends State<HomeRoute> {
             backgroundColor: Colors.red,
             onPressed: (ctx) async {
               ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
-              bool confirm = await Utils.showConfirmDialog(
+              bool confirm = await Utils.showConfirmBottomSheet(
                 context: context,
                 title: S.current.closeTokenAccount,
-                content: S.current.closeTokenAccountContent,
+                bodyBuilder: (_) => Text(S.current.closeTokenAccountContent),
                 confirmText: S.current.close,
               );
               if (!confirm) {
@@ -1040,10 +1040,10 @@ class _HomeRouteState extends State<HomeRoute> {
                     title: Text(S.current.burn),
                     onTap: () async {
                       Navigator.pop(context);
-                      bool burn = await Utils.showConfirmDialog(
+                      bool burn = await Utils.showConfirmBottomSheet(
                         context: context,
                         title: sprintf(S.current.burnConfirm, [_tokenDetails[balance.mint]?["symbol"] ?? balance.mint.shortened]),
-                        content: S.current.burnConfirmContent,
+                        bodyBuilder: (_) => Text(S.current.burnConfirmContent),
                       );
                       if (!burn) return;
                       List<Instruction> ixs = [];
@@ -1068,10 +1068,10 @@ class _HomeRouteState extends State<HomeRoute> {
                     title: Text(S.current.closeTokenAccount),
                     onTap: () async {
                       Navigator.pop(context);
-                      bool burn = await Utils.showConfirmDialog(
+                      bool burn = await Utils.showConfirmBottomSheet(
                         context: context,
                         title: S.current.closeTokenAccount,
-                        content: S.current.closeTokenAccountContent,
+                        bodyBuilder: (_) => Text(S.current.closeTokenAccountContent),
                       );
                       if (!burn) return;
                       List<Instruction> ixs = [];
@@ -1127,10 +1127,10 @@ class _HomeRouteState extends State<HomeRoute> {
     } else {
       msg = S.current.removeKeyWalletContent;
     }
-    bool confirm = await Utils.showConfirmDialog(
+    bool confirm = await Utils.showConfirmBottomSheet(
       context: context,
       title: S.current.removeWallet,
-      content: msg,
+      bodyBuilder: (_) => Text(msg),
       confirmText: S.current.delete,
     );
     if (!confirm) {

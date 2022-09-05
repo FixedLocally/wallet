@@ -60,7 +60,7 @@ class RpcServer {
     if (contextHolder.context != null) {
       approved = await Utils.showConfirmBottomSheet(
         context: contextHolder.context!,
-        builder: (ctx) {
+        bodyBuilder: (ctx) {
           return const Text("Exit?");
         },
       );
@@ -124,7 +124,7 @@ class RpcServer {
     Future<List<TokenChanges>> simulation = Utils.simulateTxs([payload], KeyManager.instance.pubKey);
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
-      builder: (context) {
+      bodyBuilder: (context) {
         return ApproveTransactionWidget(simulation: simulation);
       },
     );
@@ -192,7 +192,7 @@ class RpcServer {
     Future<List<TokenChanges>> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey);
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
-      builder: (context) {
+      bodyBuilder: (context) {
         return ApproveTransactionWidget(simulation: simulation);
       },
     );

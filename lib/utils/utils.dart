@@ -512,15 +512,15 @@ class Utils {
     String? content,
     String? confirmText,
     String? cancelText,
-    WidgetBuilder? builder,
+    WidgetBuilder? bodyBuilder,
   }) async {
     return await showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (ctx) {
         return AlertDialog(
           title: Text(title ?? S.current.areYouSure),
-          content: builder?.call(ctx) ?? Text(content ?? ""),
+          content: bodyBuilder?.call(ctx) ?? Text(content ?? ""),
           actions: [
             TextButton(
               child: Text(cancelText ?? S.current.no),
@@ -542,33 +542,76 @@ class Utils {
 
   static Future<bool> showConfirmBottomSheet({
     required BuildContext context,
-    required WidgetBuilder builder,
+    String? title,
+    String? confirmText,
+    String? cancelText,
+    required WidgetBuilder bodyBuilder,
   }) async {
+    ThemeData themeData = Theme.of(context);
     bool? result = await showModalBottomSheet<bool>(
       context: context,
       builder: (ctx) {
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              builder(ctx),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(true);
-                    },
-                    child: Text(S.current.yes),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text(S.current.no),
+          child: TextButtonTheme(
+            data: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                primary: themeData.colorScheme.onPrimary,
+                backgroundColor: themeData.colorScheme.primary,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(40)),
+                ),
+                textStyle: themeData.textTheme.button?.copyWith(
+                  color: themeData.primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (title != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(title, style: themeData.textTheme.headline6),
                   ),
                 ],
-              ),
-            ],
+                bodyBuilder(ctx),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: themeData.colorScheme.background,
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop(false);
+                          },
+                          child: Text(
+                            cancelText ?? S.current.no,
+                            style: TextStyle(
+                              color: themeData.colorScheme.onBackground,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(true);
+                          },
+                          child: Text(confirmText ?? S.current.yes),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -705,10 +748,10 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
         );
 
   Future<String?> showDelegationWarning(BuildContext context, String symbol) async {
-    bool approved = await Utils.showConfirmDialog(
+    bool approved = await Utils.showConfirmBottomSheet(
       context: context,
       title: S.current.delegationWarning,
-      content: sprintf(S.current.delegationWarning, [delegateAmount?.uiAmountString ?? "0", symbol, delegate ?? "someone"]),
+      bodyBuilder: (_) => Text(sprintf(S.current.delegationWarning, [delegateAmount?.uiAmountString ?? "0", symbol, delegate ?? "someone"])),
       confirmText: S.current.revoke,
     );
     if (!approved) return null;

@@ -184,10 +184,10 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                           ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
                           NavigatorState navigator = Navigator.of(context);
                           if (_validate()) {
-                            bool confirm = await Utils.showConfirmDialog(
+                            bool confirm = await Utils.showConfirmBottomSheet(
                               context: context,
                               title: sprintf(S.current.sendToken, [symbol]),
-                              content: "You are about to send $_amount $symbol to $_recipient.", // todo
+                              bodyBuilder: (_) => Text("You are about to send $_amount $symbol to $_recipient."), // todo
                             );
                             if (confirm) {
                               Completer<String> completer = Completer();
