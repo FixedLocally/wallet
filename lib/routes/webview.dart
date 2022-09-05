@@ -38,6 +38,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
 
   String _realMessageHandlerKey = "";
   bool _ready = false;
+  bool _exit = false;
 
   Set<JavascriptChannel> get _jsChannels => {
     JavascriptChannel(
@@ -130,6 +131,13 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
           ],
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            _exit = true;
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -144,7 +152,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
 
     return WillPopScope(
       onWillPop: () async {
-        if (await _controller?.canGoBack() == true) {
+        if (await _controller?.canGoBack() == true && !_exit) {
           _controller?.goBack();
           return false;
         }
