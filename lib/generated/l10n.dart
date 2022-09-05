@@ -410,10 +410,10 @@ class S {
     );
   }
 
-  /// `Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds.`
+  /// `Do NOT share your private key, having access to your private means having access to your funds.`
   String get showPrivateKeyContent {
     return Intl.message(
-      'Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds.',
+      'Do NOT share your private key, having access to your private means having access to your funds.',
       name: 'showPrivateKeyContent',
       desc: '',
       args: [],
@@ -765,6 +765,16 @@ class S {
     return Intl.message(
       'HALF',
       name: 'halfCap',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to reveal`
+  String get tapToReveal {
+    return Intl.message(
+      'Tap to reveal',
+      name: 'tapToReveal',
       desc: '',
       args: [],
     );

@@ -109,7 +109,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sending transaction..."),
         "setupWallet": MessageLookupByLibrary.simpleMessage("Setup Wallet"),
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
-            "Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds."),
+            "Do NOT share your private key, having access to your private means having access to your funds."),
         "signMessage": MessageLookupByLibrary.simpleMessage("Sign Message"),
         "signMessageHint":
             MessageLookupByLibrary.simpleMessage("Message to sign"),
@@ -119,6 +119,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
         "swap": MessageLookupByLibrary.simpleMessage("Swap"),
+        "tapToReveal": MessageLookupByLibrary.simpleMessage("Tap to reveal"),
         "transactionMayFailToConfirm": MessageLookupByLibrary.simpleMessage(
             "Transaction may fail to confirm"),
         "txConfirmed":

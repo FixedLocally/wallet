@@ -11,6 +11,7 @@ import 'package:sprintf/sprintf.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../generated/l10n.dart';
+import '../routes/show_secret.dart';
 import '../utils/extensions.dart';
 import '../utils/utils.dart';
 import '../widgets/show_seed.dart';
@@ -280,38 +281,28 @@ class KeyManager {
 
   Future<void> requestShowPrivateKey(BuildContext context) async {
     if (await authenticateUser(context) == false) return;
+    NavigatorState nav = Navigator.of(context);
     Wallet wallet = await Utils.showLoadingDialog(context: context, future: _activeWallet!.getWallet());
     List<int> key = (await wallet.extract()).bytes;
     key += wallet.publicKey.bytes;
     String keyBase58 = base58encode(key);
-    showDialog(
-      context: context,
-      barrierDismissible: false,
+    nav.push(MaterialPageRoute(
       builder: (ctx) {
-        NavigatorState nav = Navigator.of(ctx);
-        ScaffoldMessengerState scaffold = ScaffoldMessenger.of(ctx);
-        return AlertDialog(
-          title: Text(S.current.exportPrivateKey),
-          content: Text(S.current.showPrivateKeyContent.replaceAll("%s", keyBase58)),
-          actions: [
-            TextButton(
-              child: Text(S.current.copy),
-              onPressed: () async {
-                scaffold.showSnackBar(SnackBar(content: Text(S.current.copyPrivateKeySuccess)));
-                Clipboard.setData(ClipboardData(text: keyBase58));
-                nav.pop();
-              },
+        return ShowSecretRoute(
+          title: S.current.exportPrivateKey,
+          secret: keyBase58,
+          copySuccessMessage: S.current.copyPrivateKeySuccess,
+          header: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).errorColor.withOpacity(0.33),
+              borderRadius: BorderRadius.circular(8),
             ),
-            TextButton(
-              child: Text(S.current.close),
-              onPressed: () async {
-                Navigator.of(ctx).pop();
-              },
-            ),
-          ],
+            child: Text(S.current.showPrivateKeyContent),
+          ),
         );
       },
-    );
+    ));
   }
 }
 

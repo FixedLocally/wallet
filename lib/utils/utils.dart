@@ -376,7 +376,7 @@ class Utils {
         return [];
       }
       List tokens = resp["tokens"];
-      return tokens.map((token) => [token["address"], token]).toList();
+      return tokens.where((element) => element != null).map((token) => [token["address"], token]).toList();
     });
     if (secondBatch.isNotEmpty) {
       metadatas.addAll(await(batchGetMetadata(secondBatch)));

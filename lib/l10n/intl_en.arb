@@ -36,7 +36,7 @@
   "resetSecretRecoveryPhrase": "Reset Secret Recovery Phrase",
   "copySeedSuccess": "Copied secret recovery phrase to clipboard",
   "copyPrivateKeySuccess": "Copied private key to clipboard",
-  "showPrivateKeyContent": "Private key:\n%s\n\nDo NOT share your private key, having access to your private means having access to your funds.",
+  "showPrivateKeyContent": "Do NOT share your private key, having access to your private means having access to your funds.",
   "removeHdWalletContent": "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase.",
   "removeKeyWalletContent": "This will remove the wallet from this list, make sure you have a backup of your private key.",
   "delegationWarning": "%s %s is currently delegated to:\n%s.\n\nUnlike on Ethereum, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.",
@@ -71,5 +71,6 @@
   "chooseToken": "Choose token",
   "searchTokensOrPasteAddress": "Search tokens or paste address",
   "maxCap": "MAX",
-  "halfCap": "HALF"
+  "halfCap": "HALF",
+  "tapToReveal": "Tap to reveal"
 }
