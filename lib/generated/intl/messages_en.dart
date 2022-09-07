@@ -86,6 +86,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No Collectibles"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "pay": MessageLookupByLibrary.simpleMessage("Pay"),
+        "pleaseAuthenticateToContinue": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to continue"),
         "receive": MessageLookupByLibrary.simpleMessage("Receive"),
         "recipient": MessageLookupByLibrary.simpleMessage("Recipient"),
         "removeHdWalletContent": MessageLookupByLibrary.simpleMessage(

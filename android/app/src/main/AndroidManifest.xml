@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="xyz.utopiamint.wallet">
-   <application
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+
+    <application
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:label="wallet"

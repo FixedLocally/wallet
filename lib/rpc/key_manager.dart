@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
@@ -239,8 +240,12 @@ class KeyManager {
   }
 
   Future<bool> authenticateUser(BuildContext context) async {
-    // todo show authentication
-    return true;
+    final LocalAuthentication auth = LocalAuthentication();
+    try {
+      return auth.authenticate(localizedReason: S.current.pleaseAuthenticateToContinue);
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<void> requestShowRecoveryPhrase(BuildContext context) async {

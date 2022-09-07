@@ -799,6 +799,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Please authenticate to continue`
+  String get pleaseAuthenticateToContinue {
+    return Intl.message(
+      'Please authenticate to continue',
+      name: 'pleaseAuthenticateToContinue',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
