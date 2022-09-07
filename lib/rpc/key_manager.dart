@@ -2,7 +2,6 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
@@ -14,7 +13,6 @@ import '../generated/l10n.dart';
 import '../routes/show_secret.dart';
 import '../utils/extensions.dart';
 import '../utils/utils.dart';
-import '../widgets/show_seed.dart';
 import 'errors/errors.dart';
 
 const String derivationPathTemplate = "m/44'/501'/%s'/0'";
@@ -247,36 +245,26 @@ class KeyManager {
 
   Future<void> requestShowRecoveryPhrase(BuildContext context) async {
     if (await authenticateUser(context) == false) return;
+    NavigatorState nav = Navigator.of(context);
     String seedHash = _activeWallet!.keyHash;
     String mnemonic = (await Utils.showLoadingDialog(context: context, future: const FlutterSecureStorage().read(key: "mnemonic_$seedHash"))) ?? List.generate(12, (index) => "??").join(" ");
-    showDialog(
-      context: context,
-      barrierDismissible: false,
+    nav.push(MaterialPageRoute(
       builder: (ctx) {
-        return AlertDialog(
-          title: Text(S.current.exportSecretRecoveryPhrase),
-          content: GenerateSeedRoute(
-            mnemonic: mnemonic.split(" "),
+        return ShowSecretRoute(
+          title: S.current.exportSecretRecoveryPhrase,
+          secret: mnemonic,
+          copySuccessMessage: S.current.copySeedSuccess,
+          header: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).errorColor.withOpacity(0.33),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(S.current.seedPhraseWarning),
           ),
-          actions: [
-            TextButton(
-              child: Text(S.current.copy),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.copySeedSuccess)));
-                Clipboard.setData(ClipboardData(text: mnemonic));
-                Navigator.of(ctx).pop();
-              },
-            ),
-            TextButton(
-              child: Text(S.current.close),
-              onPressed: () async {
-                Navigator.of(ctx).pop();
-              },
-            ),
-          ],
         );
       },
-    );
+    ));
   }
 
   Future<void> requestShowPrivateKey(BuildContext context) async {

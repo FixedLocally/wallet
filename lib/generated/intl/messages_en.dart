@@ -46,7 +46,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Copied secret recovery phrase to clipboard"),
         "createWallet": MessageLookupByLibrary.simpleMessage("Create Wallet"),
         "delegationWarning": MessageLookupByLibrary.simpleMessage(
-            "%s %s is currently delegated to:\n%s.\n\nUnlike on Ethereum, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation."),
+            "%s %s is currently delegated to:\n%s.\n\nUnlike on EVM chains, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
         "enterNewKey": MessageLookupByLibrary.simpleMessage("Enter new key"),
@@ -103,13 +103,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Revoking delegation..."),
         "searchTokensOrPasteAddress": MessageLookupByLibrary.simpleMessage(
             "Search tokens or paste address"),
+        "seedPhraseWarning": MessageLookupByLibrary.simpleMessage(
+            "Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone."),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendToken": MessageLookupByLibrary.simpleMessage("Send %s"),
         "sendingTx":
             MessageLookupByLibrary.simpleMessage("Sending transaction..."),
         "setupWallet": MessageLookupByLibrary.simpleMessage("Setup Wallet"),
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
-            "Do NOT share your private key, having access to your private means having access to your funds."),
+            "Do NOT share your private key, having access to your private key means having full access to your funds."),
         "signMessage": MessageLookupByLibrary.simpleMessage("Sign Message"),
         "signMessageHint":
             MessageLookupByLibrary.simpleMessage("Message to sign"),
@@ -126,6 +128,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
         "walletNum": MessageLookupByLibrary.simpleMessage("Wallet %s"),
-        "yes": MessageLookupByLibrary.simpleMessage("Yes")
+        "yes": MessageLookupByLibrary.simpleMessage("Yes"),
+        "yourSecretRecoveryPhraseIs": MessageLookupByLibrary.simpleMessage(
+            "Your secret recovery phrase is:")
       };
 }

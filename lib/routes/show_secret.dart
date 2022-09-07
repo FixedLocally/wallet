@@ -81,12 +81,6 @@ class _ShowSecretRouteState extends State<ShowSecretRoute> {
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(S.current.ok),
-              ),
               // copy button
               TextButton(
                 onPressed: () {

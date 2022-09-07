@@ -410,10 +410,10 @@ class S {
     );
   }
 
-  /// `Do NOT share your private key, having access to your private means having access to your funds.`
+  /// `Do NOT share your private key, having access to your private key means having full access to your funds.`
   String get showPrivateKeyContent {
     return Intl.message(
-      'Do NOT share your private key, having access to your private means having access to your funds.',
+      'Do NOT share your private key, having access to your private key means having full access to your funds.',
       name: 'showPrivateKeyContent',
       desc: '',
       args: [],
@@ -440,10 +440,10 @@ class S {
     );
   }
 
-  /// `%s %s is currently delegated to:\n%s.\n\nUnlike on Ethereum, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.`
+  /// `%s %s is currently delegated to:\n%s.\n\nUnlike on EVM chains, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.`
   String get delegationWarning {
     return Intl.message(
-      '%s %s is currently delegated to:\n%s.\n\nUnlike on Ethereum, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.',
+      '%s %s is currently delegated to:\n%s.\n\nUnlike on EVM chains, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.',
       name: 'delegationWarning',
       desc: '',
       args: [],
@@ -775,6 +775,26 @@ class S {
     return Intl.message(
       'Hold to reveal',
       name: 'tapToReveal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your secret recovery phrase is:`
+  String get yourSecretRecoveryPhraseIs {
+    return Intl.message(
+      'Your secret recovery phrase is:',
+      name: 'yourSecretRecoveryPhraseIs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone.`
+  String get seedPhraseWarning {
+    return Intl.message(
+      'Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone.',
+      name: 'seedPhraseWarning',
       desc: '',
       args: [],
     );
