@@ -15,6 +15,7 @@ import 'package:sprintf/sprintf.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../generated/l10n.dart';
+import '../routes/popups/bottom_sheet.dart';
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
 
@@ -513,75 +514,14 @@ class Utils {
     String? cancelText,
     required WidgetBuilder bodyBuilder,
   }) async {
-    ThemeData themeData = Theme.of(context);
     bool? result = await showModalBottomSheet<bool>(
       context: context,
       builder: (ctx) {
-        return SafeArea(
-          child: TextButtonTheme(
-            data: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                primary: themeData.colorScheme.onPrimary,
-                backgroundColor: themeData.colorScheme.primary,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(40)),
-                ),
-                textStyle: themeData.textTheme.button?.copyWith(
-                  color: themeData.primaryColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (title != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(title, style: themeData.textTheme.headline6),
-                  ),
-                ],
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: bodyBuilder(ctx),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor: themeData.colorScheme.background,
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop(false);
-                          },
-                          child: Text(
-                            cancelText ?? S.current.no,
-                            style: TextStyle(
-                              color: themeData.colorScheme.onBackground,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(true);
-                          },
-                          child: Text(confirmText ?? S.current.yes),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+        return ConfirmBottomSheet(
+          bodyBuilder: bodyBuilder,
+          title: title,
+          confirmText: confirmText,
+          cancelText: cancelText,
         );
       },
     );
