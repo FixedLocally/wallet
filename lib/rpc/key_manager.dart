@@ -221,6 +221,25 @@ class KeyManager {
     });
   }
 
+  Future<void> requestRemoveWallet(BuildContext context, ManagedKey? managedKey) async {
+    late String msg;
+    if (KeyManager.instance.isHdWallet) {
+      msg = S.current.removeHdWalletContent;
+    } else {
+      msg = S.current.removeKeyWalletContent;
+    }
+    bool confirm = await Utils.showConfirmBottomSheet(
+      context: context,
+      title: S.current.removeWallet,
+      bodyBuilder: (_) => Text(msg),
+      confirmText: S.current.delete,
+    );
+    if (!confirm) {
+      return;
+    }
+    await KeyManager.instance.removeWallet(managedKey);
+  }
+
   Future<void> removeWallet([ManagedKey? key]) async {
     // get seed
     key ??= _activeWallet;
@@ -234,6 +253,7 @@ class KeyManager {
         } else {
           _activeWallet = null;
         }
+        _activeWallet?._active = true;
         await txn.execute("update wallets set active=1 where id=?", [_activeWallet!.id]);
       }
     });

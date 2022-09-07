@@ -809,6 +809,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Wallet Settings`
+  String get walletSettings {
+    return Intl.message(
+      'Wallet Settings',
+      name: 'walletSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Security Settings`
+  String get securitySettings {
+    return Intl.message(
+      'Security Settings',
+      name: 'securitySettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Creating wallet...`
+  String get creatingWallet {
+    return Intl.message(
+      'Creating wallet...',
+      name: 'creatingWallet',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

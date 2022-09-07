@@ -10,6 +10,7 @@ import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
+import 'package:wallet/routes/settings.dart';
 import '../generated/l10n.dart';
 import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
@@ -278,7 +279,8 @@ class _HomeRouteState extends State<HomeRoute> {
           SlidableAction(
             backgroundColor: Colors.red,
             onPressed: (ctx) async {
-              _removeWallet(key);
+              await KeyManager.instance.requestRemoveWallet(context, key);
+              setState(() {});
             },
             icon: Icons.delete_forever,
             label: S.current.removeWallet,
@@ -882,88 +884,31 @@ class _HomeRouteState extends State<HomeRoute> {
     return ListView(
       children: [
         ListTile(
+          title: Text(S.of(context).walletSettings),
           onTap: () async {
-            String? name = await Utils.showInputDialog(
-              context: context,
-              prompt: S.current.newWalletName,
-              initialValue: KeyManager.instance.walletName,
-            );
-            if (name != null) {
-              await Utils.showLoadingDialog(
-                context: context,
-                future: KeyManager.instance.renameWallet(name),
-                text: S.current.renamingWallet,
-              );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => WalletSettingsRoute(),
+              ),
+            ).then((value) {
               setState(() {});
-            }
+            });
           },
-          title: Text(S.current.renameWallet),
         ),
         ListTile(
+          title: Text(S.current.securitySettings),
           onTap: () async {
-            await Utils.showLoadingDialog(context: context, future: KeyManager.instance.createWallet(), text: "Creating wallet...");
-            setState(() {});
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => SecuritySettingsRoute(),
+              ),
+            ).then((value) {
+              setState(() {});
+            });
           },
-          title: Text(S.current.createWallet),
         ),
-        ListTile(
-          onTap: () async {
-            String? key = await Utils.showInputDialog(
-              context: context,
-              prompt: S.current.enterNewKey,
-            );
-            if (key == null) {
-              return;
-            }
-            List<int>? decodedKey;
-            try {
-              decodedKey = base58decode(key);
-            } catch (_) {
-              try {
-                decodedKey = (jsonDecode(key) as List).cast();
-              } catch (_) {}
-            }
-            if (decodedKey == null || (decodedKey.length != 64 && decodedKey.length != 32)) {
-              Utils.showInfoDialog(
-                context: context,
-                title: S.current.invalidKey,
-                content: S.current.invalidKeyContent,
-              );
-              return;
-            }
-            decodedKey = decodedKey.sublist(0, 32);
-            await KeyManager.instance.importWallet(decodedKey);
-            setState(() {});
-          },
-          title: Text(S.current.importWallet),
-        ),
-        ListTile(
-          onTap: () {
-            KeyManager.instance.requestShowPrivateKey(context);
-          },
-          title: Text(S.current.exportPrivateKey),
-        ),
-        ListTile(
-          onTap: () {
-            _removeWallet(null);
-          },
-          title: Text(S.current.removeWallet),
-        ),
-        if (KeyManager.instance.isHdWallet)
-          ...[
-            ListTile(
-              onTap: () {
-                KeyManager.instance.requestShowRecoveryPhrase(context);
-              },
-              title: Text(S.current.exportSecretRecoveryPhrase),
-            ),
-            ListTile(
-              onTap: () {
-                // todo reset seed
-              },
-              title: Text(S.current.resetSecretRecoveryPhrase),
-            ),
-          ],
       ],
     );
   }
@@ -1118,26 +1063,6 @@ class _HomeRouteState extends State<HomeRoute> {
         });
       });
     });
-  }
-
-  Future _removeWallet(ManagedKey? key) async {
-    late String msg;
-    if (KeyManager.instance.isHdWallet) {
-      msg = S.current.removeHdWalletContent;
-    } else {
-      msg = S.current.removeKeyWalletContent;
-    }
-    bool confirm = await Utils.showConfirmBottomSheet(
-      context: context,
-      title: S.current.removeWallet,
-      bodyBuilder: (_) => Text(msg),
-      confirmText: S.current.delete,
-    );
-    if (!confirm) {
-      return;
-    }
-    await KeyManager.instance.removeWallet(key);
-    setState(() {});
   }
 
   Future<void> _loadRoutes() async {

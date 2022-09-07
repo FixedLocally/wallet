@@ -45,6 +45,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "copySeedSuccess": MessageLookupByLibrary.simpleMessage(
             "Copied secret recovery phrase to clipboard"),
         "createWallet": MessageLookupByLibrary.simpleMessage("Create Wallet"),
+        "creatingWallet":
+            MessageLookupByLibrary.simpleMessage("Creating wallet..."),
         "delegationWarning": MessageLookupByLibrary.simpleMessage(
             "%s %s is currently delegated to:\n%s.\n\nUnlike on EVM chains, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -105,6 +107,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Revoking delegation..."),
         "searchTokensOrPasteAddress": MessageLookupByLibrary.simpleMessage(
             "Search tokens or paste address"),
+        "securitySettings":
+            MessageLookupByLibrary.simpleMessage("Security Settings"),
         "seedPhraseWarning": MessageLookupByLibrary.simpleMessage(
             "Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone."),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
@@ -130,6 +134,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
         "walletNum": MessageLookupByLibrary.simpleMessage("Wallet %s"),
+        "walletSettings":
+            MessageLookupByLibrary.simpleMessage("Wallet Settings"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes"),
         "yourSecretRecoveryPhraseIs": MessageLookupByLibrary.simpleMessage(
             "Your secret recovery phrase is:")
