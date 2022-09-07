@@ -770,10 +770,10 @@ class S {
     );
   }
 
-  /// `Tap to reveal`
+  /// `Hold to reveal`
   String get tapToReveal {
     return Intl.message(
-      'Tap to reveal',
+      'Hold to reveal',
       name: 'tapToReveal',
       desc: '',
       args: [],

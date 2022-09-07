@@ -119,7 +119,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
         "swap": MessageLookupByLibrary.simpleMessage("Swap"),
-        "tapToReveal": MessageLookupByLibrary.simpleMessage("Tap to reveal"),
+        "tapToReveal": MessageLookupByLibrary.simpleMessage("Hold to reveal"),
         "transactionMayFailToConfirm": MessageLookupByLibrary.simpleMessage(
             "Transaction may fail to confirm"),
         "txConfirmed":

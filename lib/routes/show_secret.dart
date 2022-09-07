@@ -39,9 +39,19 @@ class _ShowSecretRouteState extends State<ShowSecretRoute> {
             children: [
               if (widget.header != null) widget.header!,
               GestureDetector(
-                onTap: () {
+                onTapDown: (_) {
                   setState(() {
-                    _revealed = !_revealed;
+                    _revealed = true;
+                  });
+                },
+                onTapUp: (_) {
+                  setState(() {
+                    _revealed = false;
+                  });
+                },
+                onTapCancel: () {
+                  setState(() {
+                    _revealed = false;
                   });
                 },
                 child: Container(
