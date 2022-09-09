@@ -110,6 +110,12 @@ class _WalletSettingsRouteState extends State<WalletSettingsRoute> {
             },
             title: Text(S.current.importWallet),
           ),
+          ListTile(
+            onTap: () {
+              KeyManager.instance.requestRemoveWallet(context, null);
+            },
+            title: Text(S.current.removeWallet),
+          ),
         ],
       ),
     );
@@ -135,12 +141,6 @@ class _SecuritySettingsRouteState extends State<SecuritySettingsRoute> {
               KeyManager.instance.requestShowPrivateKey(context);
             },
             title: Text(S.current.exportPrivateKey),
-          ),
-          ListTile(
-            onTap: () {
-              KeyManager.instance.requestRemoveWallet(context, null);
-            },
-            title: Text(S.current.removeWallet),
           ),
           if (KeyManager.instance.isHdWallet)
             ...[
