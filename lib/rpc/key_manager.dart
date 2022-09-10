@@ -45,20 +45,56 @@ class KeyManager {
   Future<void> init() async {
     _db = await openDatabase(
       "key_manager.db",
-      version: 1,
+      version: 2,
       onCreate: (Database db, int version) async {
         await db.execute(
-          "CREATE TABLE wallets ("
-          "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
-          "name TEXT," // wallet nickname
-          "pubkey TEXT," // wallet nickname
-          "key_type TEXT," // "seed" or "json"
-          "key_hash TEXT," // secure_storage_key=`${key_type}_${key_hash}`
-          "key_path TEXT," // key derivation path eg m/44'/501'/0'/0'
-          "active BOOLEAN"
-          ")"
+            "CREATE TABLE wallets ("
+                "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                "name TEXT," // wallet nickname
+                "pubkey TEXT," // wallet nickname
+                "key_type TEXT," // "seed" or "json"
+                "key_hash TEXT," // secure_storage_key=`${key_type}_${key_hash}`
+                "key_path TEXT," // key derivation path eg m/44'/501'/0'/0'
+                "active BOOLEAN" // active wallet indicator
+                ")"
+        );
+        await db.execute(
+            "CREATE TABLE connections ("
+                "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                "wallet_id INTEGER," // wallet id in wallets table
+                "domain TEXT" // whitelisted domain
+                ")"
+        );
+        await db.execute(
+            "CREATE TABLE address_book ("
+                "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                "pubkey TEXT," // wallet pubkey
+                "nickname TEXT," // wallet nickname
+                "last_used_ts INTEGER" // last used timestamp
+                ")"
         );
       },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        switch (oldVersion) {
+          case 1:
+            await db.execute(
+                "CREATE TABLE connections ("
+                    "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                    "wallet_id INTEGER," // wallet id in wallets table
+                    "domain TEXT" // whitelisted domain
+                    ")"
+            );
+            await db.execute(
+                "CREATE TABLE address_book ("
+                    "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                    "pubkey TEXT," // wallet pubkey
+                    "nickname TEXT," // wallet nickname
+                    "last_used_ts INTEGER" // last used timestamp
+                    ")"
+            );
+            // continue; // fall thru, continue upgrading
+        }
+      }
     );
     List<Map<String, Object?>> wallets = await _db.query("wallets");
     _wallets = wallets.map((Map<String, Object?> wallet) {
