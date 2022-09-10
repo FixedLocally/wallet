@@ -62,7 +62,7 @@ class WalletApp extends StatelessWidget {
       title: 'Flutter Demo',
       darkTheme: darkTheme,
       themeMode: ThemeMode.dark,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         S.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],

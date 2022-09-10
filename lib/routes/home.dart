@@ -10,7 +10,6 @@ import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
-import 'package:wallet/routes/settings.dart';
 import '../generated/l10n.dart';
 import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
@@ -19,6 +18,8 @@ import '../utils/utils.dart';
 import '../widgets/approve_tx.dart';
 import '../widgets/header.dart';
 import '../widgets/image.dart';
+import 'mixins/inherited.dart';
+import 'settings.dart';
 import 'tokens/tokens.dart';
 import 'webview.dart';
 
@@ -29,19 +30,10 @@ class HomeRoute extends StatefulWidget {
   State<HomeRoute> createState() => _HomeRouteState();
 }
 
-class _HomeRouteState extends State<HomeRoute> {
+class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   int _page = 0;
-  final Map<String, Map<String, SplTokenAccountDataInfoWithUsd>> _balances = {};
-  final Map<String, Completer> _balancesCompleters = {};
-  final Map<String, Completer> _tokenInfoCompleters = {};
-  final Map<String, Map<String, dynamic>> _tokenDetails = {};
   final GlobalKey<RefreshIndicatorState> _nftRefresherKey = GlobalKey();
   final GlobalKey<RefreshIndicatorState> _tokenRefresherKey = GlobalKey();
-
-  final JupiterAggregatorClient _jupClient = JupiterAggregatorClient();
-  final Map<String, int> _jupTopTokens = {};
-  JupiterIndexedRouteMap? _jupRouteMap;
-  bool _jupRouteMapLoading = false;
 
   late TextEditingController _fromAmtController;
 
@@ -56,7 +48,7 @@ class _HomeRouteState extends State<HomeRoute> {
     super.initState();
     _fromAmtController = TextEditingController();
     _fromAmtController.debounce(Duration(milliseconds: 400), (value) {
-      _loadRoutes();
+      _loadRoutes(_from, _to);
     });
     _fromAmtController.addListener(() {
       if (_amt == _fromAmtController.text) return;
@@ -319,29 +311,29 @@ class _HomeRouteState extends State<HomeRoute> {
 
   Widget _balanceList(ThemeData themeData) {
     String pubKey = KeyManager.instance.pubKey;
-    if (_balances[pubKey] == null) {
-      if (_balancesCompleters[pubKey] == null) {
-        _startLoadingBalances(pubKey);
+    if (balances[pubKey] == null) {
+      if (balancesCompleters[pubKey] == null) {
+        appWidget.startLoadingBalances(pubKey);
       }
       return const Center(child: CircularProgressIndicator());
     } else {
-      Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
-      balances.removeWhere((key, value) => _tokenDetails[key]?["decimals"] == 0);
+      Map<String, SplTokenAccountDataInfoWithUsd> myBalances = Map.of(balances[pubKey]!);
+      myBalances.removeWhere((key, value) => tokenDetails[key]?["decimals"] == 0);
       return RefreshIndicator(
         key: _tokenRefresherKey,
         onRefresh: () {
-          _startLoadingBalances(pubKey);
-          return _balancesCompleters[pubKey]!.future;
+          appWidget.startLoadingBalances(pubKey);
+          return balancesCompleters[pubKey]!.future;
         },
         child: ListView.builder(
-          itemCount: balances.length + 1,
+          itemCount: myBalances.length + 1,
           itemBuilder: (ctx, index) {
             if (index == 0) {
-              double totalUsd = balances.values.fold(
+              double totalUsd = myBalances.values.fold(
                 0.0,
                 (sum, balance) => sum + max(0.0, balance.usd ?? -1),
               );
-              double totalUsdChange = balances.values.fold(
+              double totalUsdChange = myBalances.values.fold(
                 0.0,
                 (sum, balance) => sum + (balance.usdChange ?? 0),
               );
@@ -383,7 +375,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 ),
               );
             }
-            return _balanceListTile(balances.entries.elementAt(index - 1), themeData);
+            return _balanceListTile(myBalances.entries.elementAt(index - 1), themeData);
           },
         ),
       );
@@ -392,24 +384,24 @@ class _HomeRouteState extends State<HomeRoute> {
 
   Widget _swap(ThemeData themeData) {
     String pubKey = KeyManager.instance.pubKey;
-    if (_balances[pubKey] == null || _jupRouteMap == null || _jupRouteMapLoading) {
-      if (_balancesCompleters[pubKey] == null) {
-        _startLoadingBalances(pubKey);
+    if (balances[pubKey] == null || jupRouteMap == null || jupRouteMapLoading) {
+      if (balancesCompleters[pubKey] == null) {
+        appWidget.startLoadingBalances(pubKey);
       }
-      _loadJupRouteIndex();
+      appWidget.loadJupRouteIndex();
       return const Center(child: CircularProgressIndicator());
     } else {
-      Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
-      balances.removeWhere((key, value) => _tokenDetails[key]?["decimals"] == 0);
-      balances.removeWhere((key, value) => _tokenDetails[key] == null);
-      List<String> mintKeys = _jupRouteMap!.mintKeys;
-      mintKeys.removeWhere((element) => _tokenDetails[element] == null);
+      Map<String, SplTokenAccountDataInfoWithUsd> myBalances = Map.of(balances[pubKey]!);
+      myBalances.removeWhere((key, value) => tokenDetails[key]?["decimals"] == 0);
+      myBalances.removeWhere((key, value) => tokenDetails[key] == null);
+      List<String> mintKeys = jupRouteMap!.mintKeys;
+      mintKeys.removeWhere((element) => tokenDetails[element] == null);
       mintKeys.sort(Utils.compoundComparator([
-        (a, b) => (balances[b]?.usd ?? 0).compareTo(balances[a]?.usd ?? 0),
-        (a, b) => (_jupTopTokens[a] ?? 6969) - (_jupTopTokens[b] ?? 6969),
+        (a, b) => (myBalances[b]?.usd ?? 0).compareTo(myBalances[a]?.usd ?? 0),
+        (a, b) => (jupTopTokens[a] ?? 6969) - (jupTopTokens[b] ?? 6969),
       ]));
-      Map<String, dynamic> fromTokenDetail = _tokenDetails[_from] ?? {};
-      Map<String, dynamic> toTokenDetail = _tokenDetails[_to] ?? {};
+      Map<String, dynamic> fromTokenDetail = tokenDetails[_from] ?? {};
+      Map<String, dynamic> toTokenDetail = tokenDetails[_to] ?? {};
       return TextButtonTheme(
         data: TextButtonThemeData(
           style: TextButton.styleFrom(
@@ -449,7 +441,7 @@ class _HomeRouteState extends State<HomeRoute> {
                               if (mintKey == null) return;
                               setState(() {
                                 _from = mintKey;
-                                _loadRoutes();
+                                _loadRoutes(_from, _to);
                               });
                             });
                           },
@@ -494,7 +486,7 @@ class _HomeRouteState extends State<HomeRoute> {
                         visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                       ),
                       onPressed: () {
-                        _fromAmtController.text = ((balances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0) / 2).toString();
+                        _fromAmtController.text = ((myBalances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0) / 2).toString();
                       },
                       child: Text(
                         S.current.halfCap,
@@ -509,7 +501,7 @@ class _HomeRouteState extends State<HomeRoute> {
                         visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                       ),
                       onPressed: () {
-                        _fromAmtController.text = (balances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0).toString();
+                        _fromAmtController.text = (myBalances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0).toString();
                       },
                       child: Text(
                         S.current.maxCap,
@@ -521,14 +513,14 @@ class _HomeRouteState extends State<HomeRoute> {
                     SizedBox(width: 8),
                     Padding(
                       padding: const EdgeInsets.only(right: 20.0),
-                      child: Text("${balances[_from]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                      child: Text("${myBalances[_from]?.tokenAmount.uiAmountString ?? "0"} ${tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
                     ),
                   ],
                 ),
               ),
             IconButton(
               onPressed: () {
-                int decimals = _tokenDetails[_to!]!["decimals"]!;
+                int decimals = tokenDetails[_to!]!["decimals"]!;
                 setState(() {
                   String? from = _from;
                   _from = _to;
@@ -564,7 +556,7 @@ class _HomeRouteState extends State<HomeRoute> {
                               if (mintKey == null) return;
                               setState(() {
                                 _to = mintKey;
-                                _loadRoutes();
+                                _loadRoutes(_from, _to);
                               });
                             });
                           },
@@ -591,7 +583,7 @@ class _HomeRouteState extends State<HomeRoute> {
                 alignment: Alignment.bottomRight,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 20.0),
-                  child: Text("${balances[_to]?.tokenAmount.uiAmountString ?? "0"} ${_tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
+                  child: Text("${myBalances[_to]?.tokenAmount.uiAmountString ?? "0"} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
                 ),
               ),
             if (_fromAmtController.text.isNotEmpty)
@@ -603,7 +595,7 @@ class _HomeRouteState extends State<HomeRoute> {
                       i,
                       ListTile(
                         title: Text(path),
-                        subtitle: Text("${route.outAmount / pow(10, _tokenDetails[_to!]!["decimals"])}"),
+                        subtitle: Text("${route.outAmount / pow(10, tokenDetails[_to!]!["decimals"])}"),
                         trailing: i == _chosenRoute ? Icon(Icons.check) : null,
                         onTap: () async {
                           setState(() {
@@ -623,7 +615,7 @@ class _HomeRouteState extends State<HomeRoute> {
                               FocusScope.of(context).unfocus();
                               ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
                               JupiterSwapTransactions swapTxs =
-                              await _jupClient.getSwapTransactions(
+                              await appWidget.getSwapTransactions(
                                   userPublicKey: KeyManager.instance.pubKey,
                                   route: _routes![_chosenRoute]);
                               List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction]
@@ -657,8 +649,8 @@ class _HomeRouteState extends State<HomeRoute> {
                                   }
                                 }
                                 // reload routes after trying to swap
-                                _loadRoutes();
-                                _startLoadingBalances(KeyManager.instance.pubKey);
+                                _loadRoutes(_from, _to);
+                                appWidget.startLoadingBalances(KeyManager.instance.pubKey);
                               }
                             },
                             child: Text(
@@ -681,12 +673,12 @@ class _HomeRouteState extends State<HomeRoute> {
   }
 
   Widget _balanceListTile(MapEntry<String, SplTokenAccountDataInfoWithUsd> entry, ThemeData themeData) {
-    String name = _tokenDetails[entry.key]?["name"] ?? "";
-    String symbol = _tokenDetails[entry.key]?["symbol"] ?? "";
+    String name = tokenDetails[entry.key]?["name"] ?? "";
+    String symbol = tokenDetails[entry.key]?["symbol"] ?? "";
     name = name.isNotEmpty ? name : entry.key.shortened;
     Widget? leading;
-    if (_tokenDetails[entry.key] != null) {
-      String? image = _tokenDetails[entry.key]?["image"];
+    if (tokenDetails[entry.key] != null) {
+      String? image = tokenDetails[entry.key]?["image"];
       if (image != null) {
         leading = MultiImage(image: image, size: 48);
       } else {
@@ -786,33 +778,33 @@ class _HomeRouteState extends State<HomeRoute> {
 
   Widget _nftList(ThemeData themeData) {
     String pubKey = KeyManager.instance.pubKey;
-    if (_balances[pubKey] == null) {
-      if (_balancesCompleters[pubKey] == null) {
-        _startLoadingBalances(pubKey);
+    if (balances[pubKey] == null) {
+      if (balancesCompleters[pubKey] == null) {
+        appWidget.startLoadingBalances(pubKey);
       }
       return const Center(child: CircularProgressIndicator());
     } else {
-      if (_tokenInfoCompleters[pubKey]?.isCompleted != true) {
+      if (tokenInfoCompleters[pubKey]?.isCompleted != true) {
         return const Center(child: CircularProgressIndicator());
       }
-      Map<String, SplTokenAccountDataInfoWithUsd> balances = Map.of(_balances[pubKey]!);
-      balances.removeWhere((key, value) => _tokenDetails[key]?["decimals"] != 0);
+      Map<String, SplTokenAccountDataInfoWithUsd> myBalances = Map.of(balances[pubKey]!);
+      myBalances.removeWhere((key, value) => tokenDetails[key]?["decimals"] != 0);
       return RefreshIndicator(
         key: _nftRefresherKey,
         onRefresh: () {
-          _startLoadingBalances(pubKey);
-          return _balancesCompleters[pubKey]!.future;
+          appWidget.startLoadingBalances(pubKey);
+          return balancesCompleters[pubKey]!.future;
         },
-        child: balances.isNotEmpty
+        child: myBalances.isNotEmpty
             ? GridView(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 280,
                   childAspectRatio: 1,
                   mainAxisSpacing: 16,
                 ),
-                children: balances.entries.map((entry) {
+                children: myBalances.entries.map((entry) {
                   String name =
-                      _tokenDetails[entry.key]?["name"] ?? S.current.loading;
+                      tokenDetails[entry.key]?["name"] ?? S.current.loading;
                   name = name.isNotEmpty
                       ? name
                       : "${entry.key.substring(0, 5)}...";
@@ -824,7 +816,7 @@ class _HomeRouteState extends State<HomeRoute> {
                         top: 16,
                         bottom: 16,
                         child: MultiImage(
-                          image: _tokenDetails[entry.value.mint]!["image"],
+                          image: tokenDetails[entry.value.mint]!["image"],
                           size: 160,
                           borderRadius: 24,
                         ),
@@ -859,7 +851,7 @@ class _HomeRouteState extends State<HomeRoute> {
                               builder: (ctx) => SendTokenRoute(
                                 balance: entry.value,
                                 tokenDetails:
-                                    _tokenDetails[entry.value.mint] ?? {},
+                                    tokenDetails[entry.value.mint] ?? {},
                                 nft: true,
                               ),
                             ),
@@ -960,7 +952,7 @@ class _HomeRouteState extends State<HomeRoute> {
                     MaterialPageRoute(
                       builder: (ctx) => SendTokenRoute(
                         balance: balance,
-                        tokenDetails: _tokenDetails[balance.mint] ?? {},
+                        tokenDetails: tokenDetails[balance.mint] ?? {},
                       ),
                     ),
                   ) ?? false;
@@ -987,7 +979,7 @@ class _HomeRouteState extends State<HomeRoute> {
                       Navigator.pop(context);
                       bool burn = await Utils.showConfirmBottomSheet(
                         context: context,
-                        title: sprintf(S.current.burnConfirm, [_tokenDetails[balance.mint]?["symbol"] ?? balance.mint.shortened]),
+                        title: sprintf(S.current.burnConfirm, [tokenDetails[balance.mint]?["symbol"] ?? balance.mint.shortened]),
                         bodyBuilder: (_) => Text(S.current.burnConfirmContent),
                       );
                       if (!burn) return;
@@ -1004,7 +996,7 @@ class _HomeRouteState extends State<HomeRoute> {
                         owner: Ed25519HDPublicKey(base58decode(balance.owner)),
                       ));
                       await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
-                      _startLoadingBalances(KeyManager.instance.pubKey);
+                      appWidget.startLoadingBalances(KeyManager.instance.pubKey);
                     },
                   )
                 else
@@ -1032,7 +1024,7 @@ class _HomeRouteState extends State<HomeRoute> {
                         owner: Ed25519HDPublicKey(base58decode(balance.owner)),
                       ));
                       await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
-                      _startLoadingBalances(KeyManager.instance.pubKey);
+                      appWidget.startLoadingBalances(KeyManager.instance.pubKey);
                     },
                   )
             ],
@@ -1041,81 +1033,34 @@ class _HomeRouteState extends State<HomeRoute> {
       },
     );
   }
-
-  void _startLoadingBalances(String pubKey) {
-    Completer balCompleter = Completer();
-    Completer metadataCompleter = Completer();
-    _balancesCompleters[pubKey] = balCompleter;
-    _tokenInfoCompleters[pubKey] = metadataCompleter;
-    Utils.getBalances(pubKey).then((value) async {
-      balCompleter.complete();
-      setState(() {
-        _balances[pubKey] = value.asMap().map((key, value) =>
-            MapEntry(value.mint, value));
-      });
-      List<String> mints = value.map((e) => e.mint).toList();
-      mints.removeWhere((element) => _tokenDetails.keys.contains(element));
-      Map<String, Map<String, dynamic>?> tokenInfos = await Utils.getTokens(mints);
-      metadataCompleter.complete();
-      setState(() {
-        tokenInfos.forEach((mint, info) {
-          if (info != null) _tokenDetails[mint] = info;
-        });
-      });
-    });
-  }
-
-  Future<void> _loadRoutes() async {
-    if (_from == null || _to == null) {
+  
+  Future<void> _loadRoutes(String? from, String? to) async {
+    if (from == null || to == null) {
       return;
     }
     setState(() {
       _routes = null;
       _chosenRoute = -1;
     });
-    String fromMint = _from!;
-    String toMint = _to!;
+    String fromMint = from;
+    String toMint = to;
     fromMint = fromMint == nativeSol ? nativeSolMint : fromMint;
     toMint = toMint == nativeSol ? nativeSolMint : toMint;
     double amt = double.tryParse(_fromAmtController.text) ?? 0.0;
-    int decimals = _tokenDetails[_from!]!["decimals"]!;
+    int decimals = tokenDetails[from]!["decimals"]!;
     double amtIn = amt * pow(10, decimals);
     if (amtIn == 0) return;
     // print("loading routes from $amtIn $fromMint to $toMint");
     // print(StackTrace.current);
-    List<JupiterRoute> routes = await _jupClient.getQuote(
-      inputMint: fromMint,
-      outputMint: toMint,
+    List<JupiterRoute> routes = await appWidget.getQuotes(
+      fromMint: fromMint,
+      toMint: toMint,
       amount: amtIn.floor(),
       // feeBps: 10,
     );
     setState(() {
       _routes = routes;
       _chosenRoute = 0;
-    });
-  }
-
-  Future<void> _loadJupRouteIndex() async {
-    if (_jupRouteMap != null || _jupRouteMapLoading) return;
-    _jupRouteMapLoading = true;
-    JupiterIndexedRouteMap routeMap = await _jupClient.getIndexedRouteMap();
-    _jupRouteMap = routeMap;
-    print("got jup map");
-    List<String> topTokens = await Utils.getTopTokens();
-    topTokens.asMap().forEach((key, value) {
-      _jupTopTokens[value] = key;
-    });
-    List<String> mints = routeMap.mintKeys.toList();
-    mints.removeWhere((element) => _tokenDetails.keys.contains(element));
-    print(mints);
-    Utils.getTokens(mints).then((value) {
-      print("got ${value.length} tokens");
-      setState(() {
-        value.forEach((mint, info) {
-          if (info != null) _tokenDetails[mint] = info;
-        });
-        _jupRouteMapLoading = false;
-      });
     });
   }
 
@@ -1126,10 +1071,10 @@ class _HomeRouteState extends State<HomeRoute> {
       context: context,
       builder: (BuildContext context) {
         return _ChooseTokenDialog(
-          balances: _balances[pubKey] ?? {},
-          jupTopTokens: _jupTopTokens,
+          balances: balances[pubKey] ?? {},
+          jupTopTokens: jupTopTokens,
           mintKeys: [nativeSol, ...mintKeys],
-          tokenDetails: _tokenDetails,
+          tokenDetails: tokenDetails,
         );
       },
     );
