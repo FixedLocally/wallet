@@ -43,12 +43,14 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
   Set<JavascriptChannel> get _jsChannels => {
     JavascriptChannel(
       name: 'messageHandler$_realMessageHandlerKey',
-      onMessageReceived: (JavascriptMessage message) {
+      onMessageReceived: (JavascriptMessage message) async {
         String msg = message.message;
         Map call = jsonDecode(msg);
         String method = call['method'];
         Map params = call['params'] ?? {};
         int id = call['id'];
+        String url = await _controller?.currentUrl() ?? "";
+        params['domain'] = Uri.parse(url).host;
         RpcServer.entryPoint(contextHolder, method, params).then((value) {
           print("rpcCall: $method, $params => $value");
           if (value.isError) {

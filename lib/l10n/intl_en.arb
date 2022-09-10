@@ -78,5 +78,8 @@
   "pleaseAuthenticateToContinue": "Please authenticate to continue",
   "walletSettings": "Wallet Settings",
   "securitySettings": "Security Settings",
-  "creatingWallet": "Creating wallet..."
+  "creatingWallet": "Creating wallet...",
+  "connectWallet": "Connect Wallet",
+  "connectWalletContent": "Only connect to websites you trust.",
+  "cancel": "Cancel"
 }

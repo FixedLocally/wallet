@@ -304,6 +304,31 @@ class KeyManager {
     }
   }
 
+  Future<bool> requestConnect(BuildContext context, String domain, bool onlyIfTrusted) async {
+    // todo show website info
+    List l = await _db.query("connections", where: "domain=? and wallet_id=?", whereArgs: [domain, _activeWallet!.id]);
+    if (l.isEmpty) {
+      if (onlyIfTrusted) return false;
+      bool approve = await Utils.showConfirmBottomSheet(
+        context: context,
+        title: S.current.connectWallet,
+        bodyBuilder: (_) =>
+            Text(S.current.connectWalletContent),
+        confirmText: S.current.ok,
+        cancelText: S.current.cancel,
+      );
+      if (approve) {
+        await _db.insert("connections", {
+          "domain": domain,
+          "wallet_id": _activeWallet!.id,
+        });
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<void> requestShowRecoveryPhrase(BuildContext context) async {
     if (await authenticateUser(context) == false) return;
     NavigatorState nav = Navigator.of(context);

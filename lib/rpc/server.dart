@@ -74,7 +74,7 @@ class RpcServer {
 
   // return a pubkey
   static Future<RpcResponse> _connect(ContextHolder contextHolder, Map args) async {
-    if (args["onlyIfTrusted"] == true) {
+    if (contextHolder.context == null || !await KeyManager.instance.requestConnect(contextHolder.context!, args["domain"], args["onlyIfTrusted"] == true)) {
       return RpcResponse.error(RpcConstants.kUserRejected);
     }
 

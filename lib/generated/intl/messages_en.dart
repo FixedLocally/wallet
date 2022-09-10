@@ -32,12 +32,16 @@ class MessageLookup extends MessageLookupByLibrary {
             "This action is irreversible, make sure you\'ve selected the correct token."),
         "burningTokens":
             MessageLookupByLibrary.simpleMessage("Burning tokens..."),
+        "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "chooseToken": MessageLookupByLibrary.simpleMessage("Choose token"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "closeTokenAccount":
             MessageLookupByLibrary.simpleMessage("Close token account"),
         "closeTokenAccountContent": MessageLookupByLibrary.simpleMessage(
             "Another contract interaction may recreate this account."),
+        "connectWallet": MessageLookupByLibrary.simpleMessage("Connect Wallet"),
+        "connectWalletContent": MessageLookupByLibrary.simpleMessage(
+            "Only connect to websites you trust."),
         "continuE": MessageLookupByLibrary.simpleMessage("Continue"),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
         "copyPrivateKeySuccess": MessageLookupByLibrary.simpleMessage(

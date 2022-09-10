@@ -839,6 +839,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Connect Wallet`
+  String get connectWallet {
+    return Intl.message(
+      'Connect Wallet',
+      name: 'connectWallet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only connect to websites you trust.`
+  String get connectWalletContent {
+    return Intl.message(
+      'Only connect to websites you trust.',
+      name: 'connectWalletContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel`
+  String get cancel {
+    return Intl.message(
+      'Cancel',
+      name: 'cancel',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
