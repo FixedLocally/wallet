@@ -306,7 +306,6 @@ class KeyManager {
   }
 
   Future<bool> requestConnect(BuildContext context, String domain, String title, List<String> logoUrls, bool onlyIfTrusted) async {
-    // todo show website info
     ThemeData theme = Theme.of(context);
     List l = await _db.query("connections", where: "domain=? and wallet_id=?", whereArgs: [domain, _activeWallet!.id]);
     if (l.isEmpty) {
@@ -318,6 +317,7 @@ class KeyManager {
         bodyBuilder: (_) {
           return Column(
             children: [
+              SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
@@ -334,6 +334,7 @@ class KeyManager {
               Text(
                 title,
                 style: theme.textTheme.headline5,
+                textAlign: TextAlign.center,
               ),
               Text(domain),
               SizedBox(height: 16),

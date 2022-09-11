@@ -37,12 +37,12 @@ class ConfirmBottomSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 32),
+            SizedBox(height: 16),
             if (title != null) ...[
               Text(title!, style: themeData.textTheme.headline6),
             ],
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: bodyBuilder(context),
             ),
             SizedBox(height: 8),
