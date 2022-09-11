@@ -304,8 +304,10 @@ class KeyManager {
     }
   }
 
-  Future<bool> requestConnect(BuildContext context, String domain, bool onlyIfTrusted) async {
+  Future<bool> requestConnect(BuildContext context, String domain, String title, List<String> logoUrls, bool onlyIfTrusted) async {
     // todo show website info
+    print(title);
+    print(logoUrls);
     List l = await _db.query("connections", where: "domain=? and wallet_id=?", whereArgs: [domain, _activeWallet!.id]);
     if (l.isEmpty) {
       if (onlyIfTrusted) return false;
@@ -377,6 +379,10 @@ class KeyManager {
         );
       },
     ));
+  }
+
+  Future<void> clearConnectionHistory() async {
+    await _db.delete("connections", where: "wallet_id=?", whereArgs: [_activeWallet!.id]);
   }
 }
 

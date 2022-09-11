@@ -81,5 +81,7 @@
   "creatingWallet": "Creating wallet...",
   "connectWallet": "Connect Wallet",
   "connectWalletContent": "Only connect to websites you trust.",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "clearConnectionHistory": "Clear connection history",
+  "clearConnectionHistoryContent": "You will need to approve all connections to this wallet again."
 }

@@ -157,6 +157,18 @@ class _SecuritySettingsRouteState extends State<SecuritySettingsRoute> {
                 title: Text(S.current.resetSecretRecoveryPhrase),
               ),
             ],
+          ListTile(
+            onTap: () async {
+              bool approved = await Utils.showConfirmBottomSheet(
+                context: context,
+                title: S.current.clearConnectionHistory,
+                bodyBuilder: (_) => Text(S.of(context).clearConnectionHistoryContent),
+              );
+              if (!approved) return;
+              KeyManager.instance.clearConnectionHistory();
+            },
+            title: Text(S.of(context).clearConnectionHistory),
+          ),
         ],
       ),
     );
