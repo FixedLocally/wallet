@@ -869,6 +869,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Clear connection history`
+  String get clearConnectionHistory {
+    return Intl.message(
+      'Clear connection history',
+      name: 'clearConnectionHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You will need to approve all connections to this wallet again.`
+  String get clearConnectionHistoryContent {
+    return Intl.message(
+      'You will need to approve all connections to this wallet again.',
+      name: 'clearConnectionHistoryContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect`
+  String get connect {
+    return Intl.message(
+      'Connect',
+      name: 'connect',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

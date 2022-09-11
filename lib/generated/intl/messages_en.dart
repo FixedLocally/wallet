@@ -34,11 +34,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Burning tokens..."),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "chooseToken": MessageLookupByLibrary.simpleMessage("Choose token"),
+        "clearConnectionHistory":
+            MessageLookupByLibrary.simpleMessage("Clear connection history"),
+        "clearConnectionHistoryContent": MessageLookupByLibrary.simpleMessage(
+            "You will need to approve all connections to this wallet again."),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "closeTokenAccount":
             MessageLookupByLibrary.simpleMessage("Close token account"),
         "closeTokenAccountContent": MessageLookupByLibrary.simpleMessage(
             "Another contract interaction may recreate this account."),
+        "connect": MessageLookupByLibrary.simpleMessage("Connect"),
         "connectWallet": MessageLookupByLibrary.simpleMessage("Connect Wallet"),
         "connectWalletContent": MessageLookupByLibrary.simpleMessage(
             "Only connect to websites you trust."),
