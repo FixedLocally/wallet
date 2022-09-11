@@ -149,7 +149,7 @@ function(key, bogusKeys) {
                 return rpc("disconnect", opts);
             },
             signTransaction: async function(tx) {
-                let signature = await rpc("signTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash});
+                let signature = await rpc("signTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo()});
                 signature.signature = new Uint8Array(signature.signature);
                 debugLog("pre", tx);
                 if (tx.signatures.length) {
@@ -166,7 +166,7 @@ function(key, bogusKeys) {
                 return tx;
             },
             signAllTransactions: async function(txs) {
-                let signatures = await rpc("signAllTransactions", {"txs": txs.map((tx) => ({"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash}))});
+                let signatures = await rpc("signAllTransactions", {"txs": txs.map((tx) => ({"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash})), title: title(), logo: logo()});
                 for (let i = 0; i < signatures.length; ++i) {
                     signatures[i].signature = new Uint8Array(signatures[i].signature);
                     debugLog("multi pre", txs[i]);
@@ -185,7 +185,7 @@ function(key, bogusKeys) {
                 return txs;
             },
             signAndSendTransaction: async function(tx) {
-                let sig = await rpc("signAndSendTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash});
+                let sig = await rpc("signAndSendTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo()});
                 debugLog(sig);
                 return sig;
             },
