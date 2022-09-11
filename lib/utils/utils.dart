@@ -516,6 +516,9 @@ class Utils {
   }) async {
     bool? result = await showModalBottomSheet<bool>(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (ctx) {
         return ConfirmBottomSheet(
           bodyBuilder: bodyBuilder,
