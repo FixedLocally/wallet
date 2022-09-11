@@ -105,6 +105,29 @@ function(key, bogusKeys) {
                 window[`eventIngestion${bogusKey}`] = bogusRpc;
             }
         }
+        function title() {
+            let ogTitle = document.querySelectorAll('meta[name="og:title"]');
+            if (ogTitle.length > 0) {
+                return ogTitle[0].content;
+            }
+            if (document.title) {
+                return document.title;
+            }
+            return document.location.href;
+        }
+        function logo() {
+            let possibilities = [];
+            let ati = document.querySelectorAll('link[rel="apple-touch-icon"]');
+            if (ati.length > 0) {
+                possibilities.push(...Array.prototype.map.bind(ati)(x => x.href));
+            }
+            let linkIcon = document.querySelectorAll('link[rel="icon"]');
+            if (linkIcon.length > 0) {
+                possibilities.push(...Array.prototype.map.bind(linkIcon)(x => x.href));
+            }
+            possibilities.push(document.location.origin + "/favicon.ico");
+            return possibilities.filter((x, i, a) => a.indexOf(x) == i);
+        }
 
         setup();
 
@@ -120,7 +143,7 @@ function(key, bogusKeys) {
                 return rpc("create_error", {});
             },
             connect: function(opts) {
-                return rpc("connect", opts);
+                return rpc("connect", {...opts, title: title(), logo: logo()});
             },
             disconnect: function(opts) {
                 return rpc("disconnect", opts);
