@@ -40,6 +40,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   String? _from;
   String? _to;
   String _amt = "";
+  String? _loadedAmt;
   List<JupiterRoute>? _routes;
   int _chosenRoute = -1;
   bool _hasEnoughBalance = false;
@@ -444,6 +445,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                               if (mintKey == null) return;
                               setState(() {
                                 _from = mintKey;
+                                _loadedAmt = null;
                                 _loadRoutes(_from, _to);
                               });
                             });
@@ -528,6 +530,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                   String? from = _from;
                   _from = _to;
                   _to = from;
+                  _loadedAmt = null;
                   if (_routes != null && _routes!.isNotEmpty) {
                     _amt = (_routes!.first.outAmount / pow(10, decimals)).toString();
                     _fromAmtController.text = _amt;
@@ -559,6 +562,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                               if (mintKey == null) return;
                               setState(() {
                                 _to = mintKey;
+                                _loadedAmt = null;
                                 _loadRoutes(_from, _to);
                               });
                             });
@@ -1038,7 +1042,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   }
   
   Future<void> _loadRoutes(String? from, String? to) async {
-    if (from == null || to == null) {
+    if (from == null || to == null || _loadedAmt == _fromAmtController.text) {
       return;
     }
     setState(() {
@@ -1049,6 +1053,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     String toMint = to;
     fromMint = fromMint == nativeSol ? nativeSolMint : fromMint;
     toMint = toMint == nativeSol ? nativeSolMint : toMint;
+    _loadedAmt = _fromAmtController.text;
     double amt = double.tryParse(_fromAmtController.text) ?? 0.0;
     int decimals = tokenDetails[from]!["decimals"]!;
     double amtIn = amt * pow(10, decimals);
