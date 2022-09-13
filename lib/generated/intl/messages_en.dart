@@ -73,6 +73,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "importWallet": MessageLookupByLibrary.simpleMessage("Import Wallet"),
         "importedWallet":
             MessageLookupByLibrary.simpleMessage("Imported Wallet"),
+        "insufficientBalance":
+            MessageLookupByLibrary.simpleMessage("Insufficient balance"),
         "insufficientFunds":
             MessageLookupByLibrary.simpleMessage("Insufficient funds"),
         "invalidAddress":

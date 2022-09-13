@@ -42,6 +42,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   String _amt = "";
   List<JupiterRoute>? _routes;
   int _chosenRoute = -1;
+  bool _hasEnoughBalance = false;
 
   @override
   void initState() {
@@ -613,7 +614,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                       children: [
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () async {
+                            onPressed: _hasEnoughBalance ? () async {
                               FocusScope.of(context).unfocus();
                               ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
                               JupiterSwapTransactions swapTxs =
@@ -654,9 +655,9 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                                 _loadRoutes(_from, _to);
                                 appWidget.startLoadingBalances(KeyManager.instance.pubKey);
                               }
-                            },
+                            } : null,
                             child: Text(
-                              S.current.swap,
+                              _hasEnoughBalance ? S.current.swap : S.current.insufficientBalance,
                             ),
                           ),
                         ),
@@ -1063,6 +1064,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     setState(() {
       _routes = routes;
       _chosenRoute = 0;
+      _hasEnoughBalance = double.parse(balances[KeyManager.instance.pubKey]![_from]?.tokenAmount.uiAmountString ?? "0") >= (double.tryParse(_fromAmtController.text) ?? 0.0);
     });
   }
 

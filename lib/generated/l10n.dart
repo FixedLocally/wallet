@@ -899,6 +899,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Insufficient balance`
+  String get insufficientBalance {
+    return Intl.message(
+      'Insufficient balance',
+      name: 'insufficientBalance',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

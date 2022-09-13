@@ -84,5 +84,6 @@
   "cancel": "Cancel",
   "clearConnectionHistory": "Clear connection history",
   "clearConnectionHistoryContent": "You will need to approve all connections to this wallet again.",
-  "connect": "Connect"
+  "connect": "Connect",
+  "insufficientBalance": "Insufficient balance"
 }
