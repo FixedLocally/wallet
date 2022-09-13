@@ -305,6 +305,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
         _createWebsiteListTile("Mango Markets", "https://trade.mango.markets"),
         _createWebsiteListTile("Orca", "https://orca.so"),
+        _createWebsiteListTile("Marinade Governance", "https://tribeca.so/gov/mnde/nftgauges/validator"),
+        _createWebsiteListTile("Magic Eden", "https://magiceden.io"),
       ],
     );
   }
@@ -1156,6 +1158,10 @@ class _ChooseTokenDialogState extends State<_ChooseTokenDialog> {
             visualDensity: VisualDensity(horizontal: -4, vertical: -4),
             icon: Icon(Icons.clear),
             onPressed: () {
+              if (_searchController.text.isEmpty) {
+                Navigator.of(context).pop();
+                return;
+              }
               _searchController.clear();
               setState(() {
                 _filteredMints = widget.mintKeys;
