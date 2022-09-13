@@ -635,6 +635,10 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                                 },
                               );
                               if (approved) {
+                                appWidget.startLoadingBalances(pubKey);
+                                await Utils.showLoadingDialog(context: context, future: balancesCompleters[pubKey]!.future, text: S.current.sendingTx);
+                                double fromBefore = double.parse(balances[pubKey]![_from]!.tokenAmount.uiAmountString ?? "0");
+                                double toBefore = double.parse(balances[pubKey]![_to]!.tokenAmount.uiAmountString ?? "0");
                                 // send tx one by one
                                 for (Uint8List tx in txs) {
                                   Completer completer = Completer();
@@ -656,8 +660,30 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                                   }
                                 }
                                 // reload routes after trying to swap
-                                _loadRoutes(_from, _to);
+                                // clear input
+                                setState(() {
+                                  _fromAmtController.text = "";
+                                  _amt = "";
+                                  _routes = null;
+                                  _chosenRoute = -1;
+                                });
+                                // _loadRoutes(_from, _to);
                                 appWidget.startLoadingBalances(KeyManager.instance.pubKey);
+                                await balancesCompleters[pubKey]!.future;
+                                double fromAfter = double.parse(balances[pubKey]![_from]!.tokenAmount.uiAmountString ?? "0");
+                                double toAfter = double.parse(balances[pubKey]![_to]!.tokenAmount.uiAmountString ?? "0");
+                                String fromDelta = (fromBefore - fromAfter).toStringAsFixed(tokenDetails[_from]?["decimals"] ?? 6);
+                                String toDelta = (toAfter - toBefore).toStringAsFixed(tokenDetails[_from]?["decimals"] ?? 6);
+                                // rip out the trailing zeros
+                                // rip parse hack
+                                // fromDelta = double.parse(fromDelta).toString();
+                                // toDelta = double.parse(toDelta).toString();
+                                fromDelta = fromDelta.replaceAll(RegExp(r"0+$"), "");
+                                toDelta = toDelta.replaceAll(RegExp(r"0+$"), "");
+                                scaffold.showSnackBar(SnackBar(content: Text(sprintf(S.current.swapSuccess, [fromDelta, tokenDetails[_from]?["symbol"] ?? _from!.shortened, toDelta, tokenDetails[_to]?["symbol"] ?? _to!.shortened]))));
+                              } else {
+                                _loadedAmt = null;
+                                _loadRoutes(_from, _to);
                               }
                             } : null,
                             child: Text(

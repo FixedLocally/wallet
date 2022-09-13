@@ -85,5 +85,6 @@
   "clearConnectionHistory": "Clear connection history",
   "clearConnectionHistoryContent": "You will need to approve all connections to this wallet again.",
   "connect": "Connect",
-  "insufficientBalance": "Insufficient balance"
+  "insufficientBalance": "Insufficient balance",
+  "swapSuccess": "Swapped %s %s for %s %s"
 }

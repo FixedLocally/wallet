@@ -909,6 +909,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Swapped %s %s for %s %s`
+  String get swapSuccess {
+    return Intl.message(
+      'Swapped %s %s for %s %s',
+      name: 'swapSuccess',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
