@@ -594,9 +594,23 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                 ),
               ),
             if (_fromAmtController.text.isNotEmpty)
-              if (_routes != null)
-                ...[
-                  ..._routes!.asMap().map((i, route) {
+              if (_routes != null) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _loadedAmt = null;
+                          _routes = null;
+                          _loadRoutes(_from, _to);
+                        });
+                      },
+                      icon: Icon(Icons.refresh),
+                    ),
+                  ],
+                ),
+                ..._routes!.asMap().map((i, route) {
                     String path = route.marketInfos.map((e) => e.label).join(" > ");
                     return MapEntry(
                       i,
