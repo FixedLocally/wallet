@@ -90,5 +90,6 @@
   "cleanupTokenAccounts": "Cleanup token accounts",
   "noEmptyTokenAccounts": "No empty token accounts found",
   "cleanup": "Cleanup",
-  "tokenAccountsClosed": "Token accounts closed"
+  "tokenAccountsClosed": "%s Token accounts closed",
+  "selectAll": "Select all"
 }

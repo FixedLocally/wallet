@@ -127,6 +127,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Security Settings"),
         "seedPhraseWarning": MessageLookupByLibrary.simpleMessage(
             "Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone."),
+        "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendToken": MessageLookupByLibrary.simpleMessage("Send %s"),
         "sendingTx":
@@ -147,7 +148,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Swapped %s %s for %s %s"),
         "tapToReveal": MessageLookupByLibrary.simpleMessage("Hold to reveal"),
         "tokenAccountsClosed":
-            MessageLookupByLibrary.simpleMessage("Token accounts closed"),
+            MessageLookupByLibrary.simpleMessage("%s Token accounts closed"),
         "transactionMayFailToConfirm": MessageLookupByLibrary.simpleMessage(
             "Transaction may fail to confirm"),
         "txConfirmed":

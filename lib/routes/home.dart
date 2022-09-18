@@ -968,19 +968,22 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
             if (toClose.isEmpty) {
               return;
             }
-            List<Instruction> ixs = [];
-            for (SplTokenAccountDataInfoWithUsd account in toClose) {
-              ixs.add(
-                TokenInstruction.closeAccount(
-                  accountToClose: Ed25519HDPublicKey(base58decode(account.account)),
-                  destination: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
-                  owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
-                ),
-              );
+            // each tx can only take 27 accounts
+            for (int i = 0; i < toClose.length; i += 27) {
+              List<Instruction> ixs = [];
+              toClose.skip(i).take(27).forEach((account) {
+                ixs.add(
+                  TokenInstruction.closeAccount(
+                    accountToClose: Ed25519HDPublicKey(base58decode(account.account)),
+                    destination: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
+                    owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
+                  ),
+                );
+              });
+              await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs));
             }
-            await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs));
             appWidget.startLoadingBalances(KeyManager.instance.pubKey);
-            scaffold.showSnackBar(SnackBar(content: Text(S.current.tokenAccountsClosed)));
+            scaffold.showSnackBar(SnackBar(content: Text(sprintf(S.current.tokenAccountsClosed, [toClose.length]))));
           },
         ),
       ],
@@ -1353,6 +1356,14 @@ class _CloseEmptyAccountsDialogState extends State<_CloseEmptyAccountsDialog> wi
             Navigator.pop(context);
           },
           child: Text(S.current.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _selected.addAll(emptyAccounts);
+            });
+          },
+          child: Text(S.current.selectAll),
         ),
         TextButton(
           onPressed: () {

@@ -950,11 +950,21 @@ class S {
     );
   }
 
-  /// `Token accounts closed`
+  /// `%s Token accounts closed`
   String get tokenAccountsClosed {
     return Intl.message(
-      'Token accounts closed',
+      '%s Token accounts closed',
       name: 'tokenAccountsClosed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select all`
+  String get selectAll {
+    return Intl.message(
+      'Select all',
+      name: 'selectAll',
       desc: '',
       args: [],
     );
