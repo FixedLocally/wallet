@@ -27,6 +27,8 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
   JupiterIndexedRouteMap? _jupRouteMap;
   bool _jupRouteMapLoading = false;
 
+  Timer? _balanceReloader;
+
   static WalletAppWidgetState of(BuildContext context) {
     final WalletAppWidgetState? result =
     context.findAncestorStateOfType<WalletAppWidgetState>();
@@ -38,6 +40,7 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _balanceReloader = Timer(Duration(minutes: 1), () => _reloadActiveBalances(true));
   }
 
   Future<void> loadJupRouteIndex() async {
@@ -111,11 +114,24 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
     );
   }
 
+  void _reloadActiveBalances([bool reschedule = false]) {
+    if (KeyManager.instance.isReady) {
+      startLoadingBalances(KeyManager.instance.pubKey);
+    }
+    if (reschedule) {
+      _balanceReloader?.cancel();
+      _balanceReloader = Timer(Duration(minutes: 1), () => _reloadActiveBalances(true));
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('AppLifecycleState state:  $state');
-    if (state == AppLifecycleState.resumed && KeyManager.instance.isReady) {
-      startLoadingBalances(KeyManager.instance.pubKey);
+    if (state == AppLifecycleState.resumed) {
+      _reloadActiveBalances(true);
+    }
+    if (state == AppLifecycleState.paused) {
+      _balanceReloader?.cancel();
+      _balanceReloader = null;
     }
   }
 
