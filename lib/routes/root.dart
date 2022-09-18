@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:jupiter_aggregator/jupiter_aggregator.dart';
 
+import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import 'home.dart';
 
@@ -13,7 +14,7 @@ class WalletAppWidget extends StatefulWidget {
   State<WalletAppWidget> createState() => WalletAppWidgetState();
 }
 
-class WalletAppWidgetState extends State<WalletAppWidget> {
+class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObserver {
   // balances data
   final Map<String, Map<String, SplTokenAccountDataInfoWithUsd>> _balances = {};
   final Map<String, Completer> _balancesCompleters = {};
@@ -31,6 +32,12 @@ class WalletAppWidgetState extends State<WalletAppWidget> {
     context.findAncestorStateOfType<WalletAppWidgetState>();
     assert(result != null, 'No WalletAppWidgetState found in context');
     return result!;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   Future<void> loadJupRouteIndex() async {
@@ -105,6 +112,14 @@ class WalletAppWidgetState extends State<WalletAppWidget> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('AppLifecycleState state:  $state');
+    if (state == AppLifecycleState.resumed && KeyManager.instance.isReady) {
+      startLoadingBalances(KeyManager.instance.pubKey);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return WalletAppInheritedWidget(
       jupRouteMapLoading: _jupRouteMapLoading,
@@ -116,6 +131,12 @@ class WalletAppWidgetState extends State<WalletAppWidget> {
       tokenDetails: _tokenDetails,
       child: HomeRoute(),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
   }
 }
 
