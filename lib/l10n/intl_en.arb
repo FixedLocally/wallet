@@ -88,5 +88,7 @@
   "insufficientBalance": "Insufficient balance",
   "swapSuccess": "Swapped %s %s for %s %s",
   "cleanupTokenAccounts": "Cleanup token accounts",
-  "noEmptyTokenAccounts": "No empty token accounts found"
+  "noEmptyTokenAccounts": "No empty token accounts found",
+  "cleanup": "Cleanup",
+  "tokenAccountsClosed": "Token accounts closed"
 }

@@ -939,6 +939,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Cleanup`
+  String get cleanup {
+    return Intl.message(
+      'Cleanup',
+      name: 'cleanup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Token accounts closed`
+  String get tokenAccountsClosed {
+    return Intl.message(
+      'Token accounts closed',
+      name: 'tokenAccountsClosed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

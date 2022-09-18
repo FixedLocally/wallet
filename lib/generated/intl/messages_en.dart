@@ -34,6 +34,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Burning tokens..."),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "chooseToken": MessageLookupByLibrary.simpleMessage("Choose token"),
+        "cleanup": MessageLookupByLibrary.simpleMessage("Cleanup"),
         "cleanupTokenAccounts":
             MessageLookupByLibrary.simpleMessage("Cleanup token accounts"),
         "clearConnectionHistory":
@@ -145,6 +146,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "swapSuccess":
             MessageLookupByLibrary.simpleMessage("Swapped %s %s for %s %s"),
         "tapToReveal": MessageLookupByLibrary.simpleMessage("Hold to reveal"),
+        "tokenAccountsClosed":
+            MessageLookupByLibrary.simpleMessage("Token accounts closed"),
         "transactionMayFailToConfirm": MessageLookupByLibrary.simpleMessage(
             "Transaction may fail to confirm"),
         "txConfirmed":

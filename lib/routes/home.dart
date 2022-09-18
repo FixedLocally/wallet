@@ -379,7 +379,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                 ),
               );
             }
-            return _balanceListTile(myBalances.entries.elementAt(index - 1), themeData);
+            return _balanceListTile(myBalances.values.elementAt(index - 1), themeData);
           },
         ),
       );
@@ -719,13 +719,13 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     }
   }
 
-  Widget _balanceListTile(MapEntry<String, SplTokenAccountDataInfoWithUsd> entry, ThemeData themeData) {
-    String name = tokenDetails[entry.key]?["name"] ?? "";
-    String symbol = tokenDetails[entry.key]?["symbol"] ?? "";
-    name = name.isNotEmpty ? name : entry.key.shortened;
+  Widget _balanceListTile(SplTokenAccountDataInfoWithUsd entry, ThemeData themeData) {
+    String name = tokenDetails[entry.mint]?["name"] ?? "";
+    String symbol = tokenDetails[entry.mint]?["symbol"] ?? "";
+    name = name.isNotEmpty ? name : entry.mint.shortened;
     Widget? leading;
-    if (tokenDetails[entry.key] != null) {
-      String? image = tokenDetails[entry.key]?["image"];
+    if (tokenDetails[entry.mint] != null) {
+      String? image = tokenDetails[entry.mint]?["image"];
       if (image != null) {
         leading = MultiImage(image: image, size: 48);
       } else {
@@ -734,14 +734,14 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     } else {
       leading = Image.asset("assets/images/unknown.png", width: 48, height: 48,);
     }
-    String uiAmountString = entry.value.tokenAmount.uiAmountString ?? "0";
+    String uiAmountString = entry.tokenAmount.uiAmountString ?? "0";
     // double amount = double.parse(uiAmountString);
     // double unitPrice = entry.value.usd ?? -1;
-    double usd = entry.value.usd ?? -1;
-    double usdChange = (entry.value.usdChange ?? 0);
+    double usd = entry.usd ?? -1;
+    double usdChange = (entry.usdChange ?? 0);
     Widget listTile = ListTile(
       onTap: () {
-        _showTokenMenu(entry.value);
+        _showTokenMenu(entry);
       },
       leading: leading,
       title: Text.rich(TextSpan(
@@ -754,11 +754,11 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                 color: themeData.colorScheme.onBackground.withOpacity(0.8),
               ),
             ),
-          if ((entry.value.delegateAmount?.amount ?? "0") != "0")
+          if ((entry.delegateAmount?.amount ?? "0") != "0")
             WidgetSpan(
               child: GestureDetector(
                 onTap: () async {
-                  String? revokeTx = await entry.value.showDelegationWarning(context, symbol);
+                  String? revokeTx = await entry.showDelegationWarning(context, symbol);
                   if (revokeTx != null) {
                     _tokenRefresherKey.currentState?.show();
                   }
@@ -784,7 +784,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
       ) : null,
     );
     return Slidable(
-      endActionPane: entry.value.tokenAmount.amount == "0" ? ActionPane(
+      endActionPane: entry.tokenAmount.amount == "0" ? ActionPane(
         motion: const ScrollMotion(),
         children: [
           SlidableAction(
@@ -801,7 +801,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                 return;
               }
               Instruction ix = TokenInstruction.closeAccount(
-                accountToClose: Ed25519HDPublicKey(base58decode(entry.value.account)),
+                accountToClose: Ed25519HDPublicKey(base58decode(entry.account)),
                 destination: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
                 owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
               );
@@ -946,6 +946,41 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
             ).then((value) {
               setState(() {});
             });
+          },
+        ),
+        ListTile(
+          title: Text(S.current.cleanupTokenAccounts),
+          onTap: () async {
+            ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
+            appWidget.startLoadingBalances(KeyManager.instance.pubKey);
+            await Utils.showLoadingDialog(context: context, future: sharedData.balancesCompleters[KeyManager.instance.pubKey]!.future);
+            List<SplTokenAccountDataInfoWithUsd> emptyAccounts = sharedData.balances[KeyManager.instance.pubKey]!.values.where((element) => element.tokenAmount.amount == "0").toList();
+            if (emptyAccounts.isEmpty) {
+              scaffold.showSnackBar(SnackBar(content: Text(S.current.noEmptyTokenAccounts)));
+              return;
+            }
+            Set<SplTokenAccountDataInfoWithUsd> toClose = await showDialog(
+              context: context,
+              builder: (_) => _CloseEmptyAccountsDialog(
+                emptyAccounts: emptyAccounts,
+              ),
+            ) ?? {};
+            if (toClose.isEmpty) {
+              return;
+            }
+            List<Instruction> ixs = [];
+            for (SplTokenAccountDataInfoWithUsd account in toClose) {
+              ixs.add(
+                TokenInstruction.closeAccount(
+                  accountToClose: Ed25519HDPublicKey(base58decode(account.account)),
+                  destination: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
+                  owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
+                ),
+              );
+            }
+            await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs));
+            appWidget.startLoadingBalances(KeyManager.instance.pubKey);
+            scaffold.showSnackBar(SnackBar(content: Text(S.current.tokenAccountsClosed)));
           },
         ),
       ],
@@ -1243,6 +1278,89 @@ class _ChooseTokenDialogState extends State<_ChooseTokenDialog> {
           // shrinkWrap: true,
         ),
       ),
+    );
+  }
+}
+
+class _CloseEmptyAccountsDialog extends StatefulWidget {
+  final List<SplTokenAccountDataInfoWithUsd> emptyAccounts;
+
+  const _CloseEmptyAccountsDialog({
+    Key? key,
+    required this.emptyAccounts,
+  }) : super(key: key);
+
+  @override
+  State<_CloseEmptyAccountsDialog> createState() => _CloseEmptyAccountsDialogState();
+}
+
+class _CloseEmptyAccountsDialogState extends State<_CloseEmptyAccountsDialog> with UsesSharedData {
+  List<SplTokenAccountDataInfoWithUsd> get emptyAccounts => widget.emptyAccounts;
+  Set<SplTokenAccountDataInfoWithUsd> _selected = {};
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(S.current.cleanupTokenAccounts),
+      content: SizedBox(
+        height: 400,
+        width: 300,
+        child: ListView(
+          children: [
+            ...emptyAccounts.map((e) {
+              late Widget secondary;
+              if (sharedData.tokenDetails[e.mint]?["image"] != null) {
+                secondary = MultiImage(
+                  image: sharedData.tokenDetails[e.mint]?["image"],
+                  size: 40,
+                );
+              } else {
+                secondary = Image.asset(
+                  "assets/images/unknown.png",
+                  width: 40,
+                  height: 40,
+                );
+              }
+              return CheckboxListTile(
+                value: _selected.contains(e),
+                secondary: secondary,
+                onChanged: (b) {
+                  if (b == true) {
+                    setState(() {
+                      _selected.add(e);
+                    });
+                  } else {
+                    setState(() {
+                      _selected.remove(e);
+                    });
+                  }
+                },
+                title: Text(sharedData.tokenDetails[e.mint]?["name"] ?? e.mint.shortened),
+                subtitle: Text(sharedData.tokenDetails[e.mint]?["symbol"] ?? ""),
+              );
+            }),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(S.current.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context, _selected);
+          },
+          child: Text(S.of(context).cleanup),
+        ),
+      ],
     );
   }
 }
