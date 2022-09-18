@@ -6,7 +6,7 @@ import 'package:solana/base58.dart';
 import '../generated/l10n.dart';
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
-import 'root.dart';
+import 'home.dart';
 
 class ScaffoldRoute extends StatelessWidget {
   final String? title;
@@ -69,7 +69,7 @@ class _WalletSettingsRouteState extends State<WalletSettingsRoute> {
               while (nav.canPop()) {
                 nav.pop();
               }
-              nav.push(MaterialPageRoute(builder: (_) => WalletAppWidget()));
+              nav.push(MaterialPageRoute(builder: (_) => HomeRoute()));
             },
             title: Text(S.current.createWallet),
           ),
@@ -106,7 +106,7 @@ class _WalletSettingsRouteState extends State<WalletSettingsRoute> {
               while (nav.canPop()) {
                 nav.pop();
               }
-              nav.push(MaterialPageRoute(builder: (_) => WalletAppWidget()));
+              nav.push(MaterialPageRoute(builder: (_) => HomeRoute()));
             },
             title: Text(S.current.importWallet),
           ),

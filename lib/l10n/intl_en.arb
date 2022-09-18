@@ -86,5 +86,7 @@
   "clearConnectionHistoryContent": "You will need to approve all connections to this wallet again.",
   "connect": "Connect",
   "insufficientBalance": "Insufficient balance",
-  "swapSuccess": "Swapped %s %s for %s %s"
+  "swapSuccess": "Swapped %s %s for %s %s",
+  "cleanupTokenAccounts": "Cleanup token accounts",
+  "noEmptyTokenAccounts": "No empty token accounts found"
 }

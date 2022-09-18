@@ -919,6 +919,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Cleanup token accounts`
+  String get cleanupTokenAccounts {
+    return Intl.message(
+      'Cleanup token accounts',
+      name: 'cleanupTokenAccounts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No empty token accounts found`
+  String get noEmptyTokenAccounts {
+    return Intl.message(
+      'No empty token accounts found',
+      name: 'noEmptyTokenAccounts',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

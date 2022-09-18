@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'generated/l10n.dart';
 import 'routes/entry_point.dart';
+import 'routes/root.dart';
 
 void main() {
   runApp(const WalletApp());
@@ -58,16 +59,18 @@ class WalletApp extends StatelessWidget {
       fontFamily: "NotoSans",
       elevatedButtonTheme: elevatedButtonThemeData,
     );
-    return MaterialApp(
-      title: 'Flutter Demo',
-      darkTheme: darkTheme,
-      themeMode: ThemeMode.dark,
-      localizationsDelegates: const [
-        S.delegate,
-        ...GlobalMaterialLocalizations.delegates,
-      ],
-      supportedLocales: S.delegate.supportedLocales,
-      home: const EntryPointRoute(),
+    return WalletAppWidget(
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        darkTheme: darkTheme,
+        themeMode: ThemeMode.dark,
+        localizationsDelegates: const [
+          S.delegate,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: const EntryPointRoute(),
+      ),
     );
   }
 }

@@ -5,10 +5,14 @@ import 'package:jupiter_aggregator/jupiter_aggregator.dart';
 
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
-import 'home.dart';
 
 class WalletAppWidget extends StatefulWidget {
-  const WalletAppWidget({Key? key}) : super(key: key);
+  final Widget child;
+
+  const WalletAppWidget({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
 
   @override
   State<WalletAppWidget> createState() => WalletAppWidgetState();
@@ -145,7 +149,7 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
       balancesCompleters: _balancesCompleters,
       tokenInfoCompleters: _tokenInfoCompleters,
       tokenDetails: _tokenDetails,
-      child: HomeRoute(),
+      child: widget.child,
     );
   }
 

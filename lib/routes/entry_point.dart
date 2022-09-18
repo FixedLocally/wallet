@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
-import 'root.dart';
+import 'home.dart';
 import 'setup.dart';
 
 class EntryPointRoute extends StatefulWidget {
@@ -22,7 +22,7 @@ class _EntryPointRouteState extends State<EntryPointRoute> {
           if (KeyManager.instance.isEmpty) {
             return const SetupRoute();
           } else {
-            return const WalletAppWidget();
+            return const HomeRoute();
           }
         },
       ));

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../generated/l10n.dart';
 import '../rpc/key_manager.dart';
 import '../widgets/show_seed.dart';
-import 'root.dart';
+import 'home.dart';
 
 // m/44'/501'/0'/0'
 class SetupRoute extends StatefulWidget {
@@ -64,7 +64,7 @@ class _SetupRouteState extends State<SetupRoute> {
                               // replace setup route
                               Navigator.pushReplacement(context, MaterialPageRoute(
                                 builder: (ctx) {
-                                  return const WalletAppWidget();
+                                  return const HomeRoute();
                                 },
                               ));
                             }

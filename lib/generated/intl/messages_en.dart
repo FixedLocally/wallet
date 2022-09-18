@@ -34,6 +34,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Burning tokens..."),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "chooseToken": MessageLookupByLibrary.simpleMessage("Choose token"),
+        "cleanupTokenAccounts":
+            MessageLookupByLibrary.simpleMessage("Cleanup token accounts"),
         "clearConnectionHistory":
             MessageLookupByLibrary.simpleMessage("Clear connection history"),
         "clearConnectionHistoryContent": MessageLookupByLibrary.simpleMessage(
@@ -97,6 +99,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noCollectibles":
             MessageLookupByLibrary.simpleMessage("No Collectibles"),
+        "noEmptyTokenAccounts": MessageLookupByLibrary.simpleMessage(
+            "No empty token accounts found"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "pay": MessageLookupByLibrary.simpleMessage("Pay"),
         "pleaseAuthenticateToContinue": MessageLookupByLibrary.simpleMessage(
