@@ -154,6 +154,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Transaction may fail to confirm"),
         "txConfirmed":
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
+        "visitWebsite": MessageLookupByLibrary.simpleMessage("Visit website"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
         "walletNum": MessageLookupByLibrary.simpleMessage("Wallet %s"),
         "walletSettings":

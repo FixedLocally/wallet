@@ -979,6 +979,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Visit website`
+  String get visitWebsite {
+    return Intl.message(
+      'Visit website',
+      name: 'visitWebsite',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

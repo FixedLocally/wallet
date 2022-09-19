@@ -92,5 +92,6 @@
   "cleanup": "Cleanup",
   "tokenAccountsClosed": "%s Token accounts closed",
   "selectAll": "Select all",
-  "percentFee": "%s%% fee"
+  "percentFee": "%s%% fee",
+  "visitWebsite": "Visit website"
 }

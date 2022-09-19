@@ -11,6 +11,7 @@ import '../generated/l10n.dart';
 import '../utils/utils.dart';
 import '../widgets/custom_expansion_tile.dart';
 import '../widgets/image.dart';
+import 'webview.dart';
 
 Future<List<VoteAccount>> _processVoteAccounts(List list) async {
   List<VoteAccount> voteAccounts = list[0];
@@ -97,6 +98,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
           final voteAccount = voteAccounts[index];
           Map? validatorInfo = _validatorInfos[voteAccount.nodePubkey];
           String? keybaseUsername = validatorInfo?["keybaseUsername"];
+          String? website = validatorInfo?["website"];
           return CustomExpansionTile(
             key: _keys[index],
             onExpansionChanged: (b) {
@@ -107,6 +109,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
               }
             },
             childrenPadding: const EdgeInsets.only(left: 16, right: 16),
+            expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
             leading: keybaseUsername != null
                 ? KeybaseThumbnail(
               username: keybaseUsername,
@@ -119,12 +122,24 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
             ),
             title: Text(validatorInfo?["name"] ?? voteAccount.nodePubkey),
             // subtitle: Text(voteAccount.votePubkey),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text("${(voteAccount.activatedStake / lamportsPerSol).floor()} SOL"),
-                Text(sprintf(S.current.percentFee, [voteAccount.commission])),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text("${(voteAccount.activatedStake / lamportsPerSol).floor()} SOL"),
+                    Text(sprintf(S.current.percentFee, [voteAccount.commission])),
+                  ],
+                ),
+                IconButton(
+                  icon: Icon(Icons.open_in_new_rounded),
+                  tooltip: S.current.visitWebsite,
+                  onPressed: website != null ? () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => DAppRoute(title: validatorInfo?["name"], initialUrl: website)));
+                  } : null,
+                ),
               ],
             ),
             children: [
