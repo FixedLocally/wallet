@@ -999,6 +999,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Stake SOL to Validator`
+  String get stakeSolToValidator {
+    return Intl.message(
+      'Stake SOL to Validator',
+      name: 'stakeSolToValidator',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

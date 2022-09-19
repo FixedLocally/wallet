@@ -146,6 +146,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "signature": MessageLookupByLibrary.simpleMessage("Signature"),
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
+        "stakeSolToValidator":
+            MessageLookupByLibrary.simpleMessage("Stake SOL to Validator"),
         "swap": MessageLookupByLibrary.simpleMessage("Swap"),
         "swapSuccess":
             MessageLookupByLibrary.simpleMessage("Swapped %s %s for %s %s"),

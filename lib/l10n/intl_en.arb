@@ -94,5 +94,6 @@
   "selectAll": "Select all",
   "percentFee": "%s%% fee",
   "visitWebsite": "Visit website",
-  "searchValidators": "Search Validators"
+  "searchValidators": "Search Validators",
+  "stakeSolToValidator": "Stake SOL to Validator"
 }

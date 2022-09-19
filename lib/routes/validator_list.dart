@@ -8,10 +8,15 @@ import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
 
 import '../generated/l10n.dart';
+import '../rpc/key_manager.dart';
+import '../utils/extensions.dart';
 import '../utils/utils.dart';
 import '../widgets/custom_expansion_tile.dart';
 import '../widgets/image.dart';
+import 'mixins/inherited.dart';
 import 'webview.dart';
+
+double _stakeFee = 0.000010000; // 10k lamports
 
 Future<List<VoteAccount>> _processVoteAccounts(List list) async {
   List<VoteAccount> voteAccounts = list[0];
@@ -67,13 +72,13 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
       _keys = List.generate(_voteAccounts!.length, (index) => GlobalKey<CustomExpansionTileState>());
       _validatorInfos = {};
       List<ProgramAccount> validatorInfos = value[1] as List<ProgramAccount>;
-      validatorInfos.forEach((element) {
+      for (var element in validatorInfos) {
         if (element.account.data is! UnsupportedProgramAccountData) {
           print(element.pubkey);
-          return;
+          continue;
         }
         Map m = (element.account.data as UnsupportedProgramAccountData).parsed;
-        if (m["type"] != "validatorInfo") return;
+        if (m["type"] != "validatorInfo") continue;
         String identity = m["info"]["keys"].where((e) => e["signer"] == true).first["pubkey"];
         _validatorInfos[identity] = m["info"]["configData"];
         for (String key in ["name", "details"]) {
@@ -81,7 +86,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
           if (value == null) continue;
           _validatorInfos[identity]?[key] = utf8.decode(value.codeUnits);
         }
-      });
+      }
 
       _voteAccounts = await compute(_processVoteAccounts, [_voteAccounts!, _validatorInfos]);
       _filteredVoteAccounts = List.of(_voteAccounts!);
@@ -157,7 +162,16 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
               SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () {
-
+                  showModalBottomSheet(
+                    context: context,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                    ),
+                    builder: (_) => _StakeBottomSheet(
+                      voteAccount: voteAccount,
+                      validatorInfo: validatorInfo!,
+                    ),
+                  );
                 },
                 child: Text(S.current.stake),
               ),
@@ -228,6 +242,167 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
         title: const Text('Validator List'),
       ),
       body: child,
+    );
+  }
+}
+
+class _StakeBottomSheet extends StatefulWidget {
+  final VoteAccount voteAccount;
+  final Map validatorInfo;
+
+  const _StakeBottomSheet({
+    Key? key,
+    required this.voteAccount,
+    required this.validatorInfo,
+  }) : super(key: key);
+
+  @override
+  State<_StakeBottomSheet> createState() => _StakeBottomSheetState();
+}
+
+class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedData {
+  late TextEditingController _amountController;
+  String _buttonText = S.current.stake;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController = TextEditingController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
+    Map<String, SplTokenAccountDataInfoWithUsd> myBalances = Map.of(balances[KeyManager.instance.pubKey]!);
+    return TextButtonTheme(
+      data: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          primary: themeData.colorScheme.onPrimary,
+          backgroundColor: themeData.colorScheme.primary,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          textStyle: themeData.textTheme.button?.copyWith(
+            color: themeData.primaryColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              S.current.stakeSolToValidator,
+              style: themeData.textTheme.subtitle1,
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: widget.validatorInfo["keybaseUsername"] != null
+                  ? KeybaseThumbnail(
+                      username: widget.validatorInfo["keybaseUsername"],
+                      size: 48,
+                    )
+                  : Image.asset(
+                      "assets/images/unknown.png",
+                      width: 48,
+                      height: 48,
+                    ),
+              title: Text(widget.validatorInfo["name"] ?? widget.voteAccount.nodePubkey),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("${(widget.voteAccount.activatedStake / lamportsPerSol).floor()} SOL"),
+                  Text(sprintf(S.current.percentFee, [widget.voteAccount.commission])),
+                ],
+              ),
+            ),
+            Utils.wrapField(
+              margin: const EdgeInsets.only(top: 8, bottom: 8),
+              padding: EdgeInsets.only(left: 8, right: 16),
+              themeData: themeData,
+              child: TextField(
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.only(left: 8, top: 12, bottom: 12),
+                  hintText: S.current.amount,
+                  border: InputBorder.none,
+                ),
+                onChanged: (s) {
+                  try {
+                    double amount = s.doubleParsed;
+                    double balance = myBalances[nativeSol]?.tokenAmount.uiAmountString?.doubleParsed ?? 0;
+                    setState(() {
+                      if (amount > balance - _stakeFee) { // 10k lamports
+                        _buttonText = S.current.insufficientBalance;
+                      } else {
+                        _buttonText = S.current.stake;
+                      }
+                    });
+                  } catch (e) {
+                    setState(() {
+                      _buttonText = S.current.invalidAmount;
+                    });
+                  }
+                },
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                controller: _amountController,
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    style: ButtonStyle(
+                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                    ),
+                    onPressed: () {
+                      _amountController.text = ((myBalances[nativeSol]?.tokenAmount.uiAmountString?.doubleParsed ?? _stakeFee) - _stakeFee).toStringAsFixed(9);
+                    },
+                    child: Text(
+                      S.current.maxCap,
+                      style: TextStyle(
+                          fontSize: 12
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: Text("${myBalances[nativeSol]?.tokenAmount.uiAmountString ?? "0"} SOL"),
+                  ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: _buttonText != S.current.stake ? null : () {
+                if (_amountController.text.isEmpty) {
+                  return;
+                }
+                double amount = _amountController.text.doubleParsed;
+                if (amount > (myBalances[nativeSol]?.tokenAmount.uiAmountString?.doubleParsed ?? 0)) {
+                  return;
+                }
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed(
+                  "/stake",
+                  arguments: {
+                    "voteAccount": widget.voteAccount,
+                    "amount": amount,
+                  },
+                );
+              },
+              child: Text(_buttonText),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
