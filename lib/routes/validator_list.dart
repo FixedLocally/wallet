@@ -185,12 +185,17 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
-                      setState(() {
+                      if (value.isEmpty) {
+                        _filteredVoteAccounts = List.of(_voteAccounts!);
+                      } else {
                         _filteredVoteAccounts = _voteAccounts!.where((element) {
-                          Map? validatorInfo = _validatorInfos[element.nodePubkey];
-                          return (validatorInfo?["name"] ?? element.nodePubkey).toLowerCase().contains(value.toLowerCase());
+                          return (_validatorInfos[element.nodePubkey]?["name"] ?? element.nodePubkey).toLowerCase().contains(value.toLowerCase());
                         }).toList();
-                      });
+                      }
+                      for (var element in _keys) {
+                        element.currentState?.collapse(true);
+                      }
+                      setState(() {});
                     },
                   ),
                 ),
@@ -200,6 +205,9 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
                   icon: Icon(Icons.clear),
                   onPressed: () {
                     _filteredVoteAccounts = List.of(_voteAccounts!);
+                    for (var element in _keys) {
+                      element.currentState?.collapse(true);
+                    }
                     setState(() {});
                   },
                 ),

@@ -277,19 +277,19 @@ class CustomExpansionTileState extends State<CustomExpansionTile> with SingleTic
   bool _isExpanded = false;
 
   // kekw
-  void toggle() {
-    _handleTap();
+  void toggle([bool skipAnimation = false]) {
+    _handleTap(skipAnimation);
   }
 
-  void collapse() {
+  void collapse([bool skipAnimation = false]) {
     if (_isExpanded) {
-      _handleTap();
+      _handleTap(skipAnimation);
     }
   }
 
-  void expand() {
+  void expand([bool skipAnimation = false]) {
     if (!_isExpanded) {
-      _handleTap();
+      _handleTap(skipAnimation);
     }
   }
 
@@ -314,18 +314,28 @@ class CustomExpansionTileState extends State<CustomExpansionTile> with SingleTic
     super.dispose();
   }
 
-  void _handleTap() {
+  void _handleTap([bool skipAnimation = false]) {
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
-        _controller.forward();
+        if (skipAnimation) {
+          _controller.value = 1.0;
+        } else {
+          _controller.forward();
+        }
       } else {
-        _controller.reverse().then<void>((void value) {
-          if (!mounted) return;
+        if (skipAnimation) {
+          _controller.value = 0.0;
           setState(() {
             // Rebuild without widget.children.
           });
-        });
+        } else {
+          _controller.reverse().then<void>((void value) {
+            setState(() {
+              // Rebuild without widget.children.
+            });
+          });
+        }
       }
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
