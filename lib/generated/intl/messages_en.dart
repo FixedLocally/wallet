@@ -124,6 +124,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Revoking delegation..."),
         "searchTokensOrPasteAddress": MessageLookupByLibrary.simpleMessage(
             "Search tokens or paste address"),
+        "searchValidators":
+            MessageLookupByLibrary.simpleMessage("Search Validators"),
         "securitySettings":
             MessageLookupByLibrary.simpleMessage("Security Settings"),
         "seedPhraseWarning": MessageLookupByLibrary.simpleMessage(

@@ -989,6 +989,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Search Validators`
+  String get searchValidators {
+    return Intl.message(
+      'Search Validators',
+      name: 'searchValidators',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

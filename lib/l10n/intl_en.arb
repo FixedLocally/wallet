@@ -93,5 +93,6 @@
   "tokenAccountsClosed": "%s Token accounts closed",
   "selectAll": "Select all",
   "percentFee": "%s%% fee",
-  "visitWebsite": "Visit website"
+  "visitWebsite": "Visit website",
+  "searchValidators": "Search Validators"
 }

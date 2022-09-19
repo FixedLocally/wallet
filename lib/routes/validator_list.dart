@@ -54,6 +54,7 @@ class ValidatorListRoute extends StatefulWidget {
 
 class _ValidatorListRouteState extends State<ValidatorListRoute> {
   List<VoteAccount>? _voteAccounts;
+  List<VoteAccount>? _filteredVoteAccounts;
   late List<GlobalKey<CustomExpansionTileState>> _keys;
   late Map<String, Map> _validatorInfos;
 
@@ -83,6 +84,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
       });
 
       _voteAccounts = await compute(_processVoteAccounts, [_voteAccounts!, _validatorInfos]);
+      _filteredVoteAccounts = List.of(_voteAccounts!);
       setState(() {});
     });
   }
@@ -91,7 +93,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
   Widget build(BuildContext context) {
     late Widget child;
     if (_voteAccounts != null) {
-      final voteAccounts = _voteAccounts!;
+      final voteAccounts = _filteredVoteAccounts!;
       child = ListView.builder(
         itemCount: voteAccounts.length,
         itemBuilder: (ctx, index) {
@@ -120,7 +122,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
               width: 48,
               height: 48,
             ),
-            title: Text(validatorInfo?["name"] ?? voteAccount.nodePubkey),
+            title: Text(validatorInfo?["name"] ?? voteAccount.nodePubkey, maxLines: 2, overflow: TextOverflow.ellipsis,),
             // subtitle: Text(voteAccount.votePubkey),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -163,6 +165,51 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
             ],
           );
         },
+      );
+      child = Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.search,
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      isDense: true,
+                      // contentPadding: EdgeInsets.zero,
+                      hintText: S.current.searchTokensOrPasteAddress,
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _filteredVoteAccounts = _voteAccounts!.where((element) {
+                          Map? validatorInfo = _validatorInfos[element.nodePubkey];
+                          return (validatorInfo?["name"] ?? element.nodePubkey).toLowerCase().contains(value.toLowerCase());
+                        }).toList();
+                      });
+                    },
+                  ),
+                ),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    _filteredVoteAccounts = List.of(_voteAccounts!);
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: child,
+          ),
+        ],
       );
     } else {
       child = const Center(
