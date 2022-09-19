@@ -21,6 +21,7 @@ import '../widgets/image.dart';
 import 'mixins/inherited.dart';
 import 'settings.dart';
 import 'tokens/tokens.dart';
+import 'validator_list.dart';
 import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -1052,7 +1053,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                   leading: const Icon(Icons.star),
                   title: Text(S.current.stake),
                   onTap: () {
-                    Navigator.pop(ctx, 2);
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ValidatorListRoute()));
                   },
                 )
               else

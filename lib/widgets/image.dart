@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
+import '../utils/utils.dart';
 import 'svg.dart';
 
 class MultiImage extends StatefulWidget {
@@ -141,3 +143,49 @@ class _LogoState extends State<Logo> {
     }
   }
 }
+
+class KeybaseThumbnail extends StatefulWidget {
+  final String username;
+  final double size;
+
+  const KeybaseThumbnail({Key? key, required this.username, required this.size}) : super(key: key);
+
+  @override
+  State<KeybaseThumbnail> createState() => _KeybaseThumbnailState();
+}
+
+class _KeybaseThumbnailState extends State<KeybaseThumbnail> {
+  String? _url;
+
+  @override
+  void initState() {
+    super.initState();
+    Utils.httpGet("https://keybase.io/_/api/1.0/user/pic_url.json?username=${widget.username}").then((value) {
+      setState(() {
+        _url = jsonDecode(value)["pic_url"];
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_url == null) {
+      return SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    } else {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(widget.size / 2),
+        child: CachedNetworkImage(
+          imageUrl: _url!,
+          width: widget.size,
+          height: widget.size,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+  }
+}
+

@@ -91,5 +91,6 @@
   "noEmptyTokenAccounts": "No empty token accounts found",
   "cleanup": "Cleanup",
   "tokenAccountsClosed": "%s Token accounts closed",
-  "selectAll": "Select all"
+  "selectAll": "Select all",
+  "percentFee": "%s%% fee"
 }

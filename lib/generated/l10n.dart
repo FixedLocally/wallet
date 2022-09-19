@@ -969,6 +969,16 @@ class S {
       args: [],
     );
   }
+
+  /// `%s%% fee`
+  String get percentFee {
+    return Intl.message(
+      '%s%% fee',
+      name: 'percentFee',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

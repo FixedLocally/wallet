@@ -282,6 +282,14 @@ class Utils {
     return _solanaClient.rpcClient.getAccountInfo(pubkey, commitment: Commitment.confirmed, encoding: Encoding.base64);
   }
 
+  static Future<VoteAccounts> getVoteAccounts() {
+    return _solanaClient.rpcClient.getVoteAccounts(keepUnstakedDelinquents: false, delinquentSlotDistance: 128);
+  }
+
+  static Future<List<ProgramAccount>> getValidatorInfo() {
+    return _solanaClient.rpcClient.getProgramAccounts("Config1111111111111111111111111111111111111", encoding: Encoding.jsonParsed);
+  }
+
   static Future<void> confirmTransaction(
     String sig, {
     Commitment status = Commitment.confirmed,
@@ -293,7 +301,7 @@ class Utils {
   static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
     if (tokens.isEmpty) return {};
     String url = "$_coinGeckoUrl${tokens.join(",")}";
-    Map<String, dynamic> json = jsonDecode(await _httpGet(url));
+    Map<String, dynamic> json = jsonDecode(await httpGet(url));
     return Map.of(_hardCodedPrices)..addAll(json);
   }
 
@@ -364,7 +372,7 @@ class Utils {
   }
 
   static Future<List<String>> getTopTokens() async {
-    return jsonDecode((await _httpGet(_topTokensUrl))).cast<String>();
+    return jsonDecode((await httpGet(_topTokensUrl))).cast<String>();
   }
 
   static Future<List<List>> batchGetMetadata(List<String> addresses) async {
@@ -491,7 +499,7 @@ class Utils {
     );
   }
 
-  static Future<String> _httpGet(String url) async {
+  static Future<String> httpGet(String url) async {
     debugPrint("get $url");
     return DefaultCacheManager().downloadFile(url).then((value) => value.file.readAsString());
   }

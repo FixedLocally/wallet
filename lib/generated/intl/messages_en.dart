@@ -104,6 +104,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "No empty token accounts found"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "pay": MessageLookupByLibrary.simpleMessage("Pay"),
+        "percentFee": MessageLookupByLibrary.simpleMessage("%s%% fee"),
         "pleaseAuthenticateToContinue": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to continue"),
         "receive": MessageLookupByLibrary.simpleMessage("Receive"),
