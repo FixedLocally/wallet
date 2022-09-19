@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:solana/dto.dart';
@@ -11,15 +14,32 @@ import '../widgets/image.dart';
 Future<List<VoteAccount>> _processVoteAccounts(List list) async {
   List<VoteAccount> voteAccounts = list[0];
   Map<String, Map> validatorInfos = list[1];
-  VoteAccount mint = voteAccounts.firstWhere((element) => element.nodePubkey == "mint13XHZSSxtgHuTSM9qPDEJSbWktpmpM4CZxeLB8f");
-  // remove mint
-  voteAccounts.remove(mint);
-  // remove those without info or commission>20%
-  voteAccounts.removeWhere((element) => validatorInfos[element.nodePubkey] == null || element.commission > 20);
-  // shuffle
-  voteAccounts.shuffle();
-  // add mint back
-  voteAccounts.insert(0, mint);
+  Map<String, double> metrics = {};
+  for (VoteAccount voteAccount in voteAccounts) {
+    double metric = 0;
+    // no info = no visibility, users need to know who you are
+    if (validatorInfos[voteAccount.nodePubkey] == null) continue;
+    // commission too high, mainly gets rid of 100% ones
+    if (voteAccount.commission > 20) continue;
+    // has a name so it's recognisable
+    if (validatorInfos[voteAccount.nodePubkey]?["name"] != null) {
+      metric += 5;
+    }
+    // try to make unprofitable validators more visible
+    if (voteAccount.activatedStake > 1e5 * lamportsPerSol) {
+      metric += (2e5 - voteAccount.activatedStake / lamportsPerSol).clamp(0, 1e5) / 1e4;
+    } else {
+      metric += 10 - voteAccount.activatedStake / lamportsPerSol / 1e9;
+    }
+    // maximise apy
+    metric += (5 - voteAccount.commission / 2).clamp(0, 5);
+    // mass randomisation
+    metric += Random().nextDouble() * 80;
+    metrics[voteAccount.nodePubkey] = metric;
+  }
+  metrics["mint13XHZSSxtgHuTSM9qPDEJSbWktpmpM4CZxeLB8f"] = 100;
+  voteAccounts.sort((b, a) => (metrics[a.nodePubkey] ?? 0).compareTo(metrics[b.nodePubkey] ?? 0));
+
   return voteAccounts;
 }
 
@@ -50,6 +70,11 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
         if (m["type"] != "validatorInfo") return;
         String identity = m["info"]["keys"].where((e) => e["signer"] == true).first["pubkey"];
         _validatorInfos[identity] = m["info"]["configData"];
+        for (String key in ["name", "details"]) {
+          String? value = _validatorInfos[identity]?[key];
+          if (value == null) continue;
+          _validatorInfos[identity]?[key] = utf8.decode(value.codeUnits);
+        }
       });
 
       _voteAccounts = await compute(_processVoteAccounts, [_voteAccounts!, _validatorInfos]);
