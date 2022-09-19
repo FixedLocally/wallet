@@ -194,12 +194,13 @@ class WalletAppInheritedWidget extends InheritedWidget {
 
   @override
   bool updateShouldNotify(WalletAppInheritedWidget oldWidget) {
-    return balances != oldWidget.balances ||
-        balancesCompleters != oldWidget.balancesCompleters ||
-        tokenInfoCompleters != oldWidget.tokenInfoCompleters ||
-        tokenDetails != oldWidget.tokenDetails ||
-        jupTopTokens != oldWidget.jupTopTokens ||
-        jupRouteMap != oldWidget.jupRouteMap ||
-        jupRouteMapLoading != oldWidget.jupRouteMapLoading;
+    // return balances != oldWidget.balances ||
+    //     balancesCompleters != oldWidget.balancesCompleters ||
+    //     tokenInfoCompleters != oldWidget.tokenInfoCompleters ||
+    //     tokenDetails != oldWidget.tokenDetails ||
+    //     jupTopTokens != oldWidget.jupTopTokens ||
+    //     jupRouteMap != oldWidget.jupRouteMap ||
+    //     jupRouteMapLoading != oldWidget.jupRouteMapLoading;
+    return true; // oops excessive reusing of array/maps
   }
 }
