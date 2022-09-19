@@ -110,7 +110,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
                 }
               }
             },
-            childrenPadding: const EdgeInsets.only(left: 16, right: 16),
+            childrenPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
             leading: keybaseUsername != null
                 ? KeybaseThumbnail(
@@ -145,22 +145,21 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
               ],
             ),
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (validatorInfo?["keybaseUsername"] != null)
-                      Text("Keybase: ${validatorInfo?["keybaseUsername"]}"),
-                    if (validatorInfo?["details"] != null)
-                      Text("${validatorInfo?["details"]}"),
-                    if (validatorInfo?["website"] != null)
-                      Text(
-                        validatorInfo?["website"]!,
-                        style: Theme.of(context).textTheme.caption,
-                      ),
-                  ],
+              if (validatorInfo?["keybaseUsername"] != null)
+                Text("Keybase: ${validatorInfo?["keybaseUsername"]}"),
+              if (validatorInfo?["details"] != null)
+                Text("${validatorInfo?["details"]}"),
+              if (validatorInfo?["website"] != null)
+                Text(
+                  validatorInfo?["website"]!,
+                  style: Theme.of(context).textTheme.caption,
                 ),
+              SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+
+                },
+                child: Text(S.current.stake),
               ),
             ],
           );
