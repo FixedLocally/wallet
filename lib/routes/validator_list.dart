@@ -3,7 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:solana/dto.dart';
+import 'package:solana/dto.dart' hide Instruction;
+import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
 
@@ -363,7 +364,10 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
                       visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                     ),
                     onPressed: () {
-                      _amountController.text = ((myBalances[nativeSol]?.tokenAmount.uiAmountString?.doubleParsed ?? _stakeFee) - _stakeFee).toStringAsFixed(9);
+                      _amountController.text = ((myBalances[nativeSol]?.tokenAmount.uiAmountString?.doubleParsed ?? _stakeFee) - _stakeFee - 0.01).toStringAsFixed(9);
+                      setState(() {
+                        _buttonText = S.current.stake;
+                      });
                     },
                     child: Text(
                       S.current.maxCap,
@@ -375,13 +379,15 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
                   SizedBox(width: 8),
                   Padding(
                     padding: const EdgeInsets.only(right: 20.0),
-                    child: Text("${myBalances[nativeSol]?.tokenAmount.uiAmountString ?? "0"} SOL"),
+                    child: Text("${(myBalances[nativeSol]?.tokenAmount.uiAmountString ?? "0").doubleParsed - _stakeFee} SOL"),
                   ),
                 ],
               ),
             ),
             ElevatedButton(
-              onPressed: _buttonText != S.current.stake ? null : () {
+              onPressed: _buttonText != S.current.stake ? null : () async {
+                NavigatorState nav = Navigator.of(context);
+                ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
                 if (_amountController.text.isEmpty) {
                   return;
                 }
@@ -389,14 +395,54 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
                 if (amount > (myBalances[nativeSol]?.tokenAmount.uiAmountString?.doubleParsed ?? 0)) {
                   return;
                 }
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed(
-                  "/stake",
-                  arguments: {
-                    "voteAccount": widget.voteAccount,
-                    "amount": amount,
-                  },
+                bool stake = await Utils.showConfirmBottomSheet(
+                  context: context,
+                  title: S.current.stakeSolToValidator,
+                  bodyBuilder: (_) => Text(
+                    sprintf(S.current.stakeSolToValidatorConfirm, [
+                      amount,
+                      widget.validatorInfo["name"] ?? widget.voteAccount.nodePubkey,
+                    ]),
+                  ),
+                  confirmText: S.current.stake,
+                  cancelText: S.current.cancel,
                 );
+                if (stake) {
+                  String seed = Random().nextInt(1 << 31).toString();
+                  Ed25519HDPublicKey signer = Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey);
+                  Ed25519HDPublicKey stakeKey = await Ed25519HDPublicKey.createWithSeed(
+                    fromPublicKey: signer,
+                    seed: seed,
+                    programId: StakeProgram.id,
+                  );
+                  Instruction initIx = SystemInstruction.createAccountWithSeed(
+                    fundingAccount: signer,
+                    newAccount: stakeKey,
+                    base: signer,
+                    seed: seed,
+                    lamports: (amount * lamportsPerSol).floor(),
+                    space: 200,
+                    owner: StakeProgram.id,
+                  );
+                  Instruction initStakeIx = StakeInstruction.initializeChecked(
+                    stake: stakeKey,
+                    stakeAuthority: signer,
+                    withdrawAuthority: signer,
+                  );
+                  Instruction delegateStakeIx = StakeInstruction.delegateStake(
+                    stake: stakeKey,
+                    authority: signer,
+                    vote: Ed25519HDPublicKey.fromBase58(widget.voteAccount.votePubkey),
+                    config: Ed25519HDPublicKey.fromBase58("StakeConfig11111111111111111111111111111111"),
+                  );
+                  nav.pop(); // stake amount bottom sheet
+                  await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions([initIx, initStakeIx, delegateStakeIx]), text: S.current.staking);
+                  appWidget.startLoadingBalances(signer.toBase58());
+                  nav.pop(); // validator list
+                  scaffold.showSnackBar(SnackBar(
+                    content: Text(sprintf(S.current.stakeSolSuccessful, [amount, widget.validatorInfo["name"] ?? widget.voteAccount.nodePubkey])),
+                  ));
+                }
               },
               child: Text(_buttonText),
             ),

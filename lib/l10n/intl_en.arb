@@ -95,5 +95,8 @@
   "percentFee": "%s%% fee",
   "visitWebsite": "Visit website",
   "searchValidators": "Search Validators",
-  "stakeSolToValidator": "Stake SOL to Validator"
+  "stakeSolToValidator": "Stake SOL to Validator",
+  "stakeSolToValidatorConfirm": "You are about to stake %s SOL to %s.",
+  "staking": "Staking...",
+  "stakeSolSuccessful": "Staked %s SOL to %s"
 }

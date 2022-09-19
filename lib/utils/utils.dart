@@ -398,6 +398,7 @@ class Utils {
     required Future<T> future,
     String? text,
   }) async {
+    NavigatorState nav = Navigator.of(context);
     showDialog<T>(
       context: context,
       barrierDismissible: false,
@@ -414,7 +415,7 @@ class Utils {
       },
     );
     return future.whenComplete(() {
-      Navigator.of(context).pop();
+      nav.pop();
     });
   }
 

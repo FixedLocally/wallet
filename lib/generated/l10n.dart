@@ -1009,6 +1009,36 @@ class S {
       args: [],
     );
   }
+
+  /// `You are about to stake %s SOL to %s.`
+  String get stakeSolToValidatorConfirm {
+    return Intl.message(
+      'You are about to stake %s SOL to %s.',
+      name: 'stakeSolToValidatorConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Staking...`
+  String get staking {
+    return Intl.message(
+      'Staking...',
+      name: 'staking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Staked %s SOL to %s`
+  String get stakeSolSuccessful {
+    return Intl.message(
+      'Staked %s SOL to %s',
+      name: 'stakeSolSuccessful',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
