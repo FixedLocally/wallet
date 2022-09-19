@@ -9,6 +9,7 @@ import 'package:sprintf/sprintf.dart';
 
 import '../generated/l10n.dart';
 import '../utils/utils.dart';
+import '../widgets/custom_expansion_tile.dart';
 import '../widgets/image.dart';
 
 Future<List<VoteAccount>> _processVoteAccounts(List list) async {
@@ -52,13 +53,16 @@ class ValidatorListRoute extends StatefulWidget {
 
 class _ValidatorListRouteState extends State<ValidatorListRoute> {
   List<VoteAccount>? _voteAccounts;
+  late List<GlobalKey<CustomExpansionTileState>> _keys;
   late Map<String, Map> _validatorInfos;
 
   @override
   void initState() {
     super.initState();
+    _keys = [];
     Future.wait([Utils.getVoteAccounts(), Utils.getValidatorInfo()]).then((value) async {
       _voteAccounts = (value[0] as VoteAccounts).current;
+      _keys = List.generate(_voteAccounts!.length, (index) => GlobalKey<CustomExpansionTileState>());
       _validatorInfos = {};
       List<ProgramAccount> validatorInfos = value[1] as List<ProgramAccount>;
       validatorInfos.forEach((element) {
@@ -93,7 +97,16 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
           final voteAccount = voteAccounts[index];
           Map? validatorInfo = _validatorInfos[voteAccount.nodePubkey];
           String? keybaseUsername = validatorInfo?["keybaseUsername"];
-          return ListTile(
+          return CustomExpansionTile(
+            key: _keys[index],
+            onExpansionChanged: (b) {
+              if (b == true) {
+                for (int i = 0; i < _keys.length; ++i) {
+                  if (i != index) _keys[i].currentState?.collapse();
+                }
+              }
+            },
+            childrenPadding: const EdgeInsets.only(left: 16, right: 16),
             leading: keybaseUsername != null
                 ? KeybaseThumbnail(
               username: keybaseUsername,
@@ -105,13 +118,34 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
               height: 48,
             ),
             title: Text(validatorInfo?["name"] ?? voteAccount.nodePubkey),
-            subtitle: Text(voteAccount.votePubkey),
+            // subtitle: Text(voteAccount.votePubkey),
             trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text("${(voteAccount.activatedStake / lamportsPerSol).floor()} SOL"),
                 Text(sprintf(S.current.percentFee, [voteAccount.commission])),
               ],
             ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (validatorInfo?["keybaseUsername"] != null)
+                      Text("Keybase: ${validatorInfo?["keybaseUsername"]}"),
+                    if (validatorInfo?["details"] != null)
+                      Text("${validatorInfo?["details"]}"),
+                    if (validatorInfo?["website"] != null)
+                      Text(
+                        validatorInfo?["website"]!,
+                        style: Theme.of(context).textTheme.caption,
+                      ),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       );

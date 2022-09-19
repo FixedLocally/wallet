@@ -161,6 +161,7 @@ class _KeybaseThumbnailState extends State<KeybaseThumbnail> {
   void initState() {
     super.initState();
     Utils.httpGet("https://keybase.io/_/api/1.0/user/pic_url.json?username=${widget.username}").then((value) {
+      if (!mounted) return;
       setState(() {
         _url = jsonDecode(value)["pic_url"];
       });
