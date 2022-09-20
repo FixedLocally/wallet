@@ -145,7 +145,7 @@ class _LogoState extends State<Logo> {
 }
 
 class KeybaseThumbnail extends StatefulWidget {
-  final String username;
+  final String? username;
   final double size;
 
   const KeybaseThumbnail({Key? key, required this.username, required this.size}) : super(key: key);
@@ -160,12 +160,16 @@ class _KeybaseThumbnailState extends State<KeybaseThumbnail> {
   @override
   void initState() {
     super.initState();
-    Utils.httpGet("https://keybase.io/_/api/1.0/user/pic_url.json?username=${widget.username}").then((value) {
-      if (!mounted) return;
-      setState(() {
-        _url = jsonDecode(value)["pic_url"];
+    if (widget.username == null) {
+      _url = "";
+    } else {
+      Utils.httpGet("https://keybase.io/_/api/1.0/user/pic_url.json?username=${widget.username}").then((value) {
+        if (!mounted) return;
+        setState(() {
+          _url = jsonDecode(value)["pic_url"];
+        });
       });
-    });
+    }
   }
 
   @override
@@ -177,6 +181,9 @@ class _KeybaseThumbnailState extends State<KeybaseThumbnail> {
         child: Center(child: CircularProgressIndicator()),
       );
     } else {
+      if (_url!.isEmpty) {
+        return Image.asset("assets/images/unknown.png", width: widget.size, height: widget.size);
+      }
       return ClipRRect(
         borderRadius: BorderRadius.circular(widget.size / 2),
         child: CachedNetworkImage(
