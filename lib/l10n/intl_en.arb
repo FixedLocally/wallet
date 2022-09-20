@@ -98,5 +98,8 @@
   "stakeSolToValidator": "Stake SOL to Validator",
   "stakeSolToValidatorConfirm": "You are about to stake %s SOL to %s.",
   "staking": "Staking...",
-  "stakeSolSuccessful": "Staked %s SOL to %s"
+  "stakeSolSuccessful": "Staked %s SOL to %s",
+  "stakeSol": "Stake SOL",
+  "manageStakeAccounts": "Manage stake accounts",
+  "stakeAccounts": "Stake Accounts"
 }

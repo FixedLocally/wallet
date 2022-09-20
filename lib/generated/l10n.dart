@@ -1039,6 +1039,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Stake SOL`
+  String get stakeSol {
+    return Intl.message(
+      'Stake SOL',
+      name: 'stakeSol',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage stake accounts`
+  String get manageStakeAccounts {
+    return Intl.message(
+      'Manage stake accounts',
+      name: 'manageStakeAccounts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stake Accounts`
+  String get stakeAccounts {
+    return Intl.message(
+      'Stake Accounts',
+      name: 'stakeAccounts',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

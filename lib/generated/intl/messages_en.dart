@@ -87,6 +87,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKeyContent": MessageLookupByLibrary.simpleMessage(
             "Key must be a base58 encoded string or a JSON array of bytes"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
+        "manageStakeAccounts":
+            MessageLookupByLibrary.simpleMessage("Manage stake accounts"),
         "maxCap": MessageLookupByLibrary.simpleMessage("MAX"),
         "message": MessageLookupByLibrary.simpleMessage("Message"),
         "mockWallet": MessageLookupByLibrary.simpleMessage("Mock Wallet"),
@@ -146,6 +148,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "signature": MessageLookupByLibrary.simpleMessage("Signature"),
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
+        "stakeAccounts": MessageLookupByLibrary.simpleMessage("Stake Accounts"),
+        "stakeSol": MessageLookupByLibrary.simpleMessage("Stake SOL"),
         "stakeSolSuccessful":
             MessageLookupByLibrary.simpleMessage("Staked %s SOL to %s"),
         "stakeSolToValidator":

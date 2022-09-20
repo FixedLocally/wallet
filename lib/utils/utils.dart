@@ -286,6 +286,23 @@ class Utils {
     return _solanaClient.rpcClient.getVoteAccounts(keepUnstakedDelinquents: false, delinquentSlotDistance: 128);
   }
 
+  static Future<List<ProgramAccount>> getStakeAccounts(String pubkey) {
+    return _solanaClient.rpcClient.getProgramAccounts(
+      StakeProgram.programId,
+      encoding: Encoding.jsonParsed,
+      filters: [
+        ProgramDataFilter.memcmpBase58(offset: 44, bytes: pubkey), // withdraw auth match
+      ],
+    ).then((value) {
+      return value.where((e) => e.account.data is ParsedStakeProgramAccountData)
+          .toList();
+    });
+  }
+
+  static Future<int> getCurrentEpoch() {
+    return _solanaClient.rpcClient.getEpochInfo().then((value) => value.epoch);
+  }
+
   static Future<List<ProgramAccount>> getValidatorInfo() {
     return _solanaClient.rpcClient.getProgramAccounts("Config1111111111111111111111111111111111111", encoding: Encoding.jsonParsed);
   }
