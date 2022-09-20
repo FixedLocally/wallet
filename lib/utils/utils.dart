@@ -317,9 +317,18 @@ class Utils {
 
   static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
     if (tokens.isEmpty) return {};
-    String url = "$_coinGeckoUrl${tokens.join(",")}";
-    Map<String, dynamic> json = jsonDecode(await httpGet(url));
-    return Map.of(_hardCodedPrices)..addAll(json);
+    // fetch in betches of 20
+    Map<String, dynamic> result = Map.of(_hardCodedPrices);
+    List<List<String>> batches = [];
+    for (int i = 0; i < tokens.length; i += 20) {
+      batches.add(tokens.sublist(i, min(i + 20, tokens.length)));
+    }
+    for (int i = 0; i < batches.length; ++i) {
+      String url = "$_coinGeckoUrl${batches[i].join(",")}";
+      Map<String, dynamic> json = jsonDecode(await httpGet(url));
+      result.addAll(json);
+    }
+    return result;
   }
 
   static Future<List<SplTokenAccountDataInfoWithUsd>> getBalances(String pubKey) async {
