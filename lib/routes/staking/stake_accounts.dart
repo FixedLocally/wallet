@@ -4,6 +4,7 @@ import 'package:solana/solana.dart';
 
 import '../../generated/l10n.dart';
 import '../../utils/extensions.dart';
+import '../../utils/utils.dart';
 import '../../widgets/image.dart';
 
 class StakeAccountsRoute extends StatefulWidget {
@@ -49,13 +50,16 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
           bool activating = activationEpoch >= widget.epoch;
           bool deactivating = deactivationEpoch >= widget.epoch;
           bool inactive = deactivating && activating;
+          if (inactive) {
+            activating = false;
+          }
           String status = "Active";
-          if (activating) {
+          if (inactive) {
+            status = "Inactive";
+          } else if (activating) {
             status = "Activating";
           } else if (deactivating) {
             status = "Deactivating";
-          } else if (inactive) {
-            status = "Inactive";
           }
           return ListTile(
             leading: KeybaseThumbnail(
@@ -72,6 +76,31 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
                 Text(status),
               ],
             ),
+            onTap: () async {
+              int action = await Utils.showActionBottomSheet(
+                context: context,
+                title: "Stake Account",
+                actions: [
+                  if (!inactive || activating)
+                    BottomSheetAction(title: "Unstake", value: 0),
+                  if (inactive || deactivating)
+                    BottomSheetAction(title: "Re-delegate", value: 1),
+                  if (inactive)
+                    BottomSheetAction(title: "Withdraw", value: 2),
+                ],
+              );
+              switch (action) {
+                case 0:
+                  // unstake
+                  break;
+                case 1:
+                  // redelegate
+                  break;
+                case 2:
+                  // withdraw
+                  break;
+              }
+            },
           );
         },
       ),
