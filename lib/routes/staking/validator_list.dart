@@ -8,14 +8,15 @@ import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
 
-import '../generated/l10n.dart';
-import '../rpc/key_manager.dart';
-import '../utils/extensions.dart';
-import '../utils/utils.dart';
-import '../widgets/custom_expansion_tile.dart';
-import '../widgets/image.dart';
-import 'mixins/inherited.dart';
-import 'webview.dart';
+import '../../generated/l10n.dart';
+import '../../rpc/key_manager.dart';
+import '../../utils/extensions.dart';
+import '../../utils/utils.dart';
+import '../../widgets/custom_expansion_tile.dart';
+import '../../widgets/image.dart';
+import '../mixins/inherited.dart';
+import '../webview.dart';
+import 'stake_accounts.dart';
 
 double _stakeFee = 0.000010000; // 10k lamports
 
@@ -63,6 +64,9 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
   List<VoteAccount>? _filteredVoteAccounts;
   late List<GlobalKey<CustomExpansionTileState>> _keys;
   late Map<String, Map> _validatorInfos;
+  late Map<String, String> _voteIdentities;
+  Map<String, StakeProgramAccountData>? _stakes;
+  int? _epoch;
 
   @override
   void initState() {
@@ -72,6 +76,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
       _voteAccounts = (value[0] as VoteAccounts).current;
       _keys = List.generate(_voteAccounts!.length, (index) => GlobalKey<CustomExpansionTileState>());
       _validatorInfos = {};
+      _voteIdentities = {};
       List<ProgramAccount> validatorInfos = value[1] as List<ProgramAccount>;
       for (var element in validatorInfos) {
         if (element.account.data is! UnsupportedProgramAccountData) {
@@ -91,6 +96,29 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
 
       _voteAccounts = await compute(_processVoteAccounts, [_voteAccounts!, _validatorInfos]);
       _filteredVoteAccounts = List.of(_voteAccounts!);
+      for (var element in _voteAccounts!) {
+        _voteIdentities[element.votePubkey] = element.nodePubkey;
+      }
+      setState(() {});
+    });
+    _stakes = null;
+    Future.wait([Utils.getStakeAccounts(KeyManager.instance.pubKey), Utils.getCurrentEpoch()]).then((value) {
+      List<ProgramAccount> stakes = value[0] as List<ProgramAccount>;
+      int epoch = value[1] as int;
+      _stakes = {};
+      for (ProgramAccount element in stakes) {
+        StakeProgramAccountData acct = (element.account.data as ParsedStakeProgramAccountData).parsed;
+        if (acct is StakeProgramDelegatedAccountData) {
+          print("delegated stake: ${element.pubkey} ${acct.info.stake.delegation.stake} to ${acct.info.stake.delegation.voter}");
+          _stakes![element.pubkey] = acct;
+        }
+        if (acct is StakeProgramInitializedAccountData) {
+          print("initialised stake: ${acct.info.stake.delegation.stake} to ${acct.info.stake.delegation.voter}");
+          _stakes![element.pubkey] = acct;
+        }
+        print(acct);
+      }
+      _epoch = epoch;
       setState(() {});
     });
   }
@@ -100,9 +128,40 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
     late Widget child;
     if (_voteAccounts != null) {
       final voteAccounts = _filteredVoteAccounts!;
+      bool showStakes = _stakes == null || _stakes!.isNotEmpty;
       child = ListView.builder(
-        itemCount: voteAccounts.length,
+        itemCount: voteAccounts.length + (showStakes ? 1 : 0),
         itemBuilder: (ctx, index) {
+          if (showStakes) {
+            if (index == 0) {
+              return ListTile(
+                leading: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: _stakes == null
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : Icon(
+                          Icons.star_rounded,
+                          color: Colors.amber,
+                          size: 32,
+                        ),
+                ),
+                title: Text(_stakes == null ? S.current.loading : S.current.manageStakeAccounts),
+                onTap: () {
+                  if (_stakes == null || _epoch == null) return;
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => StakeAccountsRoute(
+                    voteIdentities: _voteIdentities,
+                    stakes: _stakes!,
+                    validatorInfos: _validatorInfos,
+                    epoch: _epoch!,
+                  )));
+                },
+              );
+            }
+            --index;
+          }
           final voteAccount = voteAccounts[index];
           Map? validatorInfo = _validatorInfos[voteAccount.nodePubkey];
           String? keybaseUsername = validatorInfo?["keybaseUsername"];
@@ -118,15 +177,9 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
             },
             childrenPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
-            leading: keybaseUsername != null
-                ? KeybaseThumbnail(
+            leading: KeybaseThumbnail(
               username: keybaseUsername,
               size: 48,
-            )
-                : Image.asset(
-              "assets/images/unknown.png",
-              width: 48,
-              height: 48,
             ),
             title: Text(validatorInfo?["name"] ?? voteAccount.nodePubkey, maxLines: 2, overflow: TextOverflow.ellipsis,),
             // subtitle: Text(voteAccount.votePubkey),
@@ -195,7 +248,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
                     decoration: InputDecoration(
                       isDense: true,
                       // contentPadding: EdgeInsets.zero,
-                      hintText: S.current.searchTokensOrPasteAddress,
+                      hintText: S.current.searchValidators,
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
@@ -240,7 +293,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Validator List'),
+        title: Text(S.current.stakeSol),
       ),
       body: child,
     );
@@ -302,16 +355,10 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
             SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: widget.validatorInfo["keybaseUsername"] != null
-                  ? KeybaseThumbnail(
-                      username: widget.validatorInfo["keybaseUsername"],
-                      size: 48,
-                    )
-                  : Image.asset(
-                      "assets/images/unknown.png",
-                      width: 48,
-                      height: 48,
-                    ),
+              leading: KeybaseThumbnail(
+                username: widget.validatorInfo["keybaseUsername"],
+                size: 48,
+              ),
               title: Text(widget.validatorInfo["name"] ?? widget.voteAccount.nodePubkey),
               trailing: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

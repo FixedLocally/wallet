@@ -21,7 +21,7 @@ import '../widgets/image.dart';
 import 'mixins/inherited.dart';
 import 'settings.dart';
 import 'tokens/tokens.dart';
-import 'validator_list.dart';
+import 'staking/validator_list.dart';
 import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
