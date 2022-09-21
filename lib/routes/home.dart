@@ -652,8 +652,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                               if (approved) {
                                 appWidget.startLoadingBalances(pubKey);
                                 await Utils.showLoadingDialog(context: context, future: balancesCompleters[pubKey]!.future, text: S.current.sendingTx);
-                                double fromBefore = double.parse(balances[pubKey]![_from]!.tokenAmount.uiAmountString ?? "0");
-                                double toBefore = double.parse(balances[pubKey]![_to]!.tokenAmount.uiAmountString ?? "0");
+                                double fromBefore = double.parse(balances[pubKey]?[_from]?.tokenAmount.uiAmountString ?? "0");
+                                double toBefore = double.parse(balances[pubKey]?[_to]?.tokenAmount.uiAmountString ?? "0");
                                 // send tx one by one
                                 for (Uint8List tx in txs) {
                                   Completer completer = Completer();
