@@ -1300,7 +1300,7 @@ class _CloseEmptyAccountsDialog extends StatefulWidget {
 
 class _CloseEmptyAccountsDialogState extends State<_CloseEmptyAccountsDialog> with UsesSharedData {
   List<SplTokenAccountDataInfoWithUsd> get emptyAccounts => widget.emptyAccounts;
-  Set<SplTokenAccountDataInfoWithUsd> _selected = {};
+  final Set<SplTokenAccountDataInfoWithUsd> _selected = {};
 
   @override
   void initState() {

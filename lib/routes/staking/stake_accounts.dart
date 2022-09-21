@@ -39,6 +39,7 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
         itemCount: widget.stakes.length,
         itemBuilder: (context, index) {
           NavigatorState nav = Navigator.of(context);
+          ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
           String stakeKey = widget.stakes.keys.elementAt(index);
           StakeProgramAccountData stake = widget.stakes.values.elementAt(index);
           StakeDelegatedAccountInfo stakeInfo = (stake as dynamic).info; // i'm done with is checks
@@ -134,9 +135,9 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
                   break;
                 case 100:
                   Clipboard.setData(
-                    ClipboardData(text: KeyManager.instance.pubKey),
+                    ClipboardData(text: stakeKey),
                   );
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffold.showSnackBar(
                     SnackBar(
                       content: Text(S.current.addressCopied),
                     ),

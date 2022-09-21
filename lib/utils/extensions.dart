@@ -6,7 +6,7 @@ extension StrExt on String {
   int get intParsed => int.parse(this);
   void printBySegment(int len) {
     for (int i = 0; i < length; i += len) {
-      print(substring(i, (i + len).clamp(0, length)));
+      debugPrint(substring(i, (i + len).clamp(0, length)));
     }
   }
 }

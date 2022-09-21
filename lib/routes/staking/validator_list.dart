@@ -80,7 +80,6 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
       List<ProgramAccount> validatorInfos = value[1] as List<ProgramAccount>;
       for (var element in validatorInfos) {
         if (element.account.data is! UnsupportedProgramAccountData) {
-          print(element.pubkey);
           continue;
         }
         Map m = (element.account.data as UnsupportedProgramAccountData).parsed;
@@ -109,14 +108,11 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
       for (ProgramAccount element in stakes) {
         StakeProgramAccountData acct = (element.account.data as ParsedStakeProgramAccountData).parsed;
         if (acct is StakeProgramDelegatedAccountData) {
-          print("delegated stake: ${element.pubkey} ${acct.info.stake.delegation.stake} to ${acct.info.stake.delegation.voter}");
           _stakes![element.pubkey] = acct;
         }
         if (acct is StakeProgramInitializedAccountData) {
-          print("initialised stake: ${acct.info.stake.delegation.stake} to ${acct.info.stake.delegation.voter}");
           _stakes![element.pubkey] = acct;
         }
-        print(acct);
       }
       _epoch = epoch;
       setState(() {});
