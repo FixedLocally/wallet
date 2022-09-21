@@ -11,6 +11,7 @@ import 'package:sprintf/sprintf.dart';
 
 import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
+import '../../utils/extensions.dart';
 import '../../utils/utils.dart';
 import '../../widgets/image.dart';
 import '../image.dart';
@@ -36,6 +37,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
   late Map<String, dynamic> _tokenDetails;
   late GlobalKey<FormState> _formKey;
   late TextEditingController _addressController;
+  late TextEditingController _amountController;
 
   String _recipient = "";
   String _amount = "";
@@ -49,6 +51,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
     _tokenDetails = widget.tokenDetails;
     _formKey = GlobalKey();
     _addressController = TextEditingController();
+    _amountController = TextEditingController();
     if (_tokenDetails.isEmpty) {
       Utils.getToken(widget.balance.mint).then((value) {
         setState(() {
@@ -147,6 +150,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                 Utils.wrapField(
                   themeData: themeData,
                   child: TextFormField(
+                    controller: _amountController,
                     decoration: InputDecoration(
                       hintText: S.current.amount,
                       border: InputBorder.none,
@@ -170,9 +174,45 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                   ),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Text(
-                    "${widget.balance.tokenAmount.uiAmountString} $symbol",
-                    style: themeData.textTheme.subtitle2,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "${widget.balance.tokenAmount.uiAmountString} $symbol",
+                        style: themeData.textTheme.subtitle2,
+                      ),
+                      SizedBox(width: 8),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          primary: themeData.colorScheme.onPrimary,
+                          backgroundColor: themeData.colorScheme.primary,
+                          visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          textStyle: themeData.textTheme.button?.copyWith(
+                            color: themeData.primaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        onPressed: () {
+                          String amtText = widget.balance.tokenAmount.uiAmountString ?? "0";
+                          if (widget.balance.mint == nativeSol) {
+                            amtText = (amtText.doubleParsed - 5000 / lamportsPerSol).toString();
+                          }
+                          setState(() {
+                            _amountController.text = amtText;
+                            _amount = _amountController.text;
+                          });
+                        },
+                        child: Text(
+                          S.current.maxCap,
+                          style: TextStyle(
+                              fontSize: 12
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                 ),
                 const Spacer(),
