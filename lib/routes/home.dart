@@ -487,6 +487,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Text("${myBalances[_from]?.tokenAmount.uiAmountString ?? "0"} ${tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                    SizedBox(width: 8),
                     TextButton(
                       style: ButtonStyle(
                         visualDensity: VisualDensity(horizontal: -4, vertical: -4),
@@ -516,11 +518,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                         ),
                       ),
                     ),
-                    SizedBox(width: 8),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 20.0),
-                      child: Text("${myBalances[_from]?.tokenAmount.uiAmountString ?? "0"} ${tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
-                    ),
+                    SizedBox(width: 20),
                   ],
                 ),
               ),
