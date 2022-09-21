@@ -22,6 +22,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "activating": MessageLookupByLibrary.simpleMessage("Activating"),
+        "active": MessageLookupByLibrary.simpleMessage("Active"),
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "approveTransactionTitle":
             MessageLookupByLibrary.simpleMessage("Approve transaction?"),
@@ -59,6 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "createWallet": MessageLookupByLibrary.simpleMessage("Create Wallet"),
         "creatingWallet":
             MessageLookupByLibrary.simpleMessage("Creating wallet..."),
+        "deactivating": MessageLookupByLibrary.simpleMessage("Deactivating"),
         "delegationWarning": MessageLookupByLibrary.simpleMessage(
             "%s %s is currently delegated to:\n%s.\n\nUnlike on EVM chains, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -76,6 +79,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "importWallet": MessageLookupByLibrary.simpleMessage("Import Wallet"),
         "importedWallet":
             MessageLookupByLibrary.simpleMessage("Imported Wallet"),
+        "inactive": MessageLookupByLibrary.simpleMessage("Inactive"),
         "insufficientBalance":
             MessageLookupByLibrary.simpleMessage("Insufficient balance"),
         "insufficientFunds":
@@ -111,6 +115,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please authenticate to continue"),
         "receive": MessageLookupByLibrary.simpleMessage("Receive"),
         "recipient": MessageLookupByLibrary.simpleMessage("Recipient"),
+        "redelegate": MessageLookupByLibrary.simpleMessage("Re-delegate"),
         "removeHdWalletContent": MessageLookupByLibrary.simpleMessage(
             "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase."),
         "removeKeyWalletContent": MessageLookupByLibrary.simpleMessage(
@@ -148,6 +153,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "signature": MessageLookupByLibrary.simpleMessage("Signature"),
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
+        "stakeAccount": MessageLookupByLibrary.simpleMessage("Stake Account"),
         "stakeAccounts": MessageLookupByLibrary.simpleMessage("Stake Accounts"),
         "stakeSol": MessageLookupByLibrary.simpleMessage("Stake SOL"),
         "stakeSolSuccessful":
@@ -157,6 +163,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "stakeSolToValidatorConfirm": MessageLookupByLibrary.simpleMessage(
             "You are about to stake %s SOL to %s."),
         "staking": MessageLookupByLibrary.simpleMessage("Staking..."),
+        "startUnstaking":
+            MessageLookupByLibrary.simpleMessage("Start unstaking"),
         "swap": MessageLookupByLibrary.simpleMessage("Swap"),
         "swapSuccess":
             MessageLookupByLibrary.simpleMessage("Swapped %s %s for %s %s"),
@@ -167,11 +175,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Transaction may fail to confirm"),
         "txConfirmed":
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
+        "unstake": MessageLookupByLibrary.simpleMessage("Unstake"),
         "visitWebsite": MessageLookupByLibrary.simpleMessage("Visit website"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
         "walletNum": MessageLookupByLibrary.simpleMessage("Wallet %s"),
         "walletSettings":
             MessageLookupByLibrary.simpleMessage("Wallet Settings"),
+        "withdraw": MessageLookupByLibrary.simpleMessage("Withdraw"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes"),
         "yourSecretRecoveryPhraseIs": MessageLookupByLibrary.simpleMessage(
             "Your secret recovery phrase is:")

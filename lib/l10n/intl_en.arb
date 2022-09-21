@@ -101,5 +101,14 @@
   "stakeSolSuccessful": "Staked %s SOL to %s",
   "stakeSol": "Stake SOL",
   "manageStakeAccounts": "Manage stake accounts",
-  "stakeAccounts": "Stake Accounts"
+  "stakeAccounts": "Stake Accounts",
+  "active": "Active",
+  "inactive": "Inactive",
+  "activating": "Activating",
+  "deactivating": "Deactivating",
+  "stakeAccount": "Stake Account",
+  "startUnstaking": "Start unstaking",
+  "unstake": "Unstake",
+  "redelegate": "Re-delegate",
+  "withdraw": "Withdraw"
 }

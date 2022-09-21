@@ -1069,6 +1069,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Active`
+  String get active {
+    return Intl.message(
+      'Active',
+      name: 'active',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inactive`
+  String get inactive {
+    return Intl.message(
+      'Inactive',
+      name: 'inactive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Activating`
+  String get activating {
+    return Intl.message(
+      'Activating',
+      name: 'activating',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deactivating`
+  String get deactivating {
+    return Intl.message(
+      'Deactivating',
+      name: 'deactivating',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stake Account`
+  String get stakeAccount {
+    return Intl.message(
+      'Stake Account',
+      name: 'stakeAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start unstaking`
+  String get startUnstaking {
+    return Intl.message(
+      'Start unstaking',
+      name: 'startUnstaking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unstake`
+  String get unstake {
+    return Intl.message(
+      'Unstake',
+      name: 'unstake',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Re-delegate`
+  String get redelegate {
+    return Intl.message(
+      'Re-delegate',
+      name: 'redelegate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Withdraw`
+  String get withdraw {
+    return Intl.message(
+      'Withdraw',
+      name: 'withdraw',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

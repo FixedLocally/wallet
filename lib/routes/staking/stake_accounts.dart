@@ -42,24 +42,24 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
           Map? validatorInfo = widget.validatorInfos[nodeId];
           String validatorName = validatorInfo?["name"] ?? nodeId;
           int activationEpoch = stakeInfo.stake.delegation.activationEpoch.intParsed;
-          int deactivationEpoch = -1;
+          int deactivationEpoch = 69696969;
           try {
             // default is 2^64-1 and it would throw
             deactivationEpoch = stakeInfo.stake.delegation.deactivationEpoch.intParsed;
           } catch (_) {}
           bool activating = activationEpoch >= widget.epoch;
-          bool deactivating = deactivationEpoch >= widget.epoch;
-          bool inactive = deactivating && activating;
+          bool deactivating = deactivationEpoch <= widget.epoch;
+          bool inactive = deactivationEpoch < widget.epoch && activationEpoch < widget.epoch;
           if (inactive) {
             activating = false;
           }
-          String status = "Active";
+          String status = S.current.active;
           if (inactive) {
-            status = "Inactive";
+            status = S.current.inactive;
           } else if (activating) {
-            status = "Activating";
+            status = S.current.activating;
           } else if (deactivating) {
-            status = "Deactivating";
+            status = S.current.deactivating;
           }
           return ListTile(
             leading: KeybaseThumbnail(
@@ -79,14 +79,16 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
             onTap: () async {
               int action = await Utils.showActionBottomSheet(
                 context: context,
-                title: "Stake Account",
+                title: S.current.stakeAccount,
                 actions: [
-                  if (!inactive || activating)
-                    BottomSheetAction(title: "Unstake", value: 0),
+                  if (!inactive && !deactivating && !activating)
+                    BottomSheetAction(title: S.current.startUnstaking, value: 0),
+                  if (activating)
+                    BottomSheetAction(title: S.current.unstake, value: 0),
                   if (inactive || deactivating)
-                    BottomSheetAction(title: "Re-delegate", value: 1),
+                    BottomSheetAction(title: S.current.redelegate, value: 1),
                   if (inactive)
-                    BottomSheetAction(title: "Withdraw", value: 2),
+                    BottomSheetAction(title: S.current.withdraw, value: 2),
                 ],
               );
               switch (action) {
