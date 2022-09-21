@@ -1159,6 +1159,36 @@ class S {
       args: [],
     );
   }
+
+  /// `View on SolScan`
+  String get viewOnSolscan {
+    return Intl.message(
+      'View on SolScan',
+      name: 'viewOnSolscan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy address`
+  String get copyAddress {
+    return Intl.message(
+      'Copy address',
+      name: 'copyAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Address copied`
+  String get addressCopied {
+    return Intl.message(
+      'Address copied',
+      name: 'addressCopied',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

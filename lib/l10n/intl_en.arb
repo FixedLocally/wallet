@@ -110,5 +110,8 @@
   "startUnstaking": "Start unstaking",
   "unstake": "Unstake",
   "redelegate": "Re-delegate",
-  "withdraw": "Withdraw"
+  "withdraw": "Withdraw",
+  "viewOnSolscan": "View on SolScan",
+  "copyAddress": "Copy address",
+  "addressCopied": "Address copied"
 }

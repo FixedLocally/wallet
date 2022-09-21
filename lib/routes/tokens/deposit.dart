@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
 import '../../utils/utils.dart';
 
@@ -58,8 +59,8 @@ class _DepositTokenRouteState extends State<DepositTokenRoute> {
                           ClipboardData(text: KeyManager.instance.pubKey),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Address copied"),
+                          SnackBar(
+                            content: Text(S.current.addressCopied),
                           ),
                         );
                       },

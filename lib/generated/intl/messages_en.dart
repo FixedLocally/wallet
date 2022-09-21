@@ -24,6 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "activating": MessageLookupByLibrary.simpleMessage("Activating"),
         "active": MessageLookupByLibrary.simpleMessage("Active"),
+        "addressCopied": MessageLookupByLibrary.simpleMessage("Address copied"),
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "approveTransactionTitle":
             MessageLookupByLibrary.simpleMessage("Approve transaction?"),
@@ -54,6 +55,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Only connect to websites you trust."),
         "continuE": MessageLookupByLibrary.simpleMessage("Continue"),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
+        "copyAddress": MessageLookupByLibrary.simpleMessage("Copy address"),
         "copyPrivateKeySuccess": MessageLookupByLibrary.simpleMessage(
             "Copied private key to clipboard"),
         "copySeedSuccess": MessageLookupByLibrary.simpleMessage(
@@ -176,6 +178,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "txConfirmed":
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
         "unstake": MessageLookupByLibrary.simpleMessage("Unstake"),
+        "viewOnSolscan":
+            MessageLookupByLibrary.simpleMessage("View on SolScan"),
         "visitWebsite": MessageLookupByLibrary.simpleMessage("Visit website"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
         "walletNum": MessageLookupByLibrary.simpleMessage("Wallet %s"),
