@@ -9,7 +9,7 @@ import '../utils/utils.dart';
 import 'svg.dart';
 
 class MultiImage extends StatefulWidget {
-  final String image;
+  final String? image;
   final double? size;
   final double? borderRadius;
   final bool cleanSvg;
@@ -36,23 +36,31 @@ class _MultiImageState extends State<MultiImage> {
   }
 
   void _load() {
-    Uri? uri = Uri.tryParse(widget.image);
+    if (widget.image == null) {
+      _builder = (_) => SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: Center(child: Icon(Icons.image, size: (widget.size ?? 48) / 2)),
+      );
+      return;
+    }
+    Uri? uri = Uri.tryParse(widget.image!);
     if (uri?.data?.mimeType.startsWith("image/svg") == true) {
       _builder = (_) => StringSvg(
         svg: uri!.data!.contentAsString(),
         width: widget.size,
         height: widget.size,
       );
-    } else if (widget.image.endsWith(".svg")) {
+    } else if (widget.image!.endsWith(".svg")) {
       _builder = (_) => NetworkSvg(
-        url: widget.image,
+        url: widget.image!,
         width: widget.size,
         height: widget.size,
         cleanSvg: widget.cleanSvg,
       );
-    } else {
+    } else if (uri != null) {
       _builder = (_) => CachedNetworkImage(
-        imageUrl: widget.image,
+        imageUrl: widget.image!,
         height: widget.size,
         width: widget.size,
         fit: BoxFit.cover,

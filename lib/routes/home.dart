@@ -853,25 +853,18 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                       tokenDetails[entry.key]?["name"] ?? S.current.loading;
                   final _sus = tokenDetails[entry.key]?["sus"] ?? false;
                   bool sus = _sus == true || _sus == 1;
-                  print("$name ${entry.key} $sus ${tokenDetails[entry.key]}");
                   name = name.isNotEmpty
                       ? name
                       : "${entry.key.substring(0, 5)}...";
                   Widget child = Stack(
                     children: [
-                      if (sus)
-                        Positioned.fill(
-                          child: Container(
-                            color: Colors.red.withOpacity(0.5),
-                          ),
-                        ),
                       Positioned(
                         left: 16,
                         right: 16,
                         top: 16,
                         bottom: 16,
                         child: MultiImage(
-                          image: tokenDetails[entry.value.mint]!["image"],
+                          image: tokenDetails[entry.value.mint]?["image"],
                           size: 160,
                           borderRadius: 24,
                         ),
@@ -896,6 +889,25 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                           ),
                         ),
                       ),
+                      if (sus)
+                        Positioned(
+                          top: 16,
+                          right: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              color: Colors.red.withOpacity(0.6),
+                            ),
+                            child: Text(
+                              "SUS",
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
                     ],
                   );
                   return GestureDetector(

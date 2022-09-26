@@ -67,7 +67,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
     MediaQueryData mq = MediaQuery.of(context);
     String symbol = widget.tokenDetails["symbol"] ?? "";
     Widget img = MultiImage(
-      image: widget.tokenDetails["image"] ?? "",
+      image: widget.tokenDetails["image"],
       size: widget.nft ? min(mq.size.width * 0.75, 400) : 128,
       borderRadius: widget.nft ? 16 : null,
     );
