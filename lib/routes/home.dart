@@ -848,14 +848,23 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                   childAspectRatio: 1,
                   mainAxisSpacing: 16,
                 ),
-                children: myBalances.entries.map((entry) {
+                children: myBalances.entries.where((element) => element.value.tokenAmount.uiAmountString != "0").map((entry) {
                   String name =
                       tokenDetails[entry.key]?["name"] ?? S.current.loading;
+                  final _sus = tokenDetails[entry.key]?["sus"] ?? false;
+                  bool sus = _sus == true || _sus == 1;
+                  print("$name ${entry.key} $sus ${tokenDetails[entry.key]}");
                   name = name.isNotEmpty
                       ? name
                       : "${entry.key.substring(0, 5)}...";
                   Widget child = Stack(
                     children: [
+                      if (sus)
+                        Positioned.fill(
+                          child: Container(
+                            color: Colors.red.withOpacity(0.5),
+                          ),
+                        ),
                       Positioned(
                         left: 16,
                         right: 16,
