@@ -89,13 +89,14 @@ class Utils {
             int id = await txn.insert(
               "token",
               {
+                "sus": metadataMap["sus"] == true ? 1 : 0,
                 "mint": metadataMap["address"],
                 "symbol": metadataMap["symbol"],
                 "name": metadataMap["name"],
                 "decimals": metadataMap["decimals"],
                 "image": metadataMap["image"],
                 "nft": metadataMap["nft"],
-                "ext_url": metadataMap["ext_url"],
+                "ext_url": metadataMap["externalUrl"],
                 "attributes": jsonEncode(metadataMap["attributes"]),
                 "description": metadataMap["description"],
                 "expiry": DateTime.now().millisecondsSinceEpoch ~/ 1000 + 60 * 60 * 24 * 2,
@@ -493,7 +494,7 @@ class Utils {
   static Future<Database> _openDatabase() async {
     return openDatabase(
       "token.db",
-      version: 1,
+      version: 2,
       onCreate: (Database db, int version) async {
         await db.execute(
           "CREATE TABLE token ("
@@ -504,6 +505,7 @@ class Utils {
               "image TEXT,"
               "nft INTEGER DEFAULT 0,"
               "ext_url TEXT,"
+              "sus INTEGER DEFAULT 0,"
               "attributes TEXT,"
               "description TEXT,"
               "expiry INTEGER"
@@ -522,9 +524,16 @@ class Utils {
               "name": tokenList[key]!["name"],
               "decimals": tokenList[key]!["decimals"],
               "image": tokenList[key]!["image"],
+              "sus": 0,
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
+        }
+      },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        switch (oldVersion) {
+          case 1:
+            await db.execute("ALTER TABLE token ADD COLUMN sus INTEGER DEFAULT 0");
         }
       },
     );
