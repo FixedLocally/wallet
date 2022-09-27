@@ -915,11 +915,10 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                       bool sent = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (ctx) => SendTokenRoute(
+                              builder: (ctx) => NftDetailsRoute(
                                 balance: entry.value,
                                 tokenDetails:
                                     tokenDetails[entry.value.mint] ?? {},
-                                nft: true,
                               ),
                             ),
                           ) ??

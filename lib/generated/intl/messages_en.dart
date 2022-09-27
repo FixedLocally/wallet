@@ -180,6 +180,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unstake": MessageLookupByLibrary.simpleMessage("Unstake"),
         "viewOnSolscan":
             MessageLookupByLibrary.simpleMessage("View on SolScan"),
+        "visitExternalUrl":
+            MessageLookupByLibrary.simpleMessage("Visit External URL"),
         "visitWebsite": MessageLookupByLibrary.simpleMessage("Visit website"),
         "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
         "walletNum": MessageLookupByLibrary.simpleMessage("Wallet %s"),

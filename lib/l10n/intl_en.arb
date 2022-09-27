@@ -113,5 +113,6 @@
   "withdraw": "Withdraw",
   "viewOnSolscan": "View on SolScan",
   "copyAddress": "Copy address",
-  "addressCopied": "Address copied"
+  "addressCopied": "Address copied",
+  "visitExternalUrl": "Visit External URL"
 }

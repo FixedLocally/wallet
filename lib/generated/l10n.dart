@@ -1189,6 +1189,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Visit External URL`
+  String get visitExternalUrl {
+    return Intl.message(
+      'Visit External URL',
+      name: 'visitExternalUrl',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
