@@ -101,8 +101,8 @@ class NftDetailsRoute extends StatelessWidget {
           ...attributes.map((attr) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(attr["trait_type"] + ": "),
-              Text(attr["value"]),
+              Text("${attr["trait_type"]}: "),
+              Text("${attr["value"]}"),
             ],
           )),
           const SizedBox(height: 16),
