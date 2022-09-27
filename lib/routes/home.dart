@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:jupiter_aggregator/jupiter_aggregator.dart';
 import 'package:solana/base58.dart';
@@ -97,6 +98,10 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                     value: 'unmock',
                     child: Text(S.current.exitMockWallet),
                   ),
+                PopupMenuItem(
+                  value: 'copy',
+                  child: Text(S.current.copyAddress),
+                ),
               ];
             },
             onSelected: (s) async {
@@ -175,6 +180,14 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                 case 'unmock':
                   KeyManager.instance.mockPubKey = null;
                   setState(() {});
+                  break;
+                case 'copy':
+                  Clipboard.setData(ClipboardData(text: KeyManager.instance.pubKey));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(S.current.addressCopied),
+                    ),
+                  );
                   break;
               }
             },
