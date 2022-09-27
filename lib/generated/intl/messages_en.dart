@@ -78,6 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Export Secret Recovery Phrase"),
         "halfCap": MessageLookupByLibrary.simpleMessage("HALF"),
+        "image": MessageLookupByLibrary.simpleMessage("Image"),
         "importWallet": MessageLookupByLibrary.simpleMessage("Import Wallet"),
         "importedWallet":
             MessageLookupByLibrary.simpleMessage("Imported Wallet"),

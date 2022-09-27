@@ -114,5 +114,6 @@
   "viewOnSolscan": "View on SolScan",
   "copyAddress": "Copy address",
   "addressCopied": "Address copied",
-  "visitExternalUrl": "Visit External URL"
+  "visitExternalUrl": "Visit External URL",
+  "image": "Image"
 }

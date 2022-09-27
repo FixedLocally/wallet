@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../generated/l10n.dart';
 import '../../utils/utils.dart';
 import '../../widgets/image.dart';
+import '../image.dart';
 import '../webview.dart';
 import 'tokens.dart';
 
@@ -77,11 +78,17 @@ class NftDetailsRoute extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          Center(
-            child: MultiImage(
-              image: tokenDetails["image"],
-              size: mq.size.width - 32,
-              borderRadius: 16,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => ImageRoute(heroTag: "image", image: tokenDetails["image"])));
+            },
+            child: Center(
+              child: MultiImage(
+                heroTag: "image",
+                image: tokenDetails["image"],
+                size: mq.size.width - 32,
+                borderRadius: 16,
+              ),
             ),
           ),
           if (tokenDetails["description"] != null)

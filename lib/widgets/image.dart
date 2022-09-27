@@ -10,6 +10,7 @@ import 'svg.dart';
 
 class MultiImage extends StatefulWidget {
   final String? image;
+  final String? heroTag;
   final double? size;
   final double? borderRadius;
   final bool cleanSvg;
@@ -17,6 +18,7 @@ class MultiImage extends StatefulWidget {
   const MultiImage({
     Key? key,
     required this.image,
+    this.heroTag,
     this.size,
     this.borderRadius,
     this.cleanSvg = true,
@@ -78,9 +80,16 @@ class _MultiImageState extends State<MultiImage> {
 
   @override
   Widget build(BuildContext context) {
+    Widget child = _builder(context);
+    if (widget.heroTag != null) {
+      child = Hero(
+        tag: widget.heroTag!,
+        child: child,
+      );
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(widget.borderRadius ?? ((widget.size ?? 0) / 2)),
-      child: _builder(context),
+      child: child,
     );
   }
 }
