@@ -25,7 +25,8 @@ class NftDetailsRoute extends StatelessWidget {
     MediaQueryData mq = MediaQuery.of(context);
     String? url = tokenDetails["ext_url"];
     Uri? uri = url != null ? Uri.tryParse(url) : null;
-    List attributes = jsonDecode(tokenDetails["attributes"] ?? "[]");
+    // for some reason `... ?? "[]"` could be null
+    List attributes = jsonDecode(tokenDetails["attributes"]) ?? [];
     return Scaffold(
       appBar: AppBar(
         title: Text(tokenDetails["name"]),
