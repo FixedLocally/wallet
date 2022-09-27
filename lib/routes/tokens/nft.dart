@@ -21,6 +21,7 @@ class NftDetailsRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
+    MediaQueryData mq = MediaQuery.of(context);
     String? url = tokenDetails["ext_url"];
     Uri? uri = url != null ? Uri.tryParse(url) : null;
     List attributes = jsonDecode(tokenDetails["attributes"] ?? "[]");
@@ -79,24 +80,23 @@ class NftDetailsRoute extends StatelessWidget {
           Center(
             child: MultiImage(
               image: tokenDetails["image"],
-              // size: min(mq.size.width * 0.75, 400),
+              size: mq.size.width - 32,
               borderRadius: 16,
             ),
           ),
+          if (tokenDetails["description"] != null)
+          ...[
+            const SizedBox(height: 16),
+            Text(tokenDetails["description"]),
+          ],
           const SizedBox(height: 16),
-          Text(tokenDetails["description"]),
-          const SizedBox(height: 16),
-          if (attributes is List)
-            ...[
-              for (Map<String, dynamic> attr in attributes)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(attr["trait_type"] + ": "),
-                    Text(attr["value"]),
-                  ],
-                ),
+          ...attributes.map((attr) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(attr["trait_type"] + ": "),
+              Text(attr["value"]),
             ],
+          )),
           const SizedBox(height: 16),
           Row(
             children: [
