@@ -78,6 +78,7 @@ class Utils {
     // List<List> metadatas = await Future.wait(futures);
     List<List> metadatas = await batchGetMetadata(remainingTokens);
     debugPrint("got metadatas ${metadatas.length}");
+    metadatas.map((e) => e[1]["attributes"] = jsonEncode(e[1]["attributes"])).toList();
     if (metadatas.isNotEmpty) {
       await _db!.transaction((txn) async {
         int inserted = 0;
@@ -97,7 +98,7 @@ class Utils {
                 "image": metadataMap["image"],
                 "nft": metadataMap["nft"],
                 "ext_url": metadataMap["externalUrl"],
-                "attributes": jsonEncode(metadataMap["attributes"]),
+                "attributes": metadataMap["attributes"],
                 "description": metadataMap["description"],
                 "expiry": DateTime.now().millisecondsSinceEpoch ~/ 1000 + 60 * 60 * 24 * 2,
               },

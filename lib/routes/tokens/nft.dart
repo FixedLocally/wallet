@@ -23,7 +23,7 @@ class NftDetailsRoute extends StatelessWidget {
     ThemeData theme = Theme.of(context);
     String? url = tokenDetails["ext_url"];
     Uri? uri = url != null ? Uri.tryParse(url) : null;
-    dynamic attributes = jsonDecode(tokenDetails["attributes"]);
+    List attributes = jsonDecode(tokenDetails["attributes"] ?? "[]");
     return Scaffold(
       appBar: AppBar(
         title: Text(tokenDetails["name"]),
