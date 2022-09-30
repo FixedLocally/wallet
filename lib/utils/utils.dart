@@ -72,7 +72,7 @@ class Utils {
     // List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
     //   // artificial delay to avoid hitting the rate limit
     //   await Future.delayed(Duration(milliseconds: i++ * 100));
-    //   Map resp = jsonDecode(await _httpGet("https://validator.utopiamint.xyz/token-api/token/$token"));
+    //   Map resp = jsonDecode(await _httpGet("https://validator.utopiamint.xyz/api/token/$token"));
     //   return [token, resp["success"] ? resp["token"] : null];
     // }).toList();
     // List<List> metadatas = await Future.wait(futures);
@@ -411,7 +411,7 @@ class Utils {
     if (addresses.isEmpty) return [];
     List<String> firstBatch = addresses.sublist(0, min(50, addresses.length));
     List<String> secondBatch = addresses.length > 50 ? addresses.sublist(50) : [];
-    List<List> metadatas = await _httpPost("https://validator.utopiamint.xyz/token-api/token/", firstBatch).then((value) {
+    List<List> metadatas = await _httpPost("https://validator.utopiamint.xyz/api/token/", firstBatch).then((value) {
       Map resp = jsonDecode(value);
       if (!resp["success"]) {
         return [];
