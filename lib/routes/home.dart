@@ -323,6 +323,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         _createWebsiteListTile("Orca", "https://orca.so"),
         _createWebsiteListTile("Marinade Governance", "https://tribeca.so/gov/mnde/nftgauges/validator"),
         _createWebsiteListTile("Magic Eden", "https://magiceden.io"),
+        _createWebsiteListTile("Frakt", "https://frakt.xyz/lend"),
       ],
     );
   }
@@ -385,6 +386,54 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                           style: TextStyle(
                             fontSize: 20,
                             color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Tooltip(
+                          message: S.current.send,
+                          child: RawMaterialButton(
+                            onPressed: () {
+                              // show owned token list then send page
+                            },
+                            elevation: 2.0,
+                            padding: EdgeInsets.all(6.0),
+                            shape: CircleBorder(
+                              side: BorderSide(
+                                color: themeData.colorScheme.onSurface,
+                                width: 3,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 36.0,
+                            ),
+                          ),
+                        ),
+                        Tooltip(
+                          message: S.current.receive,
+                          child: RawMaterialButton(
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) => DepositTokenRoute(),
+                              ));
+                            },
+                            elevation: 2.0,
+                            padding: EdgeInsets.all(6.0),
+                            shape: CircleBorder(
+                              side: BorderSide(
+                                color: themeData.colorScheme.onSurface,
+                                width: 3,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.arrow_downward_rounded,
+                              size: 36.0,
+                            ),
                           ),
                         ),
                       ],
