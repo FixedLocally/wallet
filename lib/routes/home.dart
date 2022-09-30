@@ -398,7 +398,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                           message: S.current.send,
                           child: RawMaterialButton(
                             onPressed: () {
-                              // show owned token list then send page
+                              // todo show owned token list then send page
                             },
                             elevation: 2.0,
                             padding: EdgeInsets.all(6.0),
