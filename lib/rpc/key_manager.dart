@@ -28,6 +28,7 @@ class KeyManager {
   List<ManagedKey> _wallets = [];
   ManagedKey? _activeWallet;
   String? mockPubKey;
+  Map<String, String?> _domainLogos = {};
 
   static KeyManager get instance {
     _instance ??= KeyManager._();
@@ -47,7 +48,7 @@ class KeyManager {
   Future<void> init() async {
     _db = await openDatabase(
       "key_manager.db",
-      version: 2,
+      version: 3,
       onCreate: (Database db, int version) async {
         await db.execute(
             "CREATE TABLE wallets ("
@@ -64,7 +65,9 @@ class KeyManager {
             "CREATE TABLE connections ("
                 "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
                 "wallet_id INTEGER," // wallet id in wallets table
-                "domain TEXT" // whitelisted domain
+                "domain TEXT," // whitelisted domain
+                "thumbnail TEXT," // whitelisted domain thumbnail
+                "last_used_ts INTEGER" // last used timestamp
                 ")"
         );
         await db.execute(
@@ -94,6 +97,15 @@ class KeyManager {
                     "last_used_ts INTEGER" // last used timestamp
                     ")"
             );
+            continue v2; // fall thru, continue upgrading
+          v2:
+          case 2:
+            await db.execute(
+                "ALTER TABLE connections ADD COLUMN thumbnail TEXT"
+            );
+            await db.execute(
+                "ALTER TABLE connections ADD COLUMN last_used_ts INTEGER"
+            );
             // continue; // fall thru, continue upgrading
         }
       }
@@ -102,6 +114,13 @@ class KeyManager {
     _wallets = wallets.map((Map<String, Object?> wallet) {
       return ManagedKey.fromJSON(wallet);
     }).toList();
+    List<Map<String, Object?>> connections = await _db.query("connections");
+    connections.forEach((element) {
+      if (element["domain"] != null && _domainLogos[element["domain"]] == null) {
+        _domainLogos[element["domain"] as String] = element["thumbnail"] as String?;
+      }
+    });
+    print(_domainLogos);
     try {
       _activeWallet = _wallets.firstWhere((ManagedKey wallet) => wallet.active);
     } catch (e) {
@@ -259,6 +278,17 @@ class KeyManager {
     });
   }
 
+  String? getDomainLogo(String domain) {
+    return _domainLogos[domain];
+  }
+
+  Future<void> setDomainLogo(String domain, String logoUrl) async {
+    _domainLogos[domain] = logoUrl;
+    return _db.transaction((txn) async {
+      await txn.execute("update connections set thumbnail=? where domain=?", [logoUrl, domain]);
+    });
+  }
+
   Future<void> requestRemoveWallet(BuildContext context, ManagedKey? managedKey) async {
     late String msg;
     if (KeyManager.instance.isHdWallet) {
@@ -326,6 +356,7 @@ class KeyManager {
                 ),
                 padding: EdgeInsets.all(16.0),
                 child: Logo(
+                  domain: domain,
                   urls: logoUrls,
                   width: 96,
                   height: 96,

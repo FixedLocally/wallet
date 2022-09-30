@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
+import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import 'svg.dart';
 
@@ -95,12 +96,14 @@ class _MultiImageState extends State<MultiImage> {
 }
 
 class Logo extends StatefulWidget {
+  final String domain;
   final List<String> urls;
   final double width;
   final double height;
 
   const Logo({
     Key? key,
+    required this.domain,
     required this.urls,
     required this.width,
     required this.height,
@@ -131,6 +134,7 @@ class _LogoState extends State<Logo> {
         setState(() {
           _fileInfo = fileInfo;
         });
+        KeyManager.instance.setDomainLogo(widget.domain, fileInfo.file.path);
         return;
       }
     }

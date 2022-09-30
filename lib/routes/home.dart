@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -265,8 +266,14 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   }
 
   Widget _createWebsiteListTile(String title, String url) {
+    String? host = Uri.parse(url).host;
+    String? logo = KeyManager.instance.getDomainLogo(host);
+    Widget leading = Icon(Icons.language);
+    if (logo != null) {
+      leading = Image.file(File(logo), width: 24, height: 24,);
+    }
     return ListTile(
-      leading: const Icon(Icons.language),
+      leading: leading,
       title: Text(title),
       onTap: () {
         Navigator.push(context, MaterialPageRoute(
