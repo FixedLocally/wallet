@@ -404,7 +404,7 @@ class Utils {
   }
 
   static Future<List<String>> getTopTokens() async {
-    return jsonDecode((await httpGet(_topTokensUrl))).cast<String>();
+    return jsonDecode((await httpGet(_topTokensUrl, cache: true))).cast<String>();
   }
 
   static Future<List<List>> batchGetMetadata(List<String> addresses) async {
@@ -540,9 +540,21 @@ class Utils {
     );
   }
 
-  static Future<String> httpGet(String url) async {
+  static Future<String> httpGet(String url, {bool cache = false}) async {
     debugPrint("get $url");
-    return DefaultCacheManager().downloadFile(url).then((value) => value.file.readAsString());
+    if (cache) {
+      return DefaultCacheManager().downloadFile(url).then((value) => value.file.readAsString());
+    }
+    return HttpClient().getUrl(Uri.parse(url)).then((HttpClientRequest request) {
+      return request.close();
+    }).then((HttpClientResponse response) {
+      if (response.statusCode == 200) {
+        return response.transform(utf8.decoder).join();
+      } else {
+        return "{\"success\":false}";
+      }
+    });
+    // return DefaultCacheManager().downloadFile(url).then((value) => value.file.readAsString());
   }
 
   static Future<String> _httpPost(String url, dynamic body) async {
@@ -552,7 +564,11 @@ class Utils {
       request.write(jsonEncode(body));
       return request.close();
     }).then((HttpClientResponse response) {
-      return response.transform(utf8.decoder).join();
+      if (response.statusCode == 200) {
+        return response.transform(utf8.decoder).join();
+      } else {
+        return "{\"success\":false}";
+      }
     });
   }
 
