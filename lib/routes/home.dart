@@ -1106,7 +1106,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
             children: [
               ListTile(
                 leading: const Icon(Icons.call_received),
-                title: Text(S.current.deposit),
+                title: Text(S.current.receive),
                 onTap: () {
                   Navigator.pushReplacement(
                     context,
