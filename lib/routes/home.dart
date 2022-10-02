@@ -335,7 +335,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     );
   }
 
-  Widget _balanceList(ThemeData themeData) {
+  Widget _balanceList(ThemeData themeData, {bool tokensOnly = false}) {
     String pubKey = KeyManager.instance.pubKey;
     if (balances[pubKey] == null) {
       if (balancesCompleters[pubKey] == null) {
@@ -345,110 +345,135 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     } else {
       Map<String, SplTokenAccountDataInfoWithUsd> myBalances = Map.of(balances[pubKey]!);
       myBalances.removeWhere((key, value) => tokenDetails[key]?["decimals"] == 0);
-      return RefreshIndicator(
-        key: _tokenRefresherKey,
-        onRefresh: () {
-          appWidget.startLoadingBalances(pubKey);
-          return balancesCompleters[pubKey]!.future;
-        },
-        child: ListView.builder(
-          itemCount: myBalances.length + 1,
-          itemBuilder: (ctx, index) {
-            if (index == 0) {
-              double totalUsd = myBalances.values.fold(
-                0.0,
-                (sum, balance) => sum + max(0.0, balance.usd ?? -1),
-              );
-              double totalUsdChange = myBalances.values.fold(
-                0.0,
-                (sum, balance) => sum + (balance.usdChange ?? 0),
-              );
-              double percent = totalUsd > 0 ? (totalUsdChange / (totalUsd - totalUsdChange) * 100) : 0;
-              bool isPositive = totalUsdChange >= 0;
-              Color color = isPositive ? Colors.green : Colors.red;
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Text(
-                      "\$ ${totalUsd.toStringAsFixed(2)}",
-                      style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w500,
+      Widget child = ListView.builder(
+        itemCount: myBalances.length + (tokensOnly ? 0 : 1),
+        itemBuilder: (ctx, index) {
+          if (index == 0 && !tokensOnly) {
+            double totalUsd = myBalances.values.fold(
+              0.0,
+              (sum, balance) => sum + max(0.0, balance.usd ?? -1),
+            );
+            double totalUsdChange = myBalances.values.fold(
+              0.0,
+              (sum, balance) => sum + (balance.usdChange ?? 0),
+            );
+            double percent = totalUsd > 0
+                ? (totalUsdChange / (totalUsd - totalUsdChange) * 100)
+                : 0;
+            bool isPositive = totalUsdChange >= 0;
+            Color color = isPositive ? Colors.green : Colors.red;
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Text(
+                    "\$ ${totalUsd.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "${isPositive ? "+" : "-"}\$ ${totalUsdChange.abs().toStringAsFixed(2)}",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: color,
+                        ),
                       ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "${isPositive ? "+" : "-"}\$ ${totalUsdChange.abs().toStringAsFixed(2)}",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: color,
-                          ),
+                      const SizedBox(width: 10),
+                      Text(
+                        "${isPositive ? "+" : ""}${percent.toStringAsFixed(2)}%",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: color,
                         ),
-                        const SizedBox(width: 10),
-                        Text(
-                          "${isPositive ? "+" : ""}${percent.toStringAsFixed(2)}%",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Tooltip(
-                          message: S.current.send,
-                          child: RawMaterialButton(
-                            onPressed: () {
-                              // todo show owned token list then send page
-                            },
-                            elevation: 2.0,
-                            padding: EdgeInsets.all(6.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(99.0),
-                              side: BorderSide(
-                                color: themeData.colorScheme.onSurface,
-                                width: 3,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Tooltip(
+                        message: S.current.send,
+                        child: RawMaterialButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => Scaffold(
+                                  appBar: AppBar(
+                                    title: Text(S.current.send),
+                                  ),
+                                  body: _balanceList(themeData, tokensOnly: true),
+                                ),
                               ),
+                            );
+                          },
+                          elevation: 2.0,
+                          padding: EdgeInsets.all(6.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(99.0),
+                            side: BorderSide(
+                              color: themeData.colorScheme.onSurface,
+                              width: 2,
                             ),
-                            child: Text(S.current.send),
                           ),
+                          child: Text(S.current.send,
+                              style: TextStyle(fontSize: 17)),
                         ),
-                        Tooltip(
-                          message: S.current.receive,
-                          child: RawMaterialButton(
-                            onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (context) => DepositTokenRoute(),
-                              ));
-                            },
-                            elevation: 2.0,
-                            padding: EdgeInsets.all(6.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(99.0),
-                              side: BorderSide(
-                                color: themeData.colorScheme.onSurface,
-                                width: 3,
-                              ),
+                      ),
+                      const SizedBox(width: 16),
+                      Tooltip(
+                        message: S.current.receive,
+                        child: RawMaterialButton(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DepositTokenRoute(),
+                                ));
+                          },
+                          elevation: 2.0,
+                          padding: EdgeInsets.all(6.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(99.0),
+                            side: BorderSide(
+                              color: themeData.colorScheme.onSurface,
+                              width: 2,
                             ),
-                              child: Text(S.current.receive),
                           ),
+                          child: Text(S.current.receive,
+                              style: TextStyle(fontSize: 17)),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            }
-            return _balanceListTile(myBalances.values.elementAt(index - 1), themeData);
-          },
-        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }
+          return _balanceListTile(
+              myBalances.values.elementAt(index - (tokensOnly ? 0 : 1)),
+              themeData,
+              sendOnly: tokensOnly);
+        },
       );
+      if (tokensOnly) {
+        return child;
+      } else {
+        return RefreshIndicator(
+          key: _tokenRefresherKey,
+          onRefresh: () {
+            appWidget.startLoadingBalances(pubKey);
+            return balancesCompleters[pubKey]!.future;
+          },
+          child: child,
+        );
+      }
     }
   }
 
@@ -783,7 +808,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     }
   }
 
-  Widget _balanceListTile(SplTokenAccountDataInfoWithUsd entry, ThemeData themeData) {
+  Widget _balanceListTile(SplTokenAccountDataInfoWithUsd entry, ThemeData themeData, {bool sendOnly = false}) {
     String name = tokenDetails[entry.mint]?["name"] ?? "";
     String symbol = tokenDetails[entry.mint]?["symbol"] ?? "";
     name = name.isNotEmpty ? name : entry.mint.shortened;
@@ -804,7 +829,11 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     double usd = entry.usd ?? -1;
     double usdChange = (entry.usdChange ?? 0);
     Widget listTile = ListTile(
-      onTap: () {
+      onTap: () async {
+        if (sendOnly) {
+          _pushSendToken(entry);
+          return;
+        }
         _showTokenMenu(entry);
       },
       leading: leading,
@@ -916,8 +945,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                 children: myBalances.entries.where((element) => element.value.tokenAmount.uiAmountString != "0").map((entry) {
                   String name =
                       tokenDetails[entry.key]?["name"] ?? S.current.loading;
-                  final _sus = tokenDetails[entry.key]?["sus"] ?? false;
-                  bool sus = _sus == true || _sus == 1;
+                  final susVal = tokenDetails[entry.key]?["sus"] ?? false;
+                  bool sus = susVal == true || susVal == 1;
                   name = name.isNotEmpty
                       ? name
                       : "${entry.key.substring(0, 5)}...";
@@ -1115,21 +1144,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
               ListTile(
                 leading: const Icon(Icons.call_made),
                 title: const Text("Send"),
-                onTap: () async {
-                  bool sent = await Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (ctx) => SendTokenRoute(
-                        balance: balance,
-                        tokenDetails: tokenDetails[balance.mint] ?? {},
-                      ),
-                    ),
-                  ) ?? false;
-                  if (sent) {
-                    if (_page == 2) _nftRefresherKey.currentState?.show();
-                    if (_page == 1) _tokenRefresherKey.currentState?.show();
-                  }
-                },
+                onTap: () => _pushSendToken(balance),
               ),
               if (balance.mint == nativeSol)
                 ListTile(
@@ -1201,6 +1216,23 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         );
       },
     );
+  }
+
+  Future<void> _pushSendToken(SplTokenAccountDataInfoWithUsd balance) async {
+    bool sent = await Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (ctx) =>
+            SendTokenRoute(
+              balance: balance,
+              tokenDetails: tokenDetails[balance.mint] ?? {},
+            ),
+      ),
+    ) ?? false;
+    if (sent) {
+      if (_page == 2) _nftRefresherKey.currentState?.show();
+      if (_page == 1) _tokenRefresherKey.currentState?.show();
+    }
   }
   
   Future<void> _loadRoutes(String? from, String? to) async {
