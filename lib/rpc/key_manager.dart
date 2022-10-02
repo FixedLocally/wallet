@@ -285,7 +285,7 @@ class KeyManager {
   Future<void> setDomainLogo(String domain, String logoUrl) async {
     _domainLogos[domain] = logoUrl;
     return _db.transaction((txn) async {
-      await txn.execute("update connections set thumbnail=? where domain=?", [logoUrl, domain]);
+      await txn.rawUpdate("update connections set thumbnail=? where domain=?", [logoUrl, domain]);
     });
   }
 
@@ -377,9 +377,12 @@ class KeyManager {
         cancelText: S.current.cancel,
       );
       if (approve) {
-        await _db.insert("connections", {
-          "domain": domain,
-          "wallet_id": _activeWallet!.id,
+        await _db.transaction((txn) async {
+          txn.insert("connections", {
+            "domain": domain,
+            "wallet_id": _activeWallet!.id,
+          });
+          await txn.rawUpdate("update connections set thumbnail=? where domain=?", [_domainLogos[domain], domain]);
         });
       } else {
         return false;

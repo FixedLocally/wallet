@@ -327,7 +327,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
         _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
         _createWebsiteListTile("Mango Markets", "https://trade.mango.markets"),
-        _createWebsiteListTile("Orca", "https://orca.so"),
+        _createWebsiteListTile("Orca", "https://www.orca.so"),
         _createWebsiteListTile("Marinade Governance", "https://tribeca.so/gov/mnde/nftgauges/validator"),
         _createWebsiteListTile("Magic Eden", "https://magiceden.io"),
         _createWebsiteListTile("Frakt", "https://frakt.xyz/lend"),
@@ -409,16 +409,14 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                             },
                             elevation: 2.0,
                             padding: EdgeInsets.all(6.0),
-                            shape: CircleBorder(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(99.0),
                               side: BorderSide(
                                 color: themeData.colorScheme.onSurface,
                                 width: 3,
                               ),
                             ),
-                            child: Icon(
-                              Icons.arrow_upward_rounded,
-                              size: 36.0,
-                            ),
+                            child: Text(S.current.send),
                           ),
                         ),
                         Tooltip(
@@ -431,16 +429,14 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                             },
                             elevation: 2.0,
                             padding: EdgeInsets.all(6.0),
-                            shape: CircleBorder(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(99.0),
                               side: BorderSide(
                                 color: themeData.colorScheme.onSurface,
                                 width: 3,
                               ),
                             ),
-                            child: Icon(
-                              Icons.arrow_downward_rounded,
-                              size: 36.0,
-                            ),
+                              child: Text(S.current.receive),
                           ),
                         ),
                       ],
