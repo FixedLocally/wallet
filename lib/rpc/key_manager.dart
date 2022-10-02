@@ -383,6 +383,14 @@ class KeyManager {
             "wallet_id": _activeWallet!.id,
           });
           await txn.rawUpdate("update connections set thumbnail=? where domain=?", [_domainLogos[domain], domain]);
+          await txn.update(
+            "connections",
+            {
+              "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
+            },
+            where: "domain=? and wallet_id=?",
+            whereArgs: [domain, _activeWallet!.id],
+          );
         });
       } else {
         return false;
