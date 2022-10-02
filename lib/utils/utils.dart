@@ -164,7 +164,8 @@ class Utils {
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(rawMessage));
     Message message = Message.decompile(compiledMessage);
     // prepend header
-    List<int> simulationPayload = [1, ...List.generate(64, (_) => 0), ...rawMessage];
+    int sigs = compiledMessage.requiredSignatureCount;
+    List<int> simulationPayload = [sigs, ...List.generate(sigs * 64, (_) => 0), ...rawMessage];
     // all addresses involved in the transaction
     List<String> addresses = message.instructions
         .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
@@ -204,7 +205,10 @@ class Utils {
       ),
     );
     Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed);
-    List results = await Future.wait([statusFuture, solBalanceFuture]).catchError((_) => <Object>[]);
+    List results = await Future.wait([statusFuture, solBalanceFuture]).catchError((_) {
+      print(_);
+      return <Object>[];
+    });
     if (results.isEmpty) return TokenChanges.error("cannot get results");
     TransactionStatus status = results[0];
     int preSolBalance = results[1];
