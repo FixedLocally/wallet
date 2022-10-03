@@ -11,6 +11,12 @@ extension StrExt on String {
   }
 }
 
+extension NumExt on num {
+  String toFixedTrimmed(int fractionDigits) {
+    return double.parse(toStringAsFixed(fractionDigits)).toString();
+  }
+}
+
 extension IterableExtenstion<T> on Iterable<T> {
   T? get firstOrNull => isEmpty ? null : first;
 }

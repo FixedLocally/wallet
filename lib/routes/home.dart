@@ -586,7 +586,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                         visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                       ),
                       onPressed: () {
-                        _fromAmtController.text = ((myBalances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0) / 2).toString();
+                        double amt = (myBalances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0) / 2;
+                        _fromAmtController.text = amt.toFixedTrimmed(tokenDetails[_from]?["decimals"] ?? 9);
                       },
                       child: Text(
                         S.current.halfCap,
@@ -606,7 +607,9 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                           bal -= 0.01;
                           bal = bal.clamp(0, double.infinity);
                         }
-                        _fromAmtController.text = bal.toStringAsFixed(tokenDetails[_from]?["decimals"] ?? 9);
+                        // String balStr = bal.toStringAsFixed(tokenDetails[_from]?["decimals"] ?? 9);
+                        // balStr = balStr.replaceAllMapped(RegExp(r"(\d+\.\d*[1-9])(0+)"), (match) => match.group(1)!);
+                        _fromAmtController.text = bal.toFixedTrimmed(tokenDetails[_from]?["decimals"] ?? 9);
                       },
                       child: Text(
                         S.current.maxCap,
@@ -784,14 +787,14 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                                 await balancesCompleters[pubKey]!.future;
                                 double fromAfter = double.parse(balances[pubKey]![_from]!.tokenAmount.uiAmountString ?? "0");
                                 double toAfter = double.parse(balances[pubKey]![_to]!.tokenAmount.uiAmountString ?? "0");
-                                String fromDelta = (fromBefore - fromAfter).toStringAsFixed(tokenDetails[_from]?["decimals"] ?? 6);
-                                String toDelta = (toAfter - toBefore).toStringAsFixed(tokenDetails[_from]?["decimals"] ?? 6);
+                                String fromDelta = (fromBefore - fromAfter).toFixedTrimmed(9);
+                                String toDelta = (toAfter - toBefore).toFixedTrimmed(9);
                                 // rip out the trailing zeros
                                 // rip parse hack
                                 // fromDelta = double.parse(fromDelta).toString();
                                 // toDelta = double.parse(toDelta).toString();
-                                fromDelta = fromDelta.replaceAll(RegExp(r"0+$"), "");
-                                toDelta = toDelta.replaceAll(RegExp(r"0+$"), "");
+                                // fromDelta = fromDelta.replaceAll(RegExp(r"0+$"), "");
+                                // toDelta = toDelta.replaceAll(RegExp(r"0+$"), "");
                                 scaffold.showSnackBar(SnackBar(content: Text(sprintf(S.current.swapSuccess, [fromDelta, tokenDetails[_from]?["symbol"] ?? _from!.shortened, toDelta, tokenDetails[_to]?["symbol"] ?? _to!.shortened]))));
                               } else {
                                 _loadedAmt = null;
