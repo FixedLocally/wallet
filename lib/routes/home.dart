@@ -570,7 +570,6 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                 SizedBox(width: 16),
               ],
             ),
-            // todo: handle native sol balances correctly
             if (_from != null)
               Align(
                 alignment: Alignment.bottomRight,
@@ -599,7 +598,12 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                         visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                       ),
                       onPressed: () {
-                        _fromAmtController.text = (myBalances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0).toString();
+                        double bal = myBalances[_from]?.tokenAmount.uiAmountString?.doubleParsed ?? 0;
+                        if (_from == nativeSol) {
+                          bal -= 0.01;
+                          bal = bal.clamp(0, double.infinity);
+                        }
+                        _fromAmtController.text = bal.toStringAsFixed(tokenDetails[_from]?["decimals"] ?? 9);
                       },
                       child: Text(
                         S.current.maxCap,
