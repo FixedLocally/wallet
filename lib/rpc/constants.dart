@@ -25,3 +25,8 @@ class RpcConstants {
     kUserRejected: "User rejected the request",
   };
 }
+
+class Constants {
+  static const String kKeySwapFrom = "swap_from";
+  static const String kKeySwapTo = "swap_to";
+}

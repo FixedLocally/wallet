@@ -33,6 +33,7 @@ dependencies:
   jupiter_aggregator: ^1.0.0
   local_auth: ^2.1.2
   qr_flutter: ^4.0.0
+  shared_preferences: ^2.0.15
   solana: ^0.26.0
   sprintf: ^6.0.2
   sqflite: ^2.0.3+1

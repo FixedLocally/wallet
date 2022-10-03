@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
@@ -23,6 +24,7 @@ const String _coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/token_pric
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
 const nativeSol = "native-sol";
 const nativeSolMint = "So11111111111111111111111111111111111111112";
+const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const Map<String, dynamic> _hardCodedPrices = {
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
     "usd": 1.0,
@@ -35,8 +37,10 @@ class Utils {
   static String _injectionJs = "";
   static Completer<void>? _completer;
   static Database? _db;
+  static SharedPreferences? _prefs;
 
   static String get injectionJs => _injectionJs;
+  static SharedPreferences get prefs => _prefs!;
 
   static Future loadAssets() async {
     if (_injectionJs.isNotEmpty) return;
@@ -48,7 +52,8 @@ class Utils {
     });
 
     Future f3 = KeyManager.instance.init();
-    Future.wait([f1, f2, f3]).then((value) => _completer!.complete(null));
+    Future f4 = SharedPreferences.getInstance().then((value) => _prefs = value);
+    Future.wait([f1, f2, f3, f4]).then((value) => _completer!.complete(null));
     return _completer!.future;
   }
 

@@ -13,6 +13,7 @@ import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
 import '../generated/l10n.dart';
+import '../rpc/constants.dart';
 import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
 import '../utils/extensions.dart';
@@ -63,6 +64,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         _amt = _fromAmtController.text;
       });
     });
+    _from = Utils.prefs.getString(Constants.kKeySwapFrom) ?? nativeSol;
+    _to = Utils.prefs.getString(Constants.kKeySwapTo) ?? usdcMint;
   }
 
   @override
@@ -742,6 +745,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                                 },
                               );
                               if (approved) {
+                                Utils.prefs.setString(Constants.kKeySwapFrom, _from!);
+                                Utils.prefs.setString(Constants.kKeySwapTo, _to!);
                                 appWidget.startLoadingBalances(pubKey);
                                 await Utils.showLoadingDialog(context: context, future: balancesCompleters[pubKey]!.future, text: S.current.sendingTx);
                                 double fromBefore = double.parse(balances[pubKey]?[_from]?.tokenAmount.uiAmountString ?? "0");
