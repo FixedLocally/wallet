@@ -14,7 +14,7 @@ import '../generated/l10n.dart';
 import '../routes/show_secret.dart';
 import '../utils/extensions.dart';
 import '../utils/utils.dart';
-import '../widgets/image.dart';
+import '../widgets/domain_info.dart';
 import 'errors/errors.dart';
 
 const String derivationPathTemplate = "m/44'/501'/%s'/0'";
@@ -337,7 +337,6 @@ class KeyManager {
   }
 
   Future<bool> requestConnect(BuildContext context, String domain, String title, List<String> logoUrls, bool onlyIfTrusted) async {
-    ThemeData theme = Theme.of(context);
     List l = await _db.query("connections", where: "domain=? and wallet_id=?", whereArgs: [domain, _activeWallet!.id]);
     if (l.isEmpty) {
       if (onlyIfTrusted) return false;
@@ -349,26 +348,11 @@ class KeyManager {
           return Column(
             children: [
               SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
-                padding: EdgeInsets.all(16.0),
-                child: Logo(
-                  domain: domain,
-                  urls: logoUrls,
-                  width: 96,
-                  height: 96,
-                ),
+              DomainInfoWidget(
+                domain: domain,
+                logoUrls: logoUrls,
+                title: title,
               ),
-              SizedBox(height: 16),
-              Text(
-                title,
-                style: theme.textTheme.headline5,
-                textAlign: TextAlign.center,
-              ),
-              Text(domain),
               SizedBox(height: 16),
               Text(S.current.connectWalletContent),
             ],

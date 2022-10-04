@@ -125,7 +125,7 @@ class RpcServer {
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
       bodyBuilder: (context) {
-        return ApproveTransactionWidget(simulation: simulation);
+        return ApproveTransactionWidget(simulation: simulation, domain: args["domain"], title: args["title"], logoUrls: args["logo"].cast<String>());
       },
     );
     // auto reject mocked requests
@@ -193,7 +193,7 @@ class RpcServer {
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
       bodyBuilder: (context) {
-        return ApproveTransactionWidget(simulation: simulation);
+        return ApproveTransactionWidget(simulation: simulation, domain: args["domain"], title: args["title"], logoUrls: args["logo"].cast<String>());
       },
     );
     // auto reject mocked requests
