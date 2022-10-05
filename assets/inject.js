@@ -169,7 +169,7 @@ function(key, bogusKeys) {
                 let signatures = await rpc("signAllTransactions", {"txs": txs.map((tx) => ({"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash})), title: title(), logo: logo()});
                 for (let i = 0; i < signatures.length; ++i) {
                     signatures[i].signature = new Uint8Array(signatures[i].signature);
-                    debugLog("multi pre", txs[i]);
+                    debugLog("multi pre", txs[i], signatures[i]);
                     if (txs[i].signatures.length) {
                         txs[i].signatures.map(sig => {
                             if (sig.publicKey.toBase58() === signatures[i].publicKey.toBase58()) {
@@ -177,7 +177,7 @@ function(key, bogusKeys) {
                             }
                         });
                     } else {
-                        txs[i].signatures = [signature[i]];
+                        txs[i].signatures = [signatures[i]];
                     }
 //                    txs[i].signers = [signatures[i].publicKey];
                     debugLog("multi post", txs[i]);
