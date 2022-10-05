@@ -20,17 +20,11 @@ import '../routes/popups/bottom_sheet.dart';
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
 
-const String _coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/token_price/solana?vs_currencies=usd&include_24hr_change=true&contract_addresses=";
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
 const nativeSol = "native-sol";
 const nativeSolMint = "So11111111111111111111111111111111111111112";
 const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-const Map<String, dynamic> _hardCodedPrices = {
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
-    "usd": 1.0,
-    "usd_24h_change": 0.0,
-  }, // usdc
-};
+
 class Utils {
   static final SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
 
@@ -332,18 +326,13 @@ class Utils {
 
   static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
     if (tokens.isEmpty) return {};
-    // fetch in betches of 20
-    Map<String, dynamic> result = Map.of(_hardCodedPrices);
-    List<List<String>> batches = [];
-    for (int i = 0; i < tokens.length; i += 20) {
-      batches.add(tokens.sublist(i, min(i + 20, tokens.length)));
+    Map<String, dynamic> prices = {};
+    String url = "https://validator.utopiamint.xyz/api/price/";
+    Map<String, dynamic> json = jsonDecode(await _httpPost(url, tokens));
+    if (json["success"] == true) {
+      prices = json["tokens"] ?? {};
     }
-    for (int i = 0; i < batches.length; ++i) {
-      String url = "$_coinGeckoUrl${batches[i].join(",")}";
-      Map<String, dynamic> json = jsonDecode(await httpGet(url));
-      result.addAll(json);
-    }
-    return result;
+    return prices;
   }
 
   static Future<List<SplTokenAccountDataInfoWithUsd>> getBalances(String pubKey) async {
