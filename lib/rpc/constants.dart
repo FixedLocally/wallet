@@ -10,8 +10,8 @@ class RpcConstants {
 
   static const int kTokenAccountLength = 165;
 
-  static final Uri kRpcUrl = Uri.parse("https://api.mainnet-beta.solana.com");
-  static final Uri kWsUrl = Uri.parse("wss://api.mainnet-beta.solana.com");
+  static final Uri kRpcUrl = Uri.parse("https://solana-mainnet.phantom.app");
+  static final Uri kWsUrl = Uri.parse("wss://solana-mainnet.phantom.app");
   // static final Uri kWsUrl = Uri.parse("wss://ssc-dao.genesysgo.net");
   // static final Uri kRpcUrl = Uri.parse("https://ssc-dao.genesysgo.net");
 

@@ -89,7 +89,9 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
         for (String key in ["name", "details"]) {
           String? value = _validatorInfos[identity]?[key];
           if (value == null) continue;
-          _validatorInfos[identity]?[key] = utf8.decode(value.codeUnits);
+          try {
+            _validatorInfos[identity]?[key] = utf8.decode(value.codeUnits);
+          } catch (_) {}
         }
       }
 
