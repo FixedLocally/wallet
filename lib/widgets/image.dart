@@ -176,6 +176,7 @@ class KeybaseThumbnail extends StatefulWidget {
 }
 
 class _KeybaseThumbnailState extends State<KeybaseThumbnail> {
+  static final Map<String, String?> _cache = {};
   String? _url;
 
   @override
@@ -184,10 +185,17 @@ class _KeybaseThumbnailState extends State<KeybaseThumbnail> {
     if (widget.username == null) {
       _url = "";
     } else {
+      if (_cache.containsKey(widget.username!)) {
+        setState(() {
+          _url = _cache[widget.username];
+        });
+        return;
+      }
       Utils.httpGet("https://keybase.io/_/api/1.0/user/pic_url.json?username=${widget.username}").then((value) {
         if (!mounted) return;
         setState(() {
           _url = jsonDecode(value)["pic_url"];
+          _cache[widget.username!] = _url;
         });
       });
     }

@@ -21,6 +21,7 @@ import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
 
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
+const String _priceApiUrl = "https://validator.utopiamint.xyz/api/price/";
 const nativeSol = "native-sol";
 const nativeSolMint = "So11111111111111111111111111111111111111112";
 const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -327,8 +328,7 @@ class Utils {
   static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
     if (tokens.isEmpty) return {};
     Map<String, dynamic> prices = {};
-    String url = "https://validator.utopiamint.xyz/api/price/";
-    Map<String, dynamic> json = jsonDecode(await _httpPost(url, tokens));
+    Map<String, dynamic> json = jsonDecode(await _httpPost(_priceApiUrl, tokens));
     if (json["success"] == true) {
       prices = json["tokens"] ?? {};
     }
