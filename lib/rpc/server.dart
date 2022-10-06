@@ -195,6 +195,7 @@ class RpcServer {
       bodyBuilder: (context) {
         return ApproveTransactionWidget(simulation: simulation, domain: args["domain"], title: args["title"], logoUrls: args["logo"].cast<String>());
       },
+      doubleConfirm: payloads.length > 10 ? "I acknowledge the risk of approving these transactions." : null,
     );
     // auto reject mocked requests
     if (KeyManager.instance.mockPubKey != null) {
