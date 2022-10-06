@@ -805,6 +805,22 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
     );
   }
 
+  List<Instruction> burnAndCloseIxs() {
+    List<Instruction> ixs = [];
+    ixs.add(TokenInstruction.burn(
+      amount: int.parse(tokenAmount.amount),
+      accountToBurnFrom: Ed25519HDPublicKey(base58decode(account)),
+      mint: Ed25519HDPublicKey(base58decode(mint)),
+      owner: Ed25519HDPublicKey(base58decode(owner)),
+    ));
+    ixs.add(TokenInstruction.closeAccount(
+      accountToClose: Ed25519HDPublicKey(base58decode(account)),
+      destination: Ed25519HDPublicKey(base58decode(owner)),
+      owner: Ed25519HDPublicKey(base58decode(owner)),
+    ));
+    return ixs;
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
