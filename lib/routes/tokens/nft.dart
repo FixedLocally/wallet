@@ -1,8 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:solana/encoder.dart';
+import 'package:sprintf/sprintf.dart';
 
 import '../../generated/l10n.dart';
+import '../../utils/extensions.dart';
 import '../../utils/utils.dart';
 import '../../widgets/image.dart';
 import '../image.dart';
@@ -45,9 +48,13 @@ class NftDetailsRoute extends StatelessWidget {
                   value: 1,
                   child: Text(S.current.viewOnSolscan),
                 ),
+                PopupMenuItem(
+                  value: 2,
+                  child: Text(S.current.burn),
+                ),
               ];
             },
-            onSelected: (int value) {
+            onSelected: (int value) async {
               switch (value) {
                 case 0:
                   Navigator.push(
@@ -71,6 +78,17 @@ class NftDetailsRoute extends StatelessWidget {
                     ),
                   );
                   break;
+                case 2:
+                  NavigatorState nav = Navigator.of(context);
+                  bool burn = await Utils.showConfirmBottomSheet(
+                    context: context,
+                    title: sprintf(S.current.burnConfirm, [tokenDetails[balance.mint]?["symbol"] ?? balance.mint.shortened]),
+                    bodyBuilder: (_) => Text(S.current.burnConfirmContent),
+                  );
+                  if (!burn) return;
+                  List<Instruction> ixs = balance.burnAndCloseIxs();
+                  await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
+                  nav.pop(true);
               }
             },
           ),
