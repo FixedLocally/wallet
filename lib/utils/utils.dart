@@ -578,6 +578,7 @@ class Utils {
     String? title,
     String? confirmText,
     String? cancelText,
+    String? doubleConfirm,
     required WidgetBuilder bodyBuilder,
   }) async {
     bool? result = await showModalBottomSheet<bool>(
@@ -591,6 +592,7 @@ class Utils {
           title: title,
           confirmText: confirmText,
           cancelText: cancelText,
+          doubleConfirm: doubleConfirm,
         );
       },
     );

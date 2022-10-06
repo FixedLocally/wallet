@@ -2,19 +2,34 @@ import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
 
-class ConfirmBottomSheet extends StatelessWidget {
+class ConfirmBottomSheet extends StatefulWidget {
   final String? title;
   final String? confirmText;
   final String? cancelText;
   final WidgetBuilder bodyBuilder;
+  final String? doubleConfirm;
 
   const ConfirmBottomSheet({
     super.key,
     this.title,
     this.confirmText,
     this.cancelText,
+    this.doubleConfirm,
     required this.bodyBuilder,
   });
+
+  @override
+  State<ConfirmBottomSheet> createState() => _ConfirmBottomSheetState();
+}
+
+class _ConfirmBottomSheetState extends State<ConfirmBottomSheet> {
+  late bool _confirmed;
+
+  @override
+  void initState() {
+    super.initState();
+    _confirmed = widget.doubleConfirm == null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +53,27 @@ class ConfirmBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(height: 16),
-            if (title != null) ...[
-              Text(title!, style: themeData.textTheme.headline6),
+            if (widget.title != null) ...[
+              Text(widget.title!, style: themeData.textTheme.headline6),
             ],
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: bodyBuilder(context),
+              child: widget.bodyBuilder(context),
             ),
             SizedBox(height: 8),
+            if (widget.doubleConfirm != null) ...[
+              CheckboxListTile(
+                controlAffinity: ListTileControlAffinity.leading,
+                dense: true,
+                value: _confirmed,
+                onChanged: (_) {
+                  setState(() {
+                    _confirmed = !_confirmed;
+                  });
+                },
+                title: Text(widget.doubleConfirm!),
+              ),
+            ],
             Row(
               children: [
                 SizedBox(width: 8),
@@ -60,7 +88,7 @@ class ConfirmBottomSheet extends StatelessWidget {
                         Navigator.of(context).pop(false);
                       },
                       child: Text(
-                        cancelText ?? S.current.no,
+                        widget.cancelText ?? S.current.no,
                         style: TextStyle(
                           color: themeData.colorScheme.onBackground,
                         ),
@@ -72,10 +100,13 @@ class ConfirmBottomSheet extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextButton(
-                      onPressed: () {
+                      style: _confirmed ? null : TextButton.styleFrom(
+                        backgroundColor: themeData.disabledColor,
+                      ),
+                      onPressed: _confirmed ? () {
                         Navigator.of(context).pop(true);
-                      },
-                      child: Text(confirmText ?? S.current.yes),
+                      } : null,
+                      child: Text(widget.confirmText ?? S.current.yes),
                     ),
                   ),
                 ),
