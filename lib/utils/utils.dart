@@ -233,7 +233,7 @@ class Utils {
         }
       }
     }
-    int postSolBalance = status.accounts?.last.lamports ?? 0;
+    int postSolBalance = status.accounts?.last?.lamports ?? 0;
     List result = await Future.wait([Future.wait(updatedAcctFutures), Future.wait(preBalanceFutures)]);
     List<SplTokenAccountDataInfo> updatedAccts = result[0];
     List<SplTokenAccountDataInfo?> preBalances = result[1];
