@@ -1210,10 +1210,10 @@ class S {
     );
   }
 
-  /// `Warning: This website is requesting approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website's developer.`
+  /// `Warning: This website is requesting your approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website's developer.`
   String get bulkTxWarning {
     return Intl.message(
-      'Warning: This website is requesting approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website\'s developer.',
+      'Warning: This website is requesting your approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website\'s developer.',
       name: 'bulkTxWarning',
       desc: '',
       args: [],

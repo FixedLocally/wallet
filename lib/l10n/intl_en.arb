@@ -116,5 +116,5 @@
   "addressCopied": "Address copied",
   "visitExternalUrl": "Visit External URL",
   "image": "Image",
-  "bulkTxWarning": "Warning: This website is requesting approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website's developer."
+  "bulkTxWarning": "Warning: This website is requesting your approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website's developer."
 }
