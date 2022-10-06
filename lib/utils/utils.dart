@@ -257,6 +257,9 @@ class Utils {
 
   static Future<List<TokenChanges>> simulateTxs(List<List<int>> rawMessage, String owner) async {
     List<TokenChanges> changes = [];
+    if (rawMessage.length > 10) {
+      return [TokenChanges.error("tooManyTransactions:${rawMessage.length}", true)];
+    }
     for (int i = 0; i < rawMessage.length; ++i) {
       // sequentially
       changes.add(await simulateTx(rawMessage[i], owner));
@@ -671,6 +674,20 @@ class Utils {
       child: child,
     );
   }
+
+  static Widget wrapWarning({
+    required BuildContext context,
+    required Widget child,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).errorColor.withOpacity(0.33),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: child,
+    );
+  }
 }
 
 class TokenChanges {
@@ -679,10 +696,11 @@ class TokenChanges {
   final Map<String, Map<String, dynamic>?> tokens;
   final int solOffset;
   final bool error;
+  final bool warning;
   final String? errorMessage;
 
-  TokenChanges(this.changes, this.updatedAccounts, this.tokens, this.solOffset) : error = false, errorMessage = null;
-  TokenChanges.error([this.errorMessage]) : changes = {}, updatedAccounts = {}, tokens = {}, solOffset = 0, error = true;
+  TokenChanges(this.changes, this.updatedAccounts, this.tokens, this.solOffset) : error = false, errorMessage = null, warning = false;
+  TokenChanges.error([this.errorMessage, this.warning = false]) : changes = {}, updatedAccounts = {}, tokens = {}, solOffset = 0, error = true;
 
   static TokenChanges merge(List<TokenChanges> tokenChanges) {
     Map<String, double> changes = {};
@@ -708,8 +726,17 @@ class TokenChanges {
     return TokenChanges(changes, updatedAccounts, tokens, solOffset);
   }
 
-  Widget widget() {
+  Widget widget(BuildContext context) {
     if (error) {
+      if (errorMessage?.startsWith("tooManyTransactions") == true) {
+        int count = int.parse(errorMessage!.split(":")[1]);
+        return Column(
+          children: [
+            Utils.wrapWarning(context: context, child: Text(sprintf(S.current.bulkTxWarning, [count]))),
+            Text(S.current.transactionMayFailToConfirm),
+          ],
+        );
+      }
       return Text(S.current.transactionMayFailToConfirm);
     } else {
       return Column(

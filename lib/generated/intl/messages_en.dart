@@ -29,6 +29,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "approveTransactionTitle":
             MessageLookupByLibrary.simpleMessage("Approve transaction?"),
         "areYouSure": MessageLookupByLibrary.simpleMessage("Are you sure?"),
+        "bulkTxWarning": MessageLookupByLibrary.simpleMessage(
+            "Warning: This website is requesting approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website\'s developer."),
         "burn": MessageLookupByLibrary.simpleMessage("Burn and close"),
         "burnConfirm": MessageLookupByLibrary.simpleMessage("Burn %s"),
         "burnConfirmContent": MessageLookupByLibrary.simpleMessage(

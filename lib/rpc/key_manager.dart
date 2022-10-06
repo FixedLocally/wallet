@@ -420,12 +420,8 @@ class KeyManager {
           title: S.current.exportPrivateKey,
           secret: keyBase58,
           copySuccessMessage: S.current.copyPrivateKeySuccess,
-          header: Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).errorColor.withOpacity(0.33),
-              borderRadius: BorderRadius.circular(8),
-            ),
+          header: Utils.wrapWarning(
+            context: context,
             child: Text(S.current.showPrivateKeyContent),
           ),
         );
