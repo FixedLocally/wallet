@@ -15,6 +15,7 @@ import '../../utils/extensions.dart';
 import '../../utils/utils.dart';
 import '../../widgets/image.dart';
 import '../image.dart';
+import '../qr_scanner.dart';
 
 
 class SendTokenRoute extends StatefulWidget {
@@ -134,7 +135,29 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                             });
                           });
                         },
-                      )
+                      ),
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                        padding: EdgeInsets.zero,
+                        icon: Icon(
+                          Icons.qr_code_scanner_rounded,
+                          color: themeData.colorScheme.onBackground,
+                        ),
+                        onPressed: () async {
+                          String? address = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QrScannerRoute(),
+                            ),
+                          );
+                          if (address != null) {
+                            setState(() {
+                              _addressController.text = address;
+                              _recipient = _addressController.text;
+                            });
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),

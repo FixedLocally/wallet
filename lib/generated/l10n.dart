@@ -1219,6 +1219,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Scan QR Code`
+  String get scanQrCode {
+    return Intl.message(
+      'Scan QR Code',
+      name: 'scanQrCode',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
