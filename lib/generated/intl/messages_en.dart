@@ -56,6 +56,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "connectWallet": MessageLookupByLibrary.simpleMessage("Connect Wallet"),
         "connectWalletContent": MessageLookupByLibrary.simpleMessage(
             "Only connect to websites you trust."),
+        "connectWalletHeadline": MessageLookupByLibrary.simpleMessage(
+            "Is requesting to connect to your #%s# wallet."),
         "continuE": MessageLookupByLibrary.simpleMessage("Continue"),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
         "copyAddress": MessageLookupByLibrary.simpleMessage("Copy address"),

@@ -15,6 +15,7 @@ import '../routes/show_secret.dart';
 import '../utils/extensions.dart';
 import '../utils/utils.dart';
 import '../widgets/domain_info.dart';
+import '../widgets/text.dart';
 import 'errors/errors.dart';
 
 const String derivationPathTemplate = "m/44'/501'/%s'/0'";
@@ -354,6 +355,10 @@ class KeyManager {
                 title: title,
               ),
               SizedBox(height: 16),
+              HighlightedText(
+                text: sprintf(S.current.connectWalletHeadline,
+                    [_activeWallet!.name]),
+              ),
               Text(S.current.connectWalletContent),
             ],
           );

@@ -121,5 +121,6 @@
   "yield": "Yield",
   "home": "Home",
   "collectibles": "Collectibles",
-  "settings": "Settings"
+  "settings": "Settings",
+  "connectWalletHeadline": "Is requesting to connect to your #%s# wallet."
 }

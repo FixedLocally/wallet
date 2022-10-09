@@ -1269,6 +1269,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Is requesting to connect to your #%s# wallet.`
+  String get connectWalletHeadline {
+    return Intl.message(
+      'Is requesting to connect to your #%s# wallet.',
+      name: 'connectWalletHeadline',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
