@@ -661,7 +661,7 @@ class Utils {
   }
 
   static Widget wrapField({
-    required ThemeData themeData,
+    required Color wrapColor,
     required Widget child,
     EdgeInsetsGeometry margin = const EdgeInsets.only(top: 16, bottom: 8),
     EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 16),
@@ -671,7 +671,7 @@ class Utils {
       padding: padding,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: themeData.colorScheme.background,
+        color: wrapColor,
       ),
       child: child,
     );

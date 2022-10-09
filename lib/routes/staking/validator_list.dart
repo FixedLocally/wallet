@@ -370,7 +370,7 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
             Utils.wrapField(
               margin: const EdgeInsets.only(top: 8, bottom: 8),
               padding: EdgeInsets.only(left: 8, right: 16),
-              themeData: themeData,
+              wrapColor: themeData.colorScheme.background,
               child: TextField(
                 decoration: InputDecoration(
                   isDense: true,

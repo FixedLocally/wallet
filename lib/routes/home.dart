@@ -73,6 +73,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     return Scaffold(
       appBar: AppBar(
         title: Center(child: _title()),
+        titleSpacing: 0,
         actions: [
           PopupMenuButton(
             itemBuilder: (context) {
@@ -555,7 +556,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                   child: Utils.wrapField(
                     margin: const EdgeInsets.only(top: 8, bottom: 8),
                     padding: EdgeInsets.only(left: 8, right: 16),
-                    themeData: themeData,
+                    wrapColor: themeData.colorScheme.background,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -677,7 +678,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                   child: Utils.wrapField(
                     margin: const EdgeInsets.only(top: 8, bottom: 8),
                     padding: EdgeInsets.only(left: 8, right: 16),
-                    themeData: themeData,
+                    wrapColor: themeData.colorScheme.background,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

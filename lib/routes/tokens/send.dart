@@ -103,7 +103,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                 img,
                 const SizedBox(height: 16),
                 Utils.wrapField(
-                  themeData: themeData,
+                  wrapColor: themeData.colorScheme.background,
                   child: Row(
                     children: [
                       Expanded(
@@ -171,7 +171,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                     ),
                   ),
                 Utils.wrapField(
-                  themeData: themeData,
+                  wrapColor: themeData.colorScheme.background,
                   child: TextFormField(
                     controller: _amountController,
                     decoration: InputDecoration(

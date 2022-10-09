@@ -1279,6 +1279,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Search or enter web address`
+  String get searchOrEnterWebAddress {
+    return Intl.message(
+      'Search or enter web address',
+      name: 'searchOrEnterWebAddress',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

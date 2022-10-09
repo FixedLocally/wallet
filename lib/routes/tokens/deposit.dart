@@ -40,7 +40,7 @@ class _DepositTokenRouteState extends State<DepositTokenRoute> {
                 ),
               ),
               Utils.wrapField(
-                themeData: themeData,
+                wrapColor: themeData.colorScheme.background,
                 child: Row(
                   children: [
                     Expanded(
