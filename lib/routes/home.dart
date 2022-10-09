@@ -39,6 +39,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   final GlobalKey<RefreshIndicatorState> _tokenRefresherKey = GlobalKey();
 
   late TextEditingController _fromAmtController;
+  late TextEditingController _searchController;
 
   String? _from;
   String? _to;
@@ -51,6 +52,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
     _fromAmtController = TextEditingController();
     _fromAmtController.debounce(Duration(milliseconds: 400), (value) {
       _loadRoutes(_from, _to);
@@ -336,7 +338,56 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   Widget _title() {
     switch (_page) {
       case 0:
-        return Text(S.current.home);
+        return Utils.wrapField(
+          wrapColor: Theme.of(context).cardColor,
+          margin: const EdgeInsets.only(top: 8, bottom: 8),
+          padding: const EdgeInsets.only(left: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: S.current.searchOrEnterWebAddress,
+                    border: InputBorder.none,
+                  ),
+                  textInputAction: TextInputAction.go,
+                  onSubmitted: (text) {
+                    Uri? uri = Uri.tryParse(text);
+                    if (uri == null || uri.host.isEmpty) {
+                      uri = Uri.parse("https://$text");
+                    }
+                    if (!uri.host.contains(".")) {
+                      uri = Uri.parse("https://www.google.com/search?q=$text");
+                    }
+                    if (text.isNotEmpty) {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => DAppRoute(
+                          title: text,
+                          initialUrl: uri.toString(),
+                        ),
+                      ));
+                      _searchController.clear();
+                    }
+                  },
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                ),
+              ),
+              _searchController.text.isNotEmpty ? IconButton(
+                visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                padding: EdgeInsets.zero,
+                icon: const Icon(Icons.clear_rounded),
+                onPressed: () {
+                  _searchController.clear();
+                  setState(() {});
+                },
+              ) : Container(),
+            ],
+          ),
+        );
       case 1:
         return GestureDetector(
           onTap: () {

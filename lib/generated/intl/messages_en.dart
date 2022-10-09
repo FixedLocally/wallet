@@ -139,6 +139,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "revokingDelegation":
             MessageLookupByLibrary.simpleMessage("Revoking delegation..."),
         "scanQrCode": MessageLookupByLibrary.simpleMessage("Scan QR Code"),
+        "searchOrEnterWebAddress":
+            MessageLookupByLibrary.simpleMessage("Search or enter web address"),
         "searchTokensOrPasteAddress": MessageLookupByLibrary.simpleMessage(
             "Search tokens or paste address"),
         "searchValidators":

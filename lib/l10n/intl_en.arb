@@ -122,5 +122,6 @@
   "home": "Home",
   "collectibles": "Collectibles",
   "settings": "Settings",
-  "connectWalletHeadline": "Is requesting to connect to your #%s# wallet."
+  "connectWalletHeadline": "Is requesting to connect to your #%s# wallet.",
+  "searchOrEnterWebAddress": "Search or enter web address"
 }
