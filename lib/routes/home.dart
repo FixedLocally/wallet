@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -35,7 +34,7 @@ class HomeRoute extends StatefulWidget {
 }
 
 class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
-  int _page = 0;
+  int _page = 1;
   final GlobalKey<RefreshIndicatorState> _nftRefresherKey = GlobalKey();
   final GlobalKey<RefreshIndicatorState> _tokenRefresherKey = GlobalKey();
 
@@ -73,16 +72,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     ThemeData themeData = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(KeyManager.instance.walletName),
-            Text(
-              KeyManager.instance.pubKey,
-              style: const TextStyle(fontSize: 14),
-            ),
-          ],
-        ),
+        title: Center(child: _title()),
         actions: [
           PopupMenuButton(
             itemBuilder: (context) {
@@ -237,26 +227,28 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         unselectedItemColor: themeData.unselectedWidgetColor,
         currentIndex: _page,
         type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: "",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
+            label: "",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.sync_alt),
-            label: 'Swap',
+            label: "",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.collections),
-            label: 'Collectibles',
+            label: "",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Settings',
+            label: "",
           ),
         ],
         onTap: (index) {
@@ -335,8 +327,41 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         _createWebsiteListTile("Marinade Governance", "https://tribeca.so/gov/mnde/nftgauges/validator"),
         _createWebsiteListTile("Magic Eden", "https://magiceden.io"),
         _createWebsiteListTile("Frakt", "https://frakt.xyz/lend"),
+        _createWebsiteListTile("Nirvana", "https://app.nirvana.finance"),
       ],
     );
+  }
+  
+  Widget _title() {
+    switch (_page) {
+      case 0:
+        return Text(S.current.home);
+      case 1:
+        return GestureDetector(
+          onTap: () {
+            Clipboard.setData(ClipboardData(text: KeyManager.instance.pubKey));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(S.current.addressCopied),
+              ),
+            );
+          },
+          child: Column(
+            children: [
+              Text(KeyManager.instance.walletName),
+              Text(KeyManager.instance.pubKey, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12),),
+            ],
+          ),
+        );
+      case 2:
+        return Text(S.current.swap);
+      case 3:
+        return Text(S.current.collectibles);
+      case 4:
+        return Text(S.current.settings);
+      default:
+        return Text(S.current.home);
+    }
   }
 
   Widget _balanceList(ThemeData themeData, {bool tokensOnly = false}) {
@@ -1197,22 +1222,18 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                         bodyBuilder: (_) => Text(S.current.closeTokenAccountContent),
                       );
                       if (!burn) return;
-                      List<Instruction> ixs = [];
-                      ixs.add(TokenInstruction.burn(
-                        amount: int.parse(balance.tokenAmount.amount),
-                        accountToBurnFrom: Ed25519HDPublicKey(base58decode(balance.account)),
-                        mint: Ed25519HDPublicKey(base58decode(balance.mint)),
-                        owner: Ed25519HDPublicKey(base58decode(balance.owner)),
-                      ));
-                      ixs.add(TokenInstruction.closeAccount(
-                        accountToClose: Ed25519HDPublicKey(base58decode(balance.account)),
-                        destination: Ed25519HDPublicKey(base58decode(balance.owner)),
-                        owner: Ed25519HDPublicKey(base58decode(balance.owner)),
-                      ));
+                      List<Instruction> ixs = balance.burnAndCloseIxs();
                       await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
                       appWidget.startLoadingBalances(KeyManager.instance.pubKey);
                     },
-                  )
+                  ),
+              ListTile(
+                leading: const Icon(Icons.trending_up_rounded),
+                title: Text(S.current.yield),
+                onTap: () async {
+                  Navigator.pop(context);
+                },
+              ),
             ],
           ),
         );

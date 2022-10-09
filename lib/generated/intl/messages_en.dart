@@ -51,6 +51,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Close token account"),
         "closeTokenAccountContent": MessageLookupByLibrary.simpleMessage(
             "Another contract interaction may recreate this account."),
+        "collectibles": MessageLookupByLibrary.simpleMessage("Collectibles"),
         "connect": MessageLookupByLibrary.simpleMessage("Connect"),
         "connectWallet": MessageLookupByLibrary.simpleMessage("Connect Wallet"),
         "connectWalletContent": MessageLookupByLibrary.simpleMessage(
@@ -80,6 +81,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Export Secret Recovery Phrase"),
         "halfCap": MessageLookupByLibrary.simpleMessage("HALF"),
+        "home": MessageLookupByLibrary.simpleMessage("Home"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
         "importWallet": MessageLookupByLibrary.simpleMessage("Import Wallet"),
         "importedWallet":
@@ -148,6 +150,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendToken": MessageLookupByLibrary.simpleMessage("Send %s"),
         "sendingTx":
             MessageLookupByLibrary.simpleMessage("Sending transaction..."),
+        "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "setupWallet": MessageLookupByLibrary.simpleMessage("Setup Wallet"),
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
             "Do NOT share your private key, having access to your private key means having full access to your funds."),
@@ -193,6 +196,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wallet Settings"),
         "withdraw": MessageLookupByLibrary.simpleMessage("Withdraw"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes"),
+        "yield": MessageLookupByLibrary.simpleMessage("Yield"),
         "yourSecretRecoveryPhraseIs": MessageLookupByLibrary.simpleMessage(
             "Your secret recovery phrase is:")
       };

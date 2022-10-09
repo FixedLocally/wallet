@@ -117,5 +117,9 @@
   "visitExternalUrl": "Visit External URL",
   "image": "Image",
   "bulkTxWarning": "Warning: This website is requesting your approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website's developer.",
-  "scanQrCode": "Scan QR Code"
+  "scanQrCode": "Scan QR Code",
+  "yield": "Yield",
+  "home": "Home",
+  "collectibles": "Collectibles",
+  "settings": "Settings"
 }

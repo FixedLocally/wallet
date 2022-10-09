@@ -1229,6 +1229,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Yield`
+  String get yield {
+    return Intl.message(
+      'Yield',
+      name: 'yield',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Home`
+  String get home {
+    return Intl.message(
+      'Home',
+      name: 'home',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collectibles`
+  String get collectibles {
+    return Intl.message(
+      'Collectibles',
+      name: 'collectibles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Settings`
+  String get settings {
+    return Intl.message(
+      'Settings',
+      name: 'settings',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
