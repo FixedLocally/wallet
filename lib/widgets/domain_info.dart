@@ -29,8 +29,7 @@ class DomainInfoWidget extends StatelessWidget {
           child: Logo(
             domain: domain,
             urls: logoUrls,
-            width: 64,
-            height: 64,
+            size: 64,
           ),
         ),
         SizedBox(height: 16),

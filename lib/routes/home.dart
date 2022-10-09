@@ -273,7 +273,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     String? logo = KeyManager.instance.getDomainLogo(host);
     Widget leading = Icon(Icons.language);
     if (logo != null) {
-      leading = Image.file(File(logo), width: 24, height: 24, errorBuilder: (_, __, ___) => Icon(Icons.language),);
+      // leading = Image.file(File(logo), width: 24, height: 24, errorBuilder: (_, __, ___) => Icon(Icons.language),);
+      leading = MultiImage(image: logo, size: 24,);
     }
     return ListTile(
       leading: leading,

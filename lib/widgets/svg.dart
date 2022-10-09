@@ -70,7 +70,12 @@ class _NetworkSvgState extends State<NetworkSvg> {
   }
 
   Future<String> _downloadSvg() async {
-    File file = await DefaultCacheManager().getSingleFile(widget.url);
+    late File file;
+    if (widget.url.startsWith("file://")) {
+      file = File(widget.url.substring(7));
+    } else {
+      file = await DefaultCacheManager().getSingleFile(widget.url);
+    }
     return file.readAsString();
   }
 

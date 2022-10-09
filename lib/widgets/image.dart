@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -47,23 +48,37 @@ class _MultiImageState extends State<MultiImage> {
       );
       return;
     }
-    Uri? uri = Uri.tryParse(widget.image!);
+    String image = widget.image!;
+    if (image.startsWith("/")) {
+      image = "file://$image";
+    }
+    Uri? uri = Uri.tryParse(image);
     if (uri?.data?.mimeType.startsWith("image/svg") == true) {
+      // data svg
       _builder = (_) => StringSvg(
         svg: uri!.data!.contentAsString(),
         width: widget.size,
         height: widget.size,
       );
-    } else if (widget.image!.endsWith(".svg")) {
+    } else if (image.endsWith(".svg")) {
+      // other svg
       _builder = (_) => NetworkSvg(
-        url: widget.image!,
+        url: image,
         width: widget.size,
         height: widget.size,
         cleanSvg: widget.cleanSvg,
       );
+    } else if (uri?.scheme == "file") {
+      _builder = (_) => Image.file(
+        File(uri!.path),
+        height: widget.size,
+        width: widget.size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Icon(Icons.language, size: (widget.size ?? 48)),
+      );
     } else if (uri != null) {
       _builder = (_) => CachedNetworkImage(
-        imageUrl: widget.image!,
+        imageUrl: image,
         height: widget.size,
         width: widget.size,
         fit: BoxFit.cover,
@@ -98,15 +113,13 @@ class _MultiImageState extends State<MultiImage> {
 class Logo extends StatefulWidget {
   final String domain;
   final List<String> urls;
-  final double width;
-  final double height;
+  final double size;
 
   const Logo({
     Key? key,
     required this.domain,
     required this.urls,
-    required this.width,
-    required this.height,
+    required this.size,
   }) : super(key: key);
 
   @override
@@ -147,18 +160,16 @@ class _LogoState extends State<Logo> {
   Widget build(BuildContext context) {
     // try the images one by one
     if (_fileInfo != null) {
-      return Image.file(
-        _fileInfo!.file,
-        width: widget.width,
-        height: widget.height,
-        fit: BoxFit.cover,
+      return MultiImage(
+        image: _fileInfo!.file.path,
+        size: widget.size,
       );
     } else {
       return SizedBox(
-        width: widget.width,
-        height: widget.height,
+        width: widget.size,
+        height: widget.size,
         child: Center(
-          child: _exhausted ? Icon(Icons.language, size: min(widget.width, widget.height)) : CircularProgressIndicator(),
+          child: _exhausted ? Icon(Icons.language, size: min(widget.size, widget.size)) : CircularProgressIndicator(),
         ),
       );
     }
