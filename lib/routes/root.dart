@@ -31,6 +31,9 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
   JupiterIndexedRouteMap? _jupRouteMap;
   bool _jupRouteMapLoading = false;
 
+  // yield data
+  final List<String> _yieldableTokens = [];
+
   Timer? _balanceReloader;
 
   static WalletAppWidgetState of(BuildContext context) {
@@ -74,6 +77,9 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
   void startLoadingBalances(String pubKey) {
     Completer balCompleter = Completer();
     Completer metadataCompleter = Completer();
+    if (_yieldableTokens.isEmpty) {
+      loadYieldableTokens();
+    }
     _balancesCompleters[pubKey] = balCompleter;
     _tokenInfoCompleters[pubKey] = metadataCompleter;
     Utils.getBalances(pubKey).then((value) async {
@@ -128,6 +134,15 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
     }
   }
 
+  Future<void> loadYieldableTokens() async {
+    Utils.getYieldableTokens().then((value) {
+      setState(() {
+        _yieldableTokens.clear();
+        _yieldableTokens.addAll(value);
+      });
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -149,6 +164,7 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
       balancesCompleters: _balancesCompleters,
       tokenInfoCompleters: _tokenInfoCompleters,
       tokenDetails: _tokenDetails,
+      yieldableTokens: _yieldableTokens,
       child: widget.child,
     );
   }
@@ -173,6 +189,9 @@ class WalletAppInheritedWidget extends InheritedWidget {
   final JupiterIndexedRouteMap? jupRouteMap;
   final bool jupRouteMapLoading;
 
+  // yield data
+  final List<String> yieldableTokens;
+
   const WalletAppInheritedWidget({
     required this.balances,
     required this.balancesCompleters,
@@ -181,6 +200,7 @@ class WalletAppInheritedWidget extends InheritedWidget {
     required this.jupTopTokens,
     required this.jupRouteMap,
     required this.jupRouteMapLoading,
+    required this.yieldableTokens,
     required super.child,
     super.key,
   });

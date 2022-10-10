@@ -23,6 +23,9 @@ mixin UsesSharedData<T extends StatefulWidget> on State<T> {
   JupiterIndexedRouteMap? get jupRouteMap => sharedData.jupRouteMap;
   bool get jupRouteMapLoading => sharedData.jupRouteMapLoading;
 
+  // yield data
+  List<String> get yieldableTokens => sharedData.yieldableTokens;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();

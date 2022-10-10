@@ -1273,13 +1273,31 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                       appWidget.startLoadingBalances(KeyManager.instance.pubKey);
                     },
                   ),
-              ListTile(
-                leading: const Icon(Icons.trending_up_rounded),
-                title: Text(S.current.yield),
-                onTap: () async {
-                  Navigator.pop(context);
-                },
-              ),
+              if (yieldableTokens.contains(balance.mint))
+                ListTile(
+                  leading: const Icon(Icons.trending_up_rounded),
+                  title: Text(S.current.yield),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Utils.showLoadingDialog(
+                      context: context,
+                      future: Utils.getYieldOpportunities(balance.mint),
+                    ).then((List<YieldOpportunity> opportunities) {
+                      return Utils.showActionBottomSheet(
+                        context: context,
+                        title: S.current.yield,
+                        actions: [
+                          ...opportunities.mapIndexed((i, e) => BottomSheetAction(
+                                title: "${e.name} (APY: ${e.apy})",
+                                value: i,
+                              )),
+                        ],
+                      ).then((value) => opportunities[value]);
+                    }).then((YieldOpportunity selected) {
+                      // todo input amount and send
+                    });
+                  },
+                ),
             ],
           ),
         );
