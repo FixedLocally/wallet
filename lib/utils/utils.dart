@@ -22,6 +22,8 @@ import '../rpc/key_manager.dart';
 
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
 const String _priceApiUrl = "https://validator.utopiamint.xyz/api/price/";
+const String _tokenMetadataApiUrl = "https://validator.utopiamint.xyz/api/token/";
+const String _yieldApiUrl = "https://validator.utopiamint.xyz/api/yield";
 const nativeSol = "native-sol";
 const nativeSolMint = "So11111111111111111111111111111111111111112";
 const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -404,6 +406,16 @@ class Utils {
     return results;
   }
 
+  static Future<List<YieldOpportunity>> getYieldOpportunities(String mint) async {
+    Map resp = jsonDecode(await httpGet("$_yieldApiUrl/$mint"));
+    return resp["yield"].map<YieldOpportunity>((e) => YieldOpportunity.fromJson(e)).toList();
+  }
+
+  static Future<List<String>> getYieldableTokens() async {
+    Map resp = jsonDecode(await httpGet("$_yieldApiUrl/all"));
+    return resp["tokens"].cast<String>();
+  }
+
   static Future<List<String>> getTopTokens() async {
     return jsonDecode((await httpGet(_topTokensUrl, cache: true))).cast<String>();
   }
@@ -412,7 +424,7 @@ class Utils {
     if (addresses.isEmpty) return [];
     List<String> firstBatch = addresses.sublist(0, min(50, addresses.length));
     List<String> secondBatch = addresses.length > 50 ? addresses.sublist(50) : [];
-    List<List> metadatas = await _httpPost("https://validator.utopiamint.xyz/api/token/", firstBatch).then((value) {
+    List<List> metadatas = await _httpPost(_tokenMetadataApiUrl, firstBatch).then((value) {
       Map resp = jsonDecode(value);
       if (!resp["success"]) {
         return [];
@@ -844,4 +856,29 @@ class BottomSheetAction {
     this.leading,
     required this.value,
   });
+}
+
+class YieldOpportunity {
+  final String name;
+  final double apy;
+  final String api;
+
+  YieldOpportunity({
+    required this.name,
+    required this.apy,
+    required this.api,
+  });
+
+  factory YieldOpportunity.fromJson(Map<String, dynamic> json) {
+    return YieldOpportunity(
+      name: json['name'],
+      apy: json['apy'],
+      api: json['api'],
+    );
+  }
+
+  @override
+  String toString() {
+    return 'YieldOpportunity{name: $name, apy: $apy, api: $api}';
+  }
 }
