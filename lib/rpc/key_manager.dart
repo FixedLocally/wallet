@@ -49,7 +49,7 @@ class KeyManager {
   Future<void> init() async {
     _db = await openDatabase(
       "key_manager.db",
-      version: 3,
+      version: 4,
       onCreate: (Database db, int version) async {
         await db.execute(
             "CREATE TABLE wallets ("
@@ -67,7 +67,6 @@ class KeyManager {
                 "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
                 "wallet_id INTEGER," // wallet id in wallets table
                 "domain TEXT," // whitelisted domain
-                "thumbnail TEXT," // whitelisted domain thumbnail
                 "last_used_ts INTEGER" // last used timestamp
                 ")"
         );
@@ -79,35 +78,56 @@ class KeyManager {
                 "last_used_ts INTEGER" // last used timestamp
                 ")"
         );
+        await db.execute(
+            "CREATE TABLE domain_logos ("
+                "domain TEXT PRIMARY KEY," // domain
+                "logo_url TEXT" // logo source
+                ")"
+        );
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
         switch (oldVersion) {
           case 1:
-            await db.execute(
-                "CREATE TABLE connections ("
-                    "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
-                    "wallet_id INTEGER," // wallet id in wallets table
-                    "domain TEXT" // whitelisted domain
-                    ")"
-            );
-            await db.execute(
-                "CREATE TABLE address_book ("
-                    "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
-                    "pubkey TEXT," // wallet pubkey
-                    "nickname TEXT," // wallet nickname
-                    "last_used_ts INTEGER" // last used timestamp
-                    ")"
-            );
+            await db.transaction((txn) async {
+              await txn.execute(
+                  "CREATE TABLE connections ("
+                      "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                      "wallet_id INTEGER," // wallet id in wallets table
+                      "domain TEXT" // whitelisted domain
+                      ")"
+              );
+              await txn.execute(
+                  "CREATE TABLE address_book ("
+                      "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                      "pubkey TEXT," // wallet pubkey
+                      "nickname TEXT," // wallet nickname
+                      "last_used_ts INTEGER" // last used timestamp
+                      ")"
+              );
+            });
             continue v2; // fall thru, continue upgrading
           v2:
           case 2:
-            await db.execute(
-                "ALTER TABLE connections ADD COLUMN thumbnail TEXT"
-            );
-            await db.execute(
-                "ALTER TABLE connections ADD COLUMN last_used_ts INTEGER"
-            );
-            // continue; // fall thru, continue upgrading
+            await db.transaction((txn) async {
+              await txn.execute(
+                  "ALTER TABLE connections ADD COLUMN thumbnail TEXT"
+              );
+              await txn.execute(
+                  "ALTER TABLE connections ADD COLUMN last_used_ts INTEGER"
+              );
+            });
+            continue v3; // fall thru, continue upgrading
+          v3:
+          case 3:
+            await db.transaction((txn) async {
+              await txn.execute("CREATE TABLE domain_logos ("
+                  "domain TEXT PRIMARY KEY," // domain
+                  "logo_url TEXT" // logo source
+                  ")");
+              // doesn't support
+              // await txn.execute("ALTER TABLE connections DROP COLUMN thumbnail");
+            });
+            // continue v4; // fall thru, continue upgrading
         }
       }
     );
@@ -115,13 +135,12 @@ class KeyManager {
     _wallets = wallets.map((Map<String, Object?> wallet) {
       return ManagedKey.fromJSON(wallet);
     }).toList();
-    List<Map<String, Object?>> connections = await _db.query("connections");
-    connections.forEach((element) {
+    List<Map<String, Object?>> domainLogos = await _db.query("domain_logos");
+    domainLogos.forEach((element) {
       if (element["domain"] != null && _domainLogos[element["domain"]] == null) {
-        _domainLogos[element["domain"] as String] = element["thumbnail"] as String?;
+        _domainLogos[element["domain"] as String] = element["logo_url"] as String?;
       }
     });
-    print(_domainLogos);
     try {
       _activeWallet = _wallets.firstWhere((ManagedKey wallet) => wallet.active);
     } catch (e) {
@@ -286,7 +305,8 @@ class KeyManager {
   Future<void> setDomainLogo(String domain, String logoUrl) async {
     _domainLogos[domain] = logoUrl;
     return _db.transaction((txn) async {
-      await txn.rawUpdate("update connections set thumbnail=? where domain=?", [logoUrl, domain]);
+      // upsert
+      await txn.rawUpdate("insert into domain_logos (logo_url, domain) values (?, ?) on conflict(domain) do update set logo_url=?", [logoUrl, domain, logoUrl]);
     });
   }
 

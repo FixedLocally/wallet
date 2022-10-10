@@ -321,7 +321,6 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
       children: [
         _createWebsiteListTile("Raydium", "https://raydium.io/pools"),
         _createWebsiteListTile("Zeta Markets", "https://mainnet.zeta.markets/"),
-        _createWebsiteListTile("Zeta Markets (Multi-Assets)", "https://mainnet.zeta.markets/referral"),
         _createWebsiteListTile("Jupiter", "https://jup.ag/"),
         _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
         _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
