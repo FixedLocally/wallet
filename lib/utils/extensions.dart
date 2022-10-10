@@ -25,6 +25,10 @@ extension NullableIterableExtenstion<T> on Iterable<T?> {
   Iterable<T> get whereNotNull => where((e) => e != null).map((e) => e!);
 }
 
+extension ListExtension<T> on List<T> {
+  List<T2> mapIndexed<T2>(T2 Function(int, T) callback) => asMap().map((k, v) => MapEntry(k, callback(k, v))).values.toList();
+}
+
 extension Debouncable<T> on ValueNotifier<T> {
   void debounce(Duration duration, ValueChanged<T> callback) {
     addListener(() {
