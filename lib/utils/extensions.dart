@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 extension StrExt on String {
-  String get shortened => "${substring(0, 4)}...${substring(length - 5)}";
+  String get shortened => "${substring(0, 4)}...${substring(length - 4)}";
   double get doubleParsed => double.parse(this);
   int get intParsed => int.parse(this);
   void printBySegment(int len) {

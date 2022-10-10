@@ -398,12 +398,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
               ),
             );
           },
-          child: Column(
-            children: [
-              Text(KeyManager.instance.walletName),
-              Text(KeyManager.instance.pubKey, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12),),
-            ],
-          ),
+          child: Text("${KeyManager.instance.walletName} (${KeyManager.instance.pubKey.shortened})"),
         );
       case 2:
         return Text(S.current.swap);
