@@ -914,11 +914,67 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     double usdChange = (entry.usdChange ?? 0);
     Widget listTile = ListTile(
       onTap: () async {
+        NavigatorState nav = Navigator.of(context);
         if (sendOnly) {
           _pushSendToken(entry);
           return;
         }
-        _showTokenMenu(entry);
+        int option = await _showTokenMenu(entry);
+        bool burn = false;
+        switch (option) {
+          case 0:
+            nav.push(MaterialPageRoute(
+              builder: (ctx) => const DepositTokenRoute(),
+            ));
+            break;
+          case 1:
+            _pushSendToken(entry);
+            break;
+          case 2:
+            nav.push(MaterialPageRoute(builder: (_) => ValidatorListRoute()));
+            break;
+          case 3:
+            burn = await Utils.showConfirmBottomSheet(
+              context: context,
+              title: sprintf(S.current.burnConfirm, [tokenDetails[entry.mint]?["symbol"] ?? entry.mint.shortened]),
+              bodyBuilder: (_) => Text(S.current.burnConfirmContent),
+            );
+            break;
+          case 4:
+            burn = await Utils.showConfirmBottomSheet(
+              context: context,
+              title: S.current.closeTokenAccount,
+              bodyBuilder: (_) => Text(S.current.closeTokenAccountContent),
+            );
+            break;
+          case 5:
+            Utils.showLoadingDialog(
+              context: context,
+              future: Utils.getYieldOpportunities(entry.mint),
+            ).then((List<YieldOpportunity> opportunities) {
+              return Utils.showActionBottomSheet(
+                context: context,
+                title: S.current.yield,
+                actions: [
+                  ...opportunities.mapIndexed((i, e) => BottomSheetAction(
+                    // title: "${e.name} (APY: ${e.apy}%)",
+                    title: sprintf(S.current.yieldOpportunityTitle, [e.name, e.apy.toStringAsFixed(2)]),
+                    value: i,
+                  )),
+                ],
+              ).then((value) {
+                if (value < 0) return;
+                YieldOpportunity opportunity = opportunities[value];
+                // todo enter amount
+              });
+            });
+            break;
+        }
+        if (burn) {
+          List<Instruction> ixs = entry.burnAndCloseIxs();
+          await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
+          appWidget.startLoadingBalances(KeyManager.instance.pubKey);
+        }
       },
       leading: leading,
       title: Text.rich(TextSpan(
@@ -1204,104 +1260,48 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     }
   }
 
-  Future _showTokenMenu(SplTokenAccountDataInfoWithUsd balance) {
-    return showModalBottomSheet(
+  Future<int> _showTokenMenu(SplTokenAccountDataInfoWithUsd balance) {
+    String name = tokenDetails[balance.mint]?["name"] ?? balance.mint.shortened;
+    return Utils.showActionBottomSheet(
       context: context,
-      builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.call_received),
-                title: Text(S.current.receive),
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (ctx) => const DepositTokenRoute(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.call_made),
-                title: const Text("Send"),
-                onTap: () => _pushSendToken(balance),
-              ),
-              if (balance.mint == nativeSol)
-                ListTile(
-                  leading: const Icon(Icons.star),
-                  title: Text(S.current.stake),
-                  onTap: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ValidatorListRoute()));
-                  },
-                )
-              else
-                if (balance.tokenAmount.amount != "0")
-                  ListTile(
-                    leading: const Icon(Icons.close),
-                    title: Text(S.current.burn),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      bool burn = await Utils.showConfirmBottomSheet(
-                        context: context,
-                        title: sprintf(S.current.burnConfirm, [tokenDetails[balance.mint]?["symbol"] ?? balance.mint.shortened]),
-                        bodyBuilder: (_) => Text(S.current.burnConfirmContent),
-                      );
-                      if (!burn) return;
-                      List<Instruction> ixs = balance.burnAndCloseIxs();
-                      await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
-                      appWidget.startLoadingBalances(KeyManager.instance.pubKey);
-                    },
-                  )
-                else
-                  ListTile(
-                    leading: const Icon(Icons.close),
-                    title: Text(S.current.closeTokenAccount),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      bool burn = await Utils.showConfirmBottomSheet(
-                        context: context,
-                        title: S.current.closeTokenAccount,
-                        bodyBuilder: (_) => Text(S.current.closeTokenAccountContent),
-                      );
-                      if (!burn) return;
-                      List<Instruction> ixs = balance.burnAndCloseIxs();
-                      await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
-                      appWidget.startLoadingBalances(KeyManager.instance.pubKey);
-                    },
-                  ),
-              if (yieldableTokens.contains(balance.mint))
-                ListTile(
-                  leading: const Icon(Icons.trending_up_rounded),
-                  title: Text(S.current.yield),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Utils.showLoadingDialog(
-                      context: context,
-                      future: Utils.getYieldOpportunities(balance.mint),
-                    ).then((List<YieldOpportunity> opportunities) {
-                      return Utils.showActionBottomSheet(
-                        context: context,
-                        title: S.current.yield,
-                        actions: [
-                          ...opportunities.mapIndexed((i, e) => BottomSheetAction(
-                                title: "${e.name} (APY: ${e.apy})",
-                                value: i,
-                              )),
-                        ],
-                      ).then((value) => opportunities[value]);
-                    }).then((YieldOpportunity selected) {
-                      // todo input amount and send
-                    });
-                  },
-                ),
-            ],
-          ),
-        );
-      },
+      title: name,
+      actions: [
+        BottomSheetAction(
+          leading: const Icon(Icons.call_received),
+          title: S.current.receive,
+          value: 0,
+        ),
+        BottomSheetAction(
+          leading: const Icon(Icons.call_made),
+          title: S.current.send,
+          value: 1,
+        ),
+        if (balance.mint == nativeSol)
+          BottomSheetAction(
+            leading: const Icon(Icons.star),
+            title: S.current.stake,
+            value: 2,
+          )
+        else
+          if (balance.tokenAmount.amount != "0")
+            BottomSheetAction(
+              leading: const Icon(Icons.close),
+              title: S.current.burn,
+              value: 3,
+            )
+          else
+            BottomSheetAction(
+              leading: const Icon(Icons.close),
+              title: S.current.closeTokenAccount,
+              value: 4,
+            ),
+        if (yieldableTokens.contains(balance.mint))
+          BottomSheetAction(
+            leading: const Icon(Icons.trending_up_rounded),
+            title: S.current.yield,
+            value: 5,
+          )
+      ],
     );
   }
 

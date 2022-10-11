@@ -201,6 +201,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "withdraw": MessageLookupByLibrary.simpleMessage("Withdraw"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes"),
         "yield": MessageLookupByLibrary.simpleMessage("Yield"),
+        "yieldOpportunityTitle":
+            MessageLookupByLibrary.simpleMessage("%s (APY: %s%%)"),
         "yourSecretRecoveryPhraseIs": MessageLookupByLibrary.simpleMessage(
             "Your secret recovery phrase is:")
       };

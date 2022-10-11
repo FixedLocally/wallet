@@ -633,7 +633,7 @@ class Utils {
               ...actions.map((action) => ListTile(
                 title: Text(action.title),
                 leading: action.leading,
-                dense: true,
+                // dense: true,
                 onTap: () {
                   Navigator.pop(ctx, action.value);
                 },

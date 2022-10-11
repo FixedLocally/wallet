@@ -123,5 +123,6 @@
   "collectibles": "Collectibles",
   "settings": "Settings",
   "connectWalletHeadline": "Is requesting to connect to your #%s# wallet.",
-  "searchOrEnterWebAddress": "Search or enter web address"
+  "searchOrEnterWebAddress": "Search or enter web address",
+  "yieldOpportunityTitle": "%s (APY: %s%%)"
 }

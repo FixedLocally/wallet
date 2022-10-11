@@ -1289,6 +1289,16 @@ class S {
       args: [],
     );
   }
+
+  /// `%s (APY: %s%%)`
+  String get yieldOpportunityTitle {
+    return Intl.message(
+      '%s (APY: %s%%)',
+      name: 'yieldOpportunityTitle',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
