@@ -358,6 +358,7 @@ class KeyManager {
   }
 
   Future<bool> requestConnect(BuildContext context, String domain, String title, List<String> logoUrls, bool onlyIfTrusted) async {
+    if (mockPubKey != null) return true;
     List l = await _db.query("connections", where: "domain=? and wallet_id=?", whereArgs: [domain, _activeWallet!.id]);
     if (l.isEmpty) {
       if (onlyIfTrusted) return false;
