@@ -968,7 +968,17 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
               ).then((value) {
                 if (value < 0) return;
                 YieldOpportunity opportunity = opportunities[value];
-                // todo enter amount
+                nav.push(
+                  MaterialPageRoute(
+                    builder: (_) => YieldDepositRoute(
+                      opportunity: opportunity,
+                      account: entry,
+                      mint: entry.mint,
+                      decimals: entry.tokenAmount.decimals,
+                      symbol: tokenDetails[entry.mint]?["symbol"] ?? entry.mint.shortened,
+                    ),
+                  ),
+                );
               });
             });
             break;

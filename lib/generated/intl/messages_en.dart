@@ -176,6 +176,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "stakeSolToValidatorConfirm": MessageLookupByLibrary.simpleMessage(
             "You are about to stake %s SOL to %s."),
         "staking": MessageLookupByLibrary.simpleMessage("Staking..."),
+        "startEarningBtn":
+            MessageLookupByLibrary.simpleMessage("Start earning %s%% APY"),
         "startUnstaking":
             MessageLookupByLibrary.simpleMessage("Start unstaking"),
         "swap": MessageLookupByLibrary.simpleMessage("Swap"),
@@ -200,7 +202,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wallet Settings"),
         "withdraw": MessageLookupByLibrary.simpleMessage("Withdraw"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes"),
-        "yield": MessageLookupByLibrary.simpleMessage("Yield"),
+        "yield": MessageLookupByLibrary.simpleMessage("Earn"),
+        "yieldDepositSuccess": MessageLookupByLibrary.simpleMessage(
+            "You are now earning %s%% on %s %s!"),
         "yieldOpportunityTitle":
             MessageLookupByLibrary.simpleMessage("%s (APY: %s%%)"),
         "yourSecretRecoveryPhraseIs": MessageLookupByLibrary.simpleMessage(

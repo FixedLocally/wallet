@@ -118,11 +118,13 @@
   "image": "Image",
   "bulkTxWarning": "Warning: This website is requesting your approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website's developer.",
   "scanQrCode": "Scan QR Code",
-  "yield": "Yield",
+  "yield": "Earn",
   "home": "Home",
   "collectibles": "Collectibles",
   "settings": "Settings",
   "connectWalletHeadline": "Is requesting to connect to your #%s# wallet.",
   "searchOrEnterWebAddress": "Search or enter web address",
-  "yieldOpportunityTitle": "%s (APY: %s%%)"
+  "yieldOpportunityTitle": "%s (APY: %s%%)",
+  "startEarningBtn": "Start earning %s%% APY",
+  "yieldDepositSuccess": "You are now earning %s%% on %s %s!"
 }

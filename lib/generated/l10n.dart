@@ -1230,10 +1230,10 @@ class S {
     );
   }
 
-  /// `Yield`
+  /// `Earn`
   String get yield {
     return Intl.message(
-      'Yield',
+      'Earn',
       name: 'yield',
       desc: '',
       args: [],
@@ -1295,6 +1295,26 @@ class S {
     return Intl.message(
       '%s (APY: %s%%)',
       name: 'yieldOpportunityTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start earning %s%% APY`
+  String get startEarningBtn {
+    return Intl.message(
+      'Start earning %s%% APY',
+      name: 'startEarningBtn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are now earning %s%% on %s %s!`
+  String get yieldDepositSuccess {
+    return Intl.message(
+      'You are now earning %s%% on %s %s!',
+      name: 'yieldDepositSuccess',
       desc: '',
       args: [],
     );
