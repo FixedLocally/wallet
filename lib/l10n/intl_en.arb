@@ -3,7 +3,7 @@
   "receive": "Receive",
   "amount": "Amount",
   "pay": "Pay",
-  "mocked": "Mocked %s",
+  "mocked": "Mocked Wallet",
   "mockWallet": "Mock Wallet",
   "mockWalletPrompt": "Enter wallet address to mock:",
   "mockWalletAddress": "Mock wallet address",

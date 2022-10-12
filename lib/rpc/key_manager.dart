@@ -12,7 +12,6 @@ import 'package:sqflite/sqflite.dart';
 
 import '../generated/l10n.dart';
 import '../routes/show_secret.dart';
-import '../utils/extensions.dart';
 import '../utils/utils.dart';
 import '../widgets/domain_info.dart';
 import '../widgets/text.dart';
@@ -41,7 +40,7 @@ class KeyManager {
   String get pubKey => mockPubKey ?? _activeWallet!.pubKey;
   bool get isHdWallet => mockPubKey != null ? false : _activeWallet!.keyType == "seed";
   bool get isReady => _ready;
-  String get walletName => mockPubKey != null ? sprintf(S.current.mocked, [mockPubKey!.shortened]) : _activeWallet!.name;
+  String get walletName => mockPubKey != null ? S.current.mocked : _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
 
   KeyManager._();

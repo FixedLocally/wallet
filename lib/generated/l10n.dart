@@ -80,10 +80,10 @@ class S {
     );
   }
 
-  /// `Mocked %s`
+  /// `Mocked Wallet`
   String get mocked {
     return Intl.message(
-      'Mocked %s',
+      'Mocked Wallet',
       name: 'mocked',
       desc: '',
       args: [],

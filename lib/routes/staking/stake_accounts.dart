@@ -7,6 +7,7 @@ import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
 import '../../utils/extensions.dart';
 import '../../utils/utils.dart';
+import '../../widgets/bottom_sheet.dart';
 import '../../widgets/image.dart';
 import '../webview.dart';
 
@@ -83,7 +84,7 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
               ],
             ),
             onTap: () async {
-              int action = await Utils.showActionBottomSheet(
+              int action = await showActionBottomSheet(
                 context: context,
                 title: S.current.stakeAccount,
                 actions: [

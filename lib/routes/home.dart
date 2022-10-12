@@ -12,18 +12,21 @@ import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
 import '../generated/l10n.dart';
+import '../models/models.dart';
 import '../rpc/constants.dart';
 import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
 import '../utils/extensions.dart';
 import '../utils/utils.dart';
 import '../widgets/approve_tx.dart';
+import '../widgets/bottom_sheet.dart';
 import '../widgets/header.dart';
 import '../widgets/image.dart';
 import 'mixins/inherited.dart';
 import 'settings.dart';
 import 'tokens/tokens.dart';
 import 'staking/validator_list.dart';
+import 'tokens/yield.dart';
 import 'webview.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -952,7 +955,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
               context: context,
               future: Utils.getYieldOpportunities(entry.mint),
             ).then((List<YieldOpportunity> opportunities) {
-              return Utils.showActionBottomSheet(
+              return showActionBottomSheet(
                 context: context,
                 title: S.current.yield,
                 actions: [
@@ -1262,7 +1265,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
 
   Future<int> _showTokenMenu(SplTokenAccountDataInfoWithUsd balance) {
     String name = tokenDetails[balance.mint]?["name"] ?? balance.mint.shortened;
-    return Utils.showActionBottomSheet(
+    return showActionBottomSheet(
       context: context,
       title: name,
       actions: [

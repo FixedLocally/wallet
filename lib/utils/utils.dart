@@ -16,6 +16,7 @@ import 'package:sprintf/sprintf.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../generated/l10n.dart';
+import '../models/models.dart';
 import '../routes/popups/bottom_sheet.dart';
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
@@ -611,41 +612,6 @@ class Utils {
     return result ?? false;
   }
 
-  static Future<int> showActionBottomSheet({
-    required BuildContext context,
-    required String title,
-    required List<BottomSheetAction> actions,
-  }) async {
-    int? result = await showModalBottomSheet<int>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(title, style: Theme.of(context).textTheme.headline6),
-              ),
-              ...actions.map((action) => ListTile(
-                title: Text(action.title),
-                leading: action.leading,
-                // dense: true,
-                onTap: () {
-                  Navigator.pop(ctx, action.value);
-                },
-              )),
-            ],
-          ),
-        );
-      },
-    );
-    return result ?? -1;
-  }
-
   static Future<bool> showInfoDialog({
     required BuildContext context,
     String? title,
@@ -844,41 +810,4 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
 
   @override
   int get hashCode => account.hashCode;
-}
-
-class BottomSheetAction {
-  final String title;
-  final Widget? leading;
-  final int value;
-
-  BottomSheetAction({
-    required this.title,
-    this.leading,
-    required this.value,
-  });
-}
-
-class YieldOpportunity {
-  final String name;
-  final double apy;
-  final String api;
-
-  YieldOpportunity({
-    required this.name,
-    required this.apy,
-    required this.api,
-  });
-
-  factory YieldOpportunity.fromJson(Map<String, dynamic> json) {
-    return YieldOpportunity(
-      name: json['name'],
-      apy: json['apy'],
-      api: json['api'],
-    );
-  }
-
-  @override
-  String toString() {
-    return 'YieldOpportunity{name: $name, apy: $apy, api: $api}';
-  }
 }
