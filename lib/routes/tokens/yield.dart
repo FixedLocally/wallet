@@ -77,7 +77,7 @@ class _YieldDepositRouteState extends State<YieldDepositRoute> with UsesSharedDa
                 Expanded(
                   child: Utils.wrapField(
                     margin: const EdgeInsets.only(top: 8, bottom: 8),
-                    padding: EdgeInsets.only(left: 8, right: 16),
+                    padding: EdgeInsets.fromLTRB(8, 10, 16, 10),
                     wrapColor: theme.colorScheme.background,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
