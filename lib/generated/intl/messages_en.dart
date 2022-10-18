@@ -156,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sending transaction..."),
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "setupWallet": MessageLookupByLibrary.simpleMessage("Setup Wallet"),
+        "setupWalletContent":
+            MessageLookupByLibrary.simpleMessage("Welcome to Mint Wallet!"),
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
             "Do NOT share your private key, having access to your private key means having full access to your funds."),
         "signMessage": MessageLookupByLibrary.simpleMessage("Sign Message"),

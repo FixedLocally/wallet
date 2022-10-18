@@ -23,9 +23,11 @@ class _SetupRouteState extends State<SetupRoute> {
       ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(S.current.setupWallet),
-            TextButton(
+            Text(S.current.setupWalletContent, style: Theme.of(context).textTheme.headline5,),
+            const SizedBox(height: 20,),
+            ElevatedButton(
               child: Text(S.current.importWallet),
               onPressed: () {
                 // Navigator.pushReplacement(context, MaterialPageRoute(
@@ -35,7 +37,7 @@ class _SetupRouteState extends State<SetupRoute> {
                 // ));
               },
             ),
-            TextButton(
+            ElevatedButton(
               child: Text(S.current.createWallet),
               onPressed: () {
                 showDialog(

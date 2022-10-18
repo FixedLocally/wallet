@@ -249,7 +249,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.collections),
+            icon: Icon(Icons.paid),
             label: "",
           ),
           BottomNavigationBarItem(

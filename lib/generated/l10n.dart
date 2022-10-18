@@ -460,6 +460,16 @@ class S {
     );
   }
 
+  /// `Welcome to Mint Wallet!`
+  String get setupWalletContent {
+    return Intl.message(
+      'Welcome to Mint Wallet!',
+      name: 'setupWalletContent',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Revoke`
   String get revoke {
     return Intl.message(

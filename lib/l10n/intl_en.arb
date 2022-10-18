@@ -41,6 +41,7 @@
   "removeKeyWalletContent": "This will remove the wallet from this list, make sure you have a backup of your private key.",
   "delegationWarning": "%s %s is currently delegated to:\n%s.\n\nUnlike on EVM chains, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation.",
   "setupWallet": "Setup Wallet",
+  "setupWalletContent": "Welcome to Mint Wallet!",
   "revoke": "Revoke",
   "message": "Message",
   "revokingDelegation": "Revoking delegation...",

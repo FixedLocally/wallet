@@ -72,7 +72,7 @@ class _YieldDepositRouteState extends State<YieldDepositRoute> with UsesSharedDa
                 SizedBox(width: 16),
                 SizedBox(
                   width: 64,
-                  child: Text(S.current.pay),
+                  child: Text(S.current.deposit),
                 ),
                 Expanded(
                   child: Utils.wrapField(
