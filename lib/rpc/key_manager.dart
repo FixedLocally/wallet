@@ -153,7 +153,8 @@ class KeyManager {
   Future<void> insertSeed(String mnemonic) async {
     assert(_ready);
     List<int> seed = bip39.mnemonicToSeed(mnemonic);
-    String seedHash = sha256.convert(seed).bytes.sublist(0, 4).map((e) => e.toRadixString(16).padLeft(2, "0")).join("");
+    List<int> spareSeed = bip39.mnemonicToSeed(bip39.generateMnemonic());
+    String seedHash = sha256.convert([...seed, ...spareSeed]).bytes.sublist(0, 4).map((e) => e.toRadixString(16).padLeft(2, "0")).join("");
     Ed25519HDKeyPair keypair = await compute(
       _generateKey,
       [seed, derivationPathTemplate.replaceAll("%s", "0")],
