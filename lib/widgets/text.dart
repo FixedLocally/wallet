@@ -11,13 +11,13 @@ class HighlightedText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // highlight text enclosed in #s
-    List<Widget> children = [];
+    List<TextSpan> children = [];
     int start = 0;
     int end = 0;
     while (end < text.length) {
       if (text[end] == '#') {
         if (end > start) {
-          children.add(Text(text.substring(start, end)));
+          children.add(TextSpan(text: text.substring(start, end)));
         }
         start = end + 1;
         end = start;
@@ -25,8 +25,8 @@ class HighlightedText extends StatelessWidget {
           end++;
         }
         if (end < text.length) {
-          children.add(Text(
-            text.substring(start, end),
+          children.add(TextSpan(
+            text: text.substring(start, end),
             style: TextStyle(fontWeight: FontWeight.bold),
           ));
           start = end + 1;
@@ -37,11 +37,14 @@ class HighlightedText extends StatelessWidget {
       }
     }
     if (end > start) {
-      children.add(Text(text.substring(start, end)));
+      children.add(TextSpan(text: text.substring(start, end)));
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: children,
+    return RichText(
+      // mainAxisSize: MainAxisSize.min,
+      text: TextSpan(
+        style: Theme.of(context).textTheme.bodyText2,
+        children: children,
+      ),
     );
   }
 }
