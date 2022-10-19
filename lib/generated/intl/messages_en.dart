@@ -100,6 +100,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKeyContent": MessageLookupByLibrary.simpleMessage(
             "Key must be a base58 encoded string or a JSON array of bytes"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
+        "loadingWallet":
+            MessageLookupByLibrary.simpleMessage("Loading Wallet..."),
         "manageStakeAccounts":
             MessageLookupByLibrary.simpleMessage("Manage stake accounts"),
         "maxCap": MessageLookupByLibrary.simpleMessage("MAX"),
@@ -209,7 +211,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "You are now earning %s%% on %s %s!"),
         "yieldOpportunityTitle":
             MessageLookupByLibrary.simpleMessage("%s (APY: %s%%)"),
-        "yourSecretRecoveryPhraseIs": MessageLookupByLibrary.simpleMessage(
-            "Your secret recovery phrase is:")
+        "yourSecretRecoveryPhraseIs":
+            MessageLookupByLibrary.simpleMessage("Secret Recovery Phrase")
       };
 }

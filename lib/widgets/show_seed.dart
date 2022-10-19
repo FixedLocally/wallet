@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../generated/l10n.dart';
+import '../routes/home.dart';
+import '../rpc/key_manager.dart';
+import '../utils/utils.dart';
 
 class GenerateSeedRoute extends StatefulWidget {
   final List<String> mnemonic;
@@ -19,19 +23,78 @@ class _GenerateSeedRouteState extends State<GenerateSeedRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(S.current.yourSecretRecoveryPhraseIs),
-        ...List.generate(4, (index) => Row(
+    // ThemeData theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(S.current.yourSecretRecoveryPhraseIs),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(child: Text("${index * 3 + 1}. ${widget.mnemonic[index * 3 + 0]}")),
-            Expanded(child: Text("${index * 3 + 2}. ${widget.mnemonic[index * 3 + 1]}")),
-            Expanded(child: Text("${index * 3 + 3}. ${widget.mnemonic[index * 3 + 2]}")),
+            Text(S.current.seedPhraseWarning),
+            ...List.generate(
+              4,
+              (index) => Row(
+                children: List.generate(
+                  3,
+                  (i) => Expanded(
+                    child: Utils.wrapField(
+                      wrapColor: Theme.of(context).cardColor,
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(16),
+                      // decoration: BoxDecoration(
+                      //   border: Border.all(
+                      //     color: theme.cardColor,
+                      //   ),
+                      // ),
+                      child: Text(
+                          "${index * 3 + i + 1}. ${widget.mnemonic[index * 3 + i]}"),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    child: Text(S.current.copy),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: widget.mnemonic.join(" ")));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(S.current.copySeedSuccess),
+                      ));
+                    },
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    child: Text(S.current.continuE),
+                    onPressed: () async {
+                      await KeyManager.instance.insertSeed(widget.mnemonic.join(" "));
+                      if (mounted) {
+                        Navigator.of(context).pop(); // the dialog
+                        // replace setup route
+                        Navigator.pushReplacement(context, MaterialPageRoute(
+                          builder: (ctx) {
+                            return const HomeRoute();
+                          },
+                        ));
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
           ],
-        )),
-        Text(S.current.seedPhraseWarning),
-      ],
+        ),
+      ),
     );
   }
 }

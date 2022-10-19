@@ -24,6 +24,15 @@ class WalletApp extends StatelessWidget {
         ),
       ),
     );
+    TextButtonThemeData textButtonThemeData = TextButtonThemeData(
+      style: ButtonStyle(
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.0),
+          ),
+        ),
+      ),
+    );
     ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       colorScheme: const ColorScheme(
@@ -58,6 +67,7 @@ class WalletApp extends StatelessWidget {
       ),
       fontFamily: "NotoSans",
       elevatedButtonTheme: elevatedButtonThemeData,
+      textButtonTheme: textButtonThemeData,
     );
     return WalletAppWidget(
       child: MaterialApp(

@@ -74,7 +74,7 @@
   "maxCap": "MAX",
   "halfCap": "HALF",
   "tapToReveal": "Hold to reveal",
-  "yourSecretRecoveryPhraseIs": "Your secret recovery phrase is:",
+  "yourSecretRecoveryPhraseIs": "Secret Recovery Phrase",
   "seedPhraseWarning": "Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone.",
   "pleaseAuthenticateToContinue": "Please authenticate to continue",
   "walletSettings": "Wallet Settings",
@@ -127,5 +127,6 @@
   "searchOrEnterWebAddress": "Search or enter web address",
   "yieldOpportunityTitle": "%s (APY: %s%%)",
   "startEarningBtn": "Start earning %s%% APY",
-  "yieldDepositSuccess": "You are now earning %s%% on %s %s!"
+  "yieldDepositSuccess": "You are now earning %s%% on %s %s!",
+  "loadingWallet": "Loading Wallet..."
 }

@@ -790,10 +790,10 @@ class S {
     );
   }
 
-  /// `Your secret recovery phrase is:`
+  /// `Secret Recovery Phrase`
   String get yourSecretRecoveryPhraseIs {
     return Intl.message(
-      'Your secret recovery phrase is:',
+      'Secret Recovery Phrase',
       name: 'yourSecretRecoveryPhraseIs',
       desc: '',
       args: [],
@@ -1325,6 +1325,16 @@ class S {
     return Intl.message(
       'You are now earning %s%% on %s %s!',
       name: 'yieldDepositSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loading Wallet...`
+  String get loadingWallet {
+    return Intl.message(
+      'Loading Wallet...',
+      name: 'loadingWallet',
       desc: '',
       args: [],
     );

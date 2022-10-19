@@ -2,9 +2,7 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 
 import '../generated/l10n.dart';
-import '../rpc/key_manager.dart';
 import '../widgets/show_seed.dart';
-import 'home.dart';
 
 // m/44'/501'/0'/0'
 class SetupRoute extends StatefulWidget {
@@ -39,42 +37,13 @@ class _SetupRouteState extends State<SetupRoute> {
             ),
             ElevatedButton(
               child: Text(S.current.createWallet),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (ctx) {
-                    String mnemonic = bip39.generateMnemonic();
-                    return AlertDialog(
-                      title: Text(S.current.createWallet),
-                      content: GenerateSeedRoute(
-                        mnemonic: mnemonic.split(" "),
-                      ),
-                      actions: [
-                        TextButton(
-                          child: Text(S.current.close),
-                          onPressed: () {
-                            Navigator.of(ctx).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: Text(S.current.continuE),
-                          onPressed: () async {
-                            await KeyManager.instance.insertSeed(mnemonic);
-                            if (mounted) {
-                              Navigator.of(ctx).pop(); // the dialog
-                              // replace setup route
-                              Navigator.pushReplacement(context, MaterialPageRoute(
-                                builder: (ctx) {
-                                  return const HomeRoute();
-                                },
-                              ));
-                            }
-                          },
-                        ),
-                      ],
-                    );
-                  },
+              onPressed: () async {
+                String mnemonic = bip39.generateMnemonic();
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => GenerateSeedRoute(
+                    mnemonic: mnemonic.split(" "),
+                  )),
                 );
               },
             ),
