@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../generated/l10n.dart';
 import 'seeds/generate_seed.dart';
+import 'seeds/restore_seed.dart';
 
 // m/44'/501'/0'/0'
 class SetupRoute extends StatefulWidget {
@@ -28,11 +29,10 @@ class _SetupRouteState extends State<SetupRoute> {
             ElevatedButton(
               child: Text(S.current.importWallet),
               onPressed: () {
-                // Navigator.pushReplacement(context, MaterialPageRoute(
-                //   builder: (ctx) {
-                //     return const HomeRoute();
-                //   },
-                // ));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => RestoreSeedRoute()),
+                );
               },
             ),
             ElevatedButton(

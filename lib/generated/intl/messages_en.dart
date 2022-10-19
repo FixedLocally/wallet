@@ -99,6 +99,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKey": MessageLookupByLibrary.simpleMessage("Invalid key"),
         "invalidKeyContent": MessageLookupByLibrary.simpleMessage(
             "Key must be a base58 encoded string or a JSON array of bytes"),
+        "invalidSeed": MessageLookupByLibrary.simpleMessage(
+            "Invalid secret recovery phrase"),
+        "invalidSeedContent": MessageLookupByLibrary.simpleMessage(
+            "Please check your secret recovery phrase and try again."),
         "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
         "loadingWallet":
             MessageLookupByLibrary.simpleMessage("Loading Wallet..."),

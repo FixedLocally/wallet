@@ -128,5 +128,7 @@
   "yieldOpportunityTitle": "%s (APY: %s%%)",
   "startEarningBtn": "Start earning %s%% APY",
   "yieldDepositSuccess": "You are now earning %s%% on %s %s!",
-  "loadingWallet": "Loading Wallet..."
+  "loadingWallet": "Loading Wallet...",
+  "invalidSeed": "Invalid secret recovery phrase",
+  "invalidSeedContent": "Please check your secret recovery phrase and try again."
 }

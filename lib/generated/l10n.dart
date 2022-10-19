@@ -1339,6 +1339,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Invalid secret recovery phrase`
+  String get invalidSeed {
+    return Intl.message(
+      'Invalid secret recovery phrase',
+      name: 'invalidSeed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check your secret recovery phrase and try again.`
+  String get invalidSeedContent {
+    return Intl.message(
+      'Please check your secret recovery phrase and try again.',
+      name: 'invalidSeedContent',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
