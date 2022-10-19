@@ -5,6 +5,7 @@ import '../generated/l10n.dart';
 import '../routes/home.dart';
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
+import 'text.dart';
 
 class GenerateSeedRoute extends StatefulWidget {
   final List<String> mnemonic;
@@ -33,7 +34,10 @@ class _GenerateSeedRouteState extends State<GenerateSeedRoute> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(S.current.seedPhraseWarning),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: HighlightedText(text: S.current.seedPhraseWarning),
+            ),
             ...List.generate(
               4,
               (index) => Row(

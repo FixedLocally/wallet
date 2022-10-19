@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../generated/l10n.dart';
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import 'home.dart';
@@ -32,7 +33,7 @@ class _EntryPointRouteState extends State<EntryPointRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Loading Wallet...'),
+        title: Text(S.current.loadingWallet),
       ),
       body: const Center(
         child: CircularProgressIndicator(),

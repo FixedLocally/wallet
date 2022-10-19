@@ -150,7 +150,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "securitySettings":
             MessageLookupByLibrary.simpleMessage("Security Settings"),
         "seedPhraseWarning": MessageLookupByLibrary.simpleMessage(
-            "Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone."),
+            "Your secret recovery phrase is the #one# and #only# way to access your wallet. Keep it safe, and #do not# share it with anyone."),
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendToken": MessageLookupByLibrary.simpleMessage("Send %s"),

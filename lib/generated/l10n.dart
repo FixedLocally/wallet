@@ -800,10 +800,10 @@ class S {
     );
   }
 
-  /// `Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone.`
+  /// `Your secret recovery phrase is the #one# and #only# way to access your wallet. Keep it safe, and #do not# share it with anyone.`
   String get seedPhraseWarning {
     return Intl.message(
-      'Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone.',
+      'Your secret recovery phrase is the #one# and #only# way to access your wallet. Keep it safe, and #do not# share it with anyone.',
       name: 'seedPhraseWarning',
       desc: '',
       args: [],

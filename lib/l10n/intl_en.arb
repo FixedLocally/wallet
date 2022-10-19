@@ -75,7 +75,7 @@
   "halfCap": "HALF",
   "tapToReveal": "Hold to reveal",
   "yourSecretRecoveryPhraseIs": "Secret Recovery Phrase",
-  "seedPhraseWarning": "Your secret recovery phrase is the ONE and ONLY way to access your wallet. DO NOT share it with anyone.",
+  "seedPhraseWarning": "Your secret recovery phrase is the #one# and #only# way to access your wallet. Keep it safe, and #do not# share it with anyone.",
   "pleaseAuthenticateToContinue": "Please authenticate to continue",
   "walletSettings": "Wallet Settings",
   "securitySettings": "Security Settings",
