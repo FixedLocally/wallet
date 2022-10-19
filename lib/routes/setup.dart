@@ -2,7 +2,7 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 
 import '../generated/l10n.dart';
-import '../widgets/show_seed.dart';
+import 'seeds/generate_seed.dart';
 
 // m/44'/501'/0'/0'
 class SetupRoute extends StatefulWidget {

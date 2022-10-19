@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../generated/l10n.dart';
-import '../routes/home.dart';
-import '../rpc/key_manager.dart';
-import '../utils/utils.dart';
-import 'text.dart';
+import '../../generated/l10n.dart';
+import '../home.dart';
+import '../../rpc/key_manager.dart';
+import '../../utils/utils.dart';
+import '../../widgets/text.dart';
 
 class GenerateSeedRoute extends StatefulWidget {
   final List<String> mnemonic;
