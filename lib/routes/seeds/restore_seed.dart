@@ -64,10 +64,10 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
               child: HighlightedText(text: S.current.seedPhraseWarning),
             ),
             ...List.generate(
-              4,
+              6,
               (index) => Row(
                 children: List.generate(
-                  3,
+                  2,
                   (i) => Expanded(
                     child: Utils.wrapField(
                       wrapColor: Theme.of(context).cardColor,
@@ -80,11 +80,11 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
                       // ),
                       child: Row(
                         children: [
-                          Text("${index * 3 + i + 1}. "),
+                          Text("${index * 2 + i + 1}. "),
                           Expanded(
                             child: TextField(
-                              controller: _controllers[index * 3 + i],
-                              focusNode: _focusNodes[index * 3 + i],
+                              controller: _controllers[index * 2 + i],
+                              focusNode: _focusNodes[index * 2 + i],
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                               ),

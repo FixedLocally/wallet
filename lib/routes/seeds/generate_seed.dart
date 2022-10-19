@@ -39,10 +39,10 @@ class _GenerateSeedRouteState extends State<GenerateSeedRoute> {
               child: HighlightedText(text: S.current.seedPhraseWarning),
             ),
             ...List.generate(
-              4,
+              6,
               (index) => Row(
                 children: List.generate(
-                  3,
+                  2,
                   (i) => Expanded(
                     child: Utils.wrapField(
                       wrapColor: Theme.of(context).cardColor,
@@ -54,7 +54,7 @@ class _GenerateSeedRouteState extends State<GenerateSeedRoute> {
                       //   ),
                       // ),
                       child: Text(
-                          "${index * 3 + i + 1}. ${widget.mnemonic[index * 3 + i]}"),
+                          "${index * 2 + i + 1}. ${widget.mnemonic[index * 2 + i]}"),
                     ),
                   ),
                 ),
