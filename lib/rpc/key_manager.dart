@@ -391,20 +391,19 @@ class KeyManager {
           txn.insert("connections", {
             "domain": domain,
             "wallet_id": _activeWallet!.id,
+            "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
           });
-          await txn.rawUpdate("update connections set thumbnail=? where domain=?", [_domainLogos[domain], domain]);
-          await txn.update(
-            "connections",
-            {
-              "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
-            },
-            where: "domain=? and wallet_id=?",
-            whereArgs: [domain, _activeWallet!.id],
-          );
         });
       } else {
         return false;
       }
+    } else {
+      await _db.transaction((txn) async {
+        await txn.update("connections",
+            {"domain": domain, "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000},
+            where: "domain=? and wallet_id=?",
+            whereArgs: [domain, _activeWallet!.id]);
+      });
     }
     return true;
   }
