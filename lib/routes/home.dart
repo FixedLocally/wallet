@@ -801,8 +801,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                       title: Row(
                         children: [
                           Text(S.current.chosenRoute, overflow: TextOverflow.ellipsis,),
-                          Spacer(),
-                          Text("${_routes?[_chosenRoute].marketInfos.map((e) => e.label).join(" > ")}", overflow: TextOverflow.ellipsis,),
+                          SizedBox(width: 16),
+                          Expanded(child: Text("${_routes?[_chosenRoute].marketInfos.map((e) => e.label).join(" > ")}", overflow: TextOverflow.ellipsis,)),
                           Icon(Icons.keyboard_arrow_right_rounded),
                         ],
                       ),
@@ -1429,6 +1429,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
       fromMint: fromMint,
       toMint: toMint,
       amount: amtIn.floor(),
+      slippage: 0.5,
       // feeBps: 10,
     );
     setState(() {

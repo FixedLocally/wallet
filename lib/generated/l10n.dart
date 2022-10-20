@@ -1400,10 +1400,10 @@ class S {
     );
   }
 
-  /// `Chosen route`
+  /// `Swapping via`
   String get chosenRoute {
     return Intl.message(
-      'Chosen route',
+      'Swapping via',
       name: 'chosenRoute',
       desc: '',
       args: [],

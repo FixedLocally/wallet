@@ -41,7 +41,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chooseSwapRoute":
             MessageLookupByLibrary.simpleMessage("Choose swap route"),
         "chooseToken": MessageLookupByLibrary.simpleMessage("Choose token"),
-        "chosenRoute": MessageLookupByLibrary.simpleMessage("Chosen route"),
+        "chosenRoute": MessageLookupByLibrary.simpleMessage("Swapping via"),
         "cleanup": MessageLookupByLibrary.simpleMessage("Cleanup"),
         "cleanupTokenAccounts":
             MessageLookupByLibrary.simpleMessage("Cleanup token accounts"),

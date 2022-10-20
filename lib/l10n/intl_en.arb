@@ -135,5 +135,5 @@
   "price": "Price",
   "minReceived": "Min received",
   "priceImpact": "Price impact",
-  "chosenRoute": "Chosen route"
+  "chosenRoute": "Swapping via"
 }

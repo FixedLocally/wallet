@@ -104,11 +104,13 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
     required String fromMint,
     required String toMint,
     required int amount,
+    double? slippage,
   }) async {
     return _jupClient.getQuote(
       inputMint: fromMint,
       outputMint: toMint,
       amount: amount,
+      slippage: slippage,
       // feeBps: 10,
     );
   }
