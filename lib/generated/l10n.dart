@@ -1359,6 +1359,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Choose swap route`
+  String get chooseSwapRoute {
+    return Intl.message(
+      'Choose swap route',
+      name: 'chooseSwapRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Price`
+  String get price {
+    return Intl.message(
+      'Price',
+      name: 'price',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Min received`
+  String get minReceived {
+    return Intl.message(
+      'Min received',
+      name: 'minReceived',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Price impact`
+  String get priceImpact {
+    return Intl.message(
+      'Price impact',
+      name: 'priceImpact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chosen route`
+  String get chosenRoute {
+    return Intl.message(
+      'Chosen route',
+      name: 'chosenRoute',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

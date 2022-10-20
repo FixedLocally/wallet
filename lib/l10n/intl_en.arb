@@ -130,5 +130,10 @@
   "yieldDepositSuccess": "You are now earning %s%% on %s %s!",
   "loadingWallet": "Loading Wallet...",
   "invalidSeed": "Invalid secret recovery phrase",
-  "invalidSeedContent": "Please check your secret recovery phrase and try again."
+  "invalidSeedContent": "Please check your secret recovery phrase and try again.",
+  "chooseSwapRoute": "Choose swap route",
+  "price": "Price",
+  "minReceived": "Min received",
+  "priceImpact": "Price impact",
+  "chosenRoute": "Chosen route"
 }

@@ -38,7 +38,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "burningTokens":
             MessageLookupByLibrary.simpleMessage("Burning tokens..."),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "chooseSwapRoute":
+            MessageLookupByLibrary.simpleMessage("Choose swap route"),
         "chooseToken": MessageLookupByLibrary.simpleMessage("Choose token"),
+        "chosenRoute": MessageLookupByLibrary.simpleMessage("Chosen route"),
         "cleanup": MessageLookupByLibrary.simpleMessage("Cleanup"),
         "cleanupTokenAccounts":
             MessageLookupByLibrary.simpleMessage("Cleanup token accounts"),
@@ -110,6 +113,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Manage stake accounts"),
         "maxCap": MessageLookupByLibrary.simpleMessage("MAX"),
         "message": MessageLookupByLibrary.simpleMessage("Message"),
+        "minReceived": MessageLookupByLibrary.simpleMessage("Min received"),
         "mockWallet": MessageLookupByLibrary.simpleMessage("Mock Wallet"),
         "mockWalletAddress":
             MessageLookupByLibrary.simpleMessage("Mock wallet address"),
@@ -128,6 +132,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "percentFee": MessageLookupByLibrary.simpleMessage("%s%% fee"),
         "pleaseAuthenticateToContinue": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to continue"),
+        "price": MessageLookupByLibrary.simpleMessage("Price"),
+        "priceImpact": MessageLookupByLibrary.simpleMessage("Price impact"),
         "receive": MessageLookupByLibrary.simpleMessage("Receive"),
         "recipient": MessageLookupByLibrary.simpleMessage("Recipient"),
         "redelegate": MessageLookupByLibrary.simpleMessage("Re-delegate"),

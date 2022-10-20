@@ -751,6 +751,17 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                             ],
                           ),
                         ),
+                        if (_routes != null)
+                          ...[
+                            SizedBox(width: 8),
+                            Text(
+                              (_routes![_chosenRoute].outAmount / pow(10, toTokenDetail["decimals"] ?? 9)).toStringAsFixed(toTokenDetail["decimals"] ?? 9),
+                              style: themeData.textTheme.bodyText1!.copyWith(
+                                color: themeData.disabledColor,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
                         Spacer(),
                       ],
                     ),
@@ -784,22 +795,82 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                     ),
                   ],
                 ),
-                ..._routes!.asMap().map((i, route) {
-                    String path = route.marketInfos.map((e) => e.label).join(" > ");
-                    return MapEntry(
-                      i,
-                      ListTile(
-                        title: Text(path),
-                        subtitle: Text("${route.outAmount / pow(10, tokenDetails[_to!]!["decimals"])}"),
-                        trailing: i == _chosenRoute ? Icon(Icons.check) : null,
-                        onTap: () async {
+                if (_routes != null)
+                  ...[
+                    ListTile(
+                      title: Row(
+                        children: [
+                          Text(S.current.chosenRoute, overflow: TextOverflow.ellipsis,),
+                          Spacer(),
+                          Text("${_routes?[_chosenRoute].marketInfos.map((e) => e.label).join(" > ")}", overflow: TextOverflow.ellipsis,),
+                          Icon(Icons.keyboard_arrow_right_rounded),
+                        ],
+                      ),
+                      onTap: () async {
+                        int? i = await showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                          ),
+                          builder: (_) {
+                            return SafeArea(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(S.current.chooseSwapRoute, style: Theme.of(context).textTheme.headline6),
+                                  ),
+                                  ..._routes!.mapIndexed((i, route) => ListTile(
+                                    title: Text(route.marketInfos.map((e) => e.label).join(" > ")),
+                                    onTap: () {
+                                      Navigator.of(context).pop(i);
+                                    },
+                                  ))
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                        if (i != null) {
                           setState(() {
                             _chosenRoute = i;
                           });
-                        },
+                        }
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          Row(
+                            children: [
+                              Text(S.current.price),
+                              Spacer(),
+                              Text("${((_routes?[_chosenRoute].outAmount ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6) / (_routes?[_chosenRoute].inAmount ?? 0) * pow(10, tokenDetails[_from]?["decimals"] ?? 6)).toFixedTrimmed(6)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened} per ${tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(S.current.minReceived),
+                              Spacer(),
+                              Text("${(_routes?[_chosenRoute].outAmountWithSlippage ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(S.current.priceImpact),
+                              Spacer(),
+                              Text("${((_routes?[_chosenRoute].priceImpactPct ?? 0) * 100).toStringAsFixed(4)}%"),
+                            ],
+                          ),
+                        ],
                       ),
-                    );
-                  }).values,
+                    ),
+                    // Text("Price impact: ${((_routes?[_chosenRoute].) * 100).toStringAsFixed(4)}%"),
+                  ],
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     child: Row(
