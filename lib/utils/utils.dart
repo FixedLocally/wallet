@@ -213,6 +213,9 @@ class Utils {
       return <Object>[];
     });
     if (results.isEmpty) return TokenChanges.error("cannot get results");
+    if ((results[0] as TransactionStatus).err != null) {
+      return TokenChanges.error("simulation failed");
+    }
     TransactionStatus status = results[0];
     int preSolBalance = results[1];
 
