@@ -1409,6 +1409,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Unlock Wallet`
+  String get unlockWallet {
+    return Intl.message(
+      'Unlock Wallet',
+      name: 'unlockWallet',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

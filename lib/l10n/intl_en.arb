@@ -135,5 +135,6 @@
   "price": "Price",
   "minReceived": "Min received",
   "priceImpact": "Price impact",
-  "chosenRoute": "Swapping via"
+  "chosenRoute": "Swapping via",
+  "unlockWallet": "Unlock Wallet"
 }

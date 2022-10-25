@@ -23,6 +23,7 @@ import '../widgets/bottom_sheet.dart';
 import '../widgets/header.dart';
 import '../widgets/image.dart';
 import '../widgets/text_icon.dart';
+import 'locked.dart';
 import 'mixins/inherited.dart';
 import 'settings.dart';
 import 'tokens/tokens.dart';
@@ -37,7 +38,7 @@ class HomeRoute extends StatefulWidget {
   State<HomeRoute> createState() => _HomeRouteState();
 }
 
-class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
+class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindingObserver {
   int _page = 1;
   final GlobalKey<RefreshIndicatorState> _nftRefresherKey = GlobalKey();
   final GlobalKey<RefreshIndicatorState> _tokenRefresherKey = GlobalKey();
@@ -71,6 +72,18 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     });
     _from = Utils.prefs.getString(Constants.kKeySwapFrom) ?? nativeSol;
     _to = Utils.prefs.getString(Constants.kKeySwapTo) ?? usdcMint;
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // _reloadActiveBalances(true);
+    }
+    if (state == AppLifecycleState.paused) {
+      print("paused");
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LockedRoute()));
+    }
   }
 
   @override
@@ -1494,6 +1507,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   void dispose() {
     super.dispose();
     _fromAmtController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
   }
 }
 
