@@ -22,6 +22,7 @@ import '../widgets/approve_tx.dart';
 import '../widgets/bottom_sheet.dart';
 import '../widgets/header.dart';
 import '../widgets/image.dart';
+import '../widgets/text_icon.dart';
 import 'mixins/inherited.dart';
 import 'settings.dart';
 import 'tokens/tokens.dart';
@@ -193,6 +194,12 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
             },
           ),
         ],
+        leading: Builder(builder: (ctx) {
+          return IconButton(
+            icon: TextIcon(text: KeyManager.instance.walletName),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          );
+        }),
       ),
       drawer: Drawer(
         child: CustomScrollView(
@@ -289,6 +296,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
   }
 
   Widget _createWalletListTile(ManagedKey key) {
+    bool selected = key.active && KeyManager.instance.mockPubKey == null;
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
@@ -305,7 +313,20 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         ],
       ),
       child: ListTile(
-        leading: key.active && KeyManager.instance.mockPubKey == null ? const Icon(Icons.check) : const Icon(Icons.language),
+        leading: Stack(
+          children: [
+            TextIcon(text: key.name, radius: 16),
+            if (selected)
+              Positioned(
+                right: 3,
+                bottom: 3,
+                child: CircleAvatar(
+                  radius: 6,
+                  backgroundColor: Colors.green,
+                ),
+              ),
+          ],
+        ),
         visualDensity: VisualDensity.compact,
         title: Text(key.name),
         style: ListTileStyle.drawer,
