@@ -145,6 +145,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "renameWallet": MessageLookupByLibrary.simpleMessage("Rename Wallet"),
         "renamingWallet":
             MessageLookupByLibrary.simpleMessage("Renaming wallet..."),
+        "requireAuthToUnlock": MessageLookupByLibrary.simpleMessage(
+            "Transactions require authentication"),
         "resetSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Reset Secret Recovery Phrase"),
         "revoke": MessageLookupByLibrary.simpleMessage("Revoke"),

@@ -136,5 +136,6 @@
   "minReceived": "Min received",
   "priceImpact": "Price impact",
   "chosenRoute": "Swapping via",
-  "unlockWallet": "Unlock Wallet"
+  "unlockWallet": "Unlock Wallet",
+  "requireAuthToUnlock": "Transactions require authentication"
 }

@@ -29,4 +29,5 @@ class RpcConstants {
 class Constants {
   static const String kKeySwapFrom = "swap_from";
   static const String kKeySwapTo = "swap_to";
+  static const String kKeyRequireAuth = "require_auth";
 }

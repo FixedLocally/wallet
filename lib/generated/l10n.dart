@@ -1419,6 +1419,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Transactions require authentication`
+  String get requireAuthToUnlock {
+    return Intl.message(
+      'Transactions require authentication',
+      name: 'requireAuthToUnlock',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

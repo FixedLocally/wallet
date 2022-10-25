@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:solana/base58.dart';
 
 import '../generated/l10n.dart';
+import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import 'home.dart';
@@ -168,6 +169,21 @@ class _SecuritySettingsRouteState extends State<SecuritySettingsRoute> {
               KeyManager.instance.clearConnectionHistory();
             },
             title: Text(S.of(context).clearConnectionHistory),
+          ),
+          SwitchListTile(
+            value: Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false,
+            onChanged: (b) async {
+              if (!(await KeyManager.instance.authenticateUser(context))) {
+                return;
+              }
+              Utils.prefs.setBool(Constants.kKeyRequireAuth, b).then((value) {
+                setState(() {});
+              });
+            },
+            title: Text(S.current.requireAuthToUnlock),
+          ),
+          ListTile(
+            title: Text("")
           ),
         ],
       ),

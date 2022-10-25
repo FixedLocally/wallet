@@ -133,6 +133,11 @@ class RpcServer {
       return RpcResponse.error(RpcConstants.kUserRejected);
     }
     if (approved) {
+      if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
+        approved = await KeyManager.instance.authenticateUser(contextHolder.context!);
+      }
+    }
+    if (approved) {
       String recentBlockhash = args["recentBlockhash"];
       SignedTx signedTx = await KeyManager.instance.signMessage(message, recentBlockhash);
       print(signedTx.signatures.first.toBase58());
@@ -200,6 +205,11 @@ class RpcServer {
     // auto reject mocked requests
     if (KeyManager.instance.mockPubKey != null) {
       return RpcResponse.error(RpcConstants.kUserRejected);
+    }
+    if (approved) {
+      if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
+        approved = await KeyManager.instance.authenticateUser(contextHolder.context!);
+      }
     }
     if (approved) {
       List<SignedTx> signedTxs = [];
