@@ -312,6 +312,11 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         subtitle: Text(key.pubKey, maxLines: 1, overflow: TextOverflow.ellipsis),
         onTap: () async {
           Navigator.pop(context);
+          if (key.active) {
+            return;
+          }
+          _tokenRefresherKey.currentState?.show();
+          appWidget.startLoadingBalances(key.pubKey);
           await KeyManager.instance.setActiveKey(key);
           setState(() {});
         },
@@ -417,6 +422,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     String pubKey = KeyManager.instance.pubKey;
     if (balances[pubKey] == null) {
       if (balancesCompleters[pubKey] == null) {
+        _tokenRefresherKey.currentState?.show();
         appWidget.startLoadingBalances(pubKey);
       }
       return const Center(child: CircularProgressIndicator());
@@ -559,6 +565,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     String pubKey = KeyManager.instance.pubKey;
     if (balances[pubKey] == null || jupRouteMap == null || jupRouteMapLoading) {
       if (balancesCompleters[pubKey] == null) {
+        _tokenRefresherKey.currentState?.show();
         appWidget.startLoadingBalances(pubKey);
       }
       appWidget.loadJupRouteIndex();
@@ -896,6 +903,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                               if (approved) {
                                 Utils.prefs.setString(Constants.kKeySwapFrom, _from!);
                                 Utils.prefs.setString(Constants.kKeySwapTo, _to!);
+                                _tokenRefresherKey.currentState?.show();
                                 appWidget.startLoadingBalances(pubKey);
                                 await Utils.showLoadingDialog(context: context, future: balancesCompleters[pubKey]!.future, text: S.current.sendingTx);
                                 double fromBefore = double.parse(balances[pubKey]?[_from]?.tokenAmount.uiAmountString ?? "0");
@@ -929,6 +937,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
                                   _chosenRoute = -1;
                                 });
                                 // _loadRoutes(_from, _to);
+                                _tokenRefresherKey.currentState?.show();
                                 appWidget.startLoadingBalances(KeyManager.instance.pubKey);
                                 await balancesCompleters[pubKey]!.future;
                                 double fromAfter = double.parse(balances[pubKey]![_from]!.tokenAmount.uiAmountString ?? "0");
@@ -1057,6 +1066,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
         if (burn) {
           List<Instruction> ixs = entry.burnAndCloseIxs();
           await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
+          _tokenRefresherKey.currentState?.show();
           appWidget.startLoadingBalances(KeyManager.instance.pubKey);
         }
       },
@@ -1144,6 +1154,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
     String pubKey = KeyManager.instance.pubKey;
     if (balances[pubKey] == null) {
       if (balancesCompleters[pubKey] == null) {
+        _tokenRefresherKey.currentState?.show();
         appWidget.startLoadingBalances(pubKey);
       }
       return const Center(child: CircularProgressIndicator());
@@ -1156,6 +1167,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
       return RefreshIndicator(
         key: _nftRefresherKey,
         onRefresh: () {
+          _tokenRefresherKey.currentState?.show();
           appWidget.startLoadingBalances(pubKey);
           return balancesCompleters[pubKey]!.future;
         },
@@ -1289,6 +1301,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
           title: Text(S.current.cleanupTokenAccounts),
           onTap: () async {
             ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
+            _tokenRefresherKey.currentState?.show();
             appWidget.startLoadingBalances(KeyManager.instance.pubKey);
             await Utils.showLoadingDialog(context: context, future: sharedData.balancesCompleters[KeyManager.instance.pubKey]!.future);
             List<SplTokenAccountDataInfoWithUsd> emptyAccounts = sharedData.balances[KeyManager.instance.pubKey]!.values.where((element) => element.tokenAmount.amount == "0").toList();
@@ -1319,6 +1332,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData {
               });
               await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs));
             }
+            _tokenRefresherKey.currentState?.show();
             appWidget.startLoadingBalances(KeyManager.instance.pubKey);
             scaffold.showSnackBar(SnackBar(content: Text(sprintf(S.current.tokenAccountsClosed, [toClose.length]))));
           },

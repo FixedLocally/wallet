@@ -175,7 +175,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
       // initialUrl: widget.initialUrl,
       javascriptMode: JavascriptMode.unrestricted,
       javascriptChannels: _jsChannels,
-      debuggingEnabled: kDebugMode,
+      debuggingEnabled: !kReleaseMode,
 
       onPageStarted: (String url) {
         _runInjection();
