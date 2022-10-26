@@ -12,6 +12,16 @@ class LockedRoute extends StatefulWidget {
 
 class _LockedRouteState extends State<LockedRoute> {
   @override
+  void initState() {
+    super.initState();
+    KeyManager.instance.authenticateUser(context).then((value) {
+      if (value) {
+        Navigator.pop(context);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(

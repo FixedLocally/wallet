@@ -351,7 +351,10 @@ class KeyManager {
   Future<bool> authenticateUser(BuildContext context) async {
     final LocalAuthentication auth = LocalAuthentication();
     try {
-      return auth.authenticate(localizedReason: S.current.pleaseAuthenticateToContinue);
+      return auth.authenticate(
+        localizedReason: S.current.pleaseAuthenticateToContinue,
+        options: AuthenticationOptions(stickyAuth: true),
+      );
     } catch (e) {
       return false;
     }

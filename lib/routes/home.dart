@@ -53,6 +53,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
   List<JupiterRoute>? _routes;
   int _chosenRoute = -1;
   bool _hasEnoughBalance = false;
+  bool _locked = false;
 
   @override
   void initState() {
@@ -73,6 +74,12 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
     _from = Utils.prefs.getString(Constants.kKeySwapFrom) ?? nativeSol;
     _to = Utils.prefs.getString(Constants.kKeySwapTo) ?? usdcMint;
     WidgetsBinding.instance.addObserver(this);
+    if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.push(context, MaterialPageRoute(builder: (ctx) => const LockedRoute())).then((value) => _locked = false);
+        _locked = true;
+      });
+    }
   }
 
   @override
@@ -81,8 +88,11 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
       // _reloadActiveBalances(true);
     }
     if (state == AppLifecycleState.paused) {
-      print("paused");
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LockedRoute()));
+      if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
+        if (!_locked) {
+          Navigator.push(context, MaterialPageRoute(builder: (ctx) => const LockedRoute())).then((value) => _locked = false);
+        }
+      }
     }
   }
 
