@@ -18,6 +18,50 @@ import '../widgets/text.dart';
 import 'errors/errors.dart';
 
 const String derivationPathTemplate = "m/44'/501'/%s'/0'";
+const List<Map<String, dynamic>> _defaultApps = [
+  {
+    "url": "https://solend.fi/dashboard",
+    "name": "Solend",
+    "last_used_ts": 0,
+    "used_count": 0,
+    "starred": 0
+  },
+  {
+    "url": "https://jup.ag",
+    "name": "Jupiter Aggregator",
+    "last_used_ts": 0,
+    "used_count": 0,
+    "starred": 0
+  },
+  {
+    "url": "https://dex.zeta.markets",
+    "name": "Zeta Markets",
+    "last_used_ts": 0,
+    "used_count": 0,
+    "starred": 0
+  },
+  {
+    "url": "https://tulip.garden/leverage",
+    "name": "Tulip",
+    "last_used_ts": 0,
+    "used_count": 0,
+    "starred": 0
+  },
+  {
+    "url": "https://www.orca.so/",
+    "name": "Orca",
+    "last_used_ts": 0,
+    "used_count": 0,
+    "starred": 0
+  },
+  {
+    "url": "https://magiceden.io/",
+    "name": "Magic Eden",
+    "last_used_ts": 0,
+    "used_count": 0,
+    "starred": 0
+  },
+];
 
 class KeyManager {
   static KeyManager? _instance;
@@ -29,6 +73,7 @@ class KeyManager {
   ManagedKey? _activeWallet;
   String? mockPubKey;
   Map<String, String?> _domainLogos = {};
+  List<App> _apps = [];
 
   static KeyManager get instance {
     _instance ??= KeyManager._();
@@ -42,13 +87,14 @@ class KeyManager {
   bool get isReady => _ready && _wallets.isNotEmpty;
   String get walletName => mockPubKey != null ? S.current.mocked : _activeWallet!.name;
   List<ManagedKey> get wallets => List.unmodifiable(_wallets);
+  List<App> get apps => List.unmodifiable(_apps);
 
   KeyManager._();
 
   Future<void> init() async {
     _db = await openDatabase(
       "key_manager.db",
-      version: 4,
+      version: 5,
       onCreate: (Database db, int version) async {
         await db.execute(
             "CREATE TABLE wallets ("
@@ -83,6 +129,20 @@ class KeyManager {
                 "logo_url TEXT" // logo source
                 ")"
         );
+        await db.execute(
+          "CREATE TABLE apps ("
+                "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                "url TEXT," // app url
+                "name TEXT," // app name
+                "last_used_ts INTEGER," // last used timestamp
+                "used_count INTEGER," // used count
+                "starred INTEGER" // added to favourites
+                ")"
+        );
+        // add a few default apps
+        for (final app in _defaultApps) {
+          await db.insert("apps", app);
+        }
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
         switch (oldVersion) {
@@ -126,7 +186,23 @@ class KeyManager {
               // doesn't support
               // await txn.execute("ALTER TABLE connections DROP COLUMN thumbnail");
             });
-            // continue v4; // fall thru, continue upgrading
+            continue v4; // fall thru, continue upgrading
+          v4:
+          case 4:
+            await db.transaction((txn) async {
+              await txn.execute("CREATE TABLE apps ("
+                  "id INTEGER PRIMARY KEY," // rowid (sqlite specs)
+                  "url TEXT," // app url
+                  "name TEXT," // app name
+                  "last_used_ts INTEGER," // last used timestamp
+                  "used_count INTEGER," // used count
+                  "starred INTEGER" // added to favourites
+                  ")");
+              for (final app in _defaultApps) {
+                await txn.insert("apps", app);
+              }
+            });
+            // continue v5; // fall thru, continue upgrading
         }
       }
     );
@@ -135,11 +211,11 @@ class KeyManager {
       return ManagedKey.fromJSON(wallet);
     }).toList();
     List<Map<String, Object?>> domainLogos = await _db.query("domain_logos");
-    domainLogos.forEach((element) {
+    for (var element in domainLogos) {
       if (element["domain"] != null && _domainLogos[element["domain"]] == null) {
         _domainLogos[element["domain"] as String] = element["logo_url"] as String?;
       }
-    });
+    }
     try {
       _activeWallet = _wallets.firstWhere((ManagedKey wallet) => wallet.active);
     } catch (e) {
@@ -147,6 +223,7 @@ class KeyManager {
         _activeWallet ??= _wallets.first;
       }
     }
+    _db.query("apps").then((value) => value.forEach((e) => _apps.add(App.fromJSON(e))));
     _ready = true;
   }
 
@@ -544,6 +621,42 @@ class ManagedKey {
   @override
   String toString() {
     return 'ManagedKey{name: $name, pubKey: $pubKey, active: $active}';
+  }
+}
+
+class App {
+  /*
+    "url": "https://magiceden.io/",
+    "name": "Magic Eden",
+    "last_used_ts": 0,
+    "used_count": 0,
+    "starred": 0
+   */
+  final int id;
+  final String url;
+  final String name;
+  final int lastUsedTs;
+  final int usedCount;
+  final bool starred;
+
+  const App({
+    required this.id,
+    required this.url,
+    required this.name,
+    required this.lastUsedTs,
+    required this.usedCount,
+    required this.starred,
+  });
+
+  factory App.fromJSON(Map<String, Object?> m) {
+    return App(
+      id: m["id"] as int,
+      url: m["url"] as String,
+      name: m["name"] as String,
+      lastUsedTs: m["last_used_ts"] as int,
+      usedCount: m["used_count"] as int,
+      starred: m["starred"] as int != 0,
+    );
   }
 }
 
