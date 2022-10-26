@@ -147,7 +147,7 @@ class _LogoState extends State<Logo> {
         setState(() {
           _fileInfo = fileInfo;
         });
-        KeyManager.instance.setDomainLogo(widget.domain, fileInfo.file.path);
+        KeyManager.instance.setDomainLogo(widget.domain, url);
         return;
       }
     }
