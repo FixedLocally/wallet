@@ -91,6 +91,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
       if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
         if (!_locked) {
           Navigator.push(context, MaterialPageRoute(builder: (ctx) => const LockedRoute())).then((value) => _locked = false);
+          _locked = true;
         }
       }
     }
@@ -369,19 +370,20 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
   }
 
   Widget _dAppList() {
-    return Column(
+    return ListView(
       children: [
         _createWebsiteListTile("Raydium", "https://raydium.io/pools"),
         _createWebsiteListTile("Zeta Markets", "https://mainnet.zeta.markets/"),
         _createWebsiteListTile("Jupiter", "https://jup.ag/"),
         _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
         _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
-        _createWebsiteListTile("Mango Markets", "https://trade.mango.markets"),
         _createWebsiteListTile("Orca", "https://www.orca.so"),
         _createWebsiteListTile("Marinade Governance", "https://tribeca.so/gov/mnde/nftgauges/validator"),
         _createWebsiteListTile("Magic Eden", "https://magiceden.io"),
         _createWebsiteListTile("Frakt", "https://frakt.xyz/lend"),
-        _createWebsiteListTile("Nirvana", "https://app.nirvana.finance"),
+        ...KeyManager.instance.apps.map((dApp) {
+          return _createWebsiteListTile(dApp.name, dApp.url);
+        }),
       ],
     );
   }
