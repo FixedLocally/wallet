@@ -297,24 +297,30 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
     );
   }
 
-  Widget _createWebsiteListTile(String title, String url) {
+  Widget _createAppTile(String title, String url) {
     String? host = Uri.parse(url).host;
     String? logo = KeyManager.instance.getDomainLogo(host);
-    Widget leading = Icon(Icons.language);
+    Widget leading = Icon(Icons.language, size: 48,);
     if (logo != null) {
       // leading = Image.file(File(logo), width: 24, height: 24, errorBuilder: (_, __, ___) => Icon(Icons.language),);
-      leading = MultiImage(image: logo, size: 24,);
+      leading = MultiImage(image: logo, size: 48,);
     }
-    return ListTile(
-      leading: leading,
-      title: Text(title),
-      onTap: () {
+    return RawMaterialButton(
+      child: Column(
+        children: [
+          leading,
+          Text(title, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,),
+        ],
+      ),
+      onPressed: () {
         Navigator.push(context, MaterialPageRoute(
           builder: (context) => DAppRoute(
             title: title,
             initialUrl: url,
           ),
-        ));
+        )).then((value) {
+          setState(() {});
+        });
       },
     );
   }
@@ -371,19 +377,18 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
 
   Widget _dAppList() {
     return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       children: [
-        _createWebsiteListTile("Raydium", "https://raydium.io/pools"),
-        _createWebsiteListTile("Zeta Markets", "https://mainnet.zeta.markets/"),
-        _createWebsiteListTile("Jupiter", "https://jup.ag/"),
-        _createWebsiteListTile("Solend", "https://solend.fi/dashboard"),
-        _createWebsiteListTile("Tulip", "https://tulip.garden/lend"),
-        _createWebsiteListTile("Orca", "https://www.orca.so"),
-        _createWebsiteListTile("Marinade Governance", "https://tribeca.so/gov/mnde/nftgauges/validator"),
-        _createWebsiteListTile("Magic Eden", "https://magiceden.io"),
-        _createWebsiteListTile("Frakt", "https://frakt.xyz/lend"),
-        ...KeyManager.instance.apps.map((dApp) {
-          return _createWebsiteListTile(dApp.name, dApp.url);
-        }),
+        GridView.extent(
+          maxCrossAxisExtent: 112,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            ...KeyManager.instance.apps.map((dApp) {
+              return _createAppTile(dApp.name, dApp.url);
+            }),
+          ],
+        ),
       ],
     );
   }

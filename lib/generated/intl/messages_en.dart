@@ -120,6 +120,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mockWalletPrompt": MessageLookupByLibrary.simpleMessage(
             "Enter wallet address to mock:"),
         "mocked": MessageLookupByLibrary.simpleMessage("Mocked Wallet"),
+        "myApps": MessageLookupByLibrary.simpleMessage("My Apps"),
         "newWalletName":
             MessageLookupByLibrary.simpleMessage("New wallet name"),
         "no": MessageLookupByLibrary.simpleMessage("No"),

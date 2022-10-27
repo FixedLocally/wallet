@@ -137,5 +137,6 @@
   "priceImpact": "Price impact",
   "chosenRoute": "Swapping via",
   "unlockWallet": "Unlock Wallet",
-  "requireAuthToUnlock": "Transactions require authentication"
+  "requireAuthToUnlock": "Transactions require authentication",
+  "myApps": "My Apps"
 }

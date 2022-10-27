@@ -467,25 +467,50 @@ class KeyManager {
         cancelText: S.current.cancel,
       );
       if (approve) {
-        await _db.transaction((txn) async {
-          txn.insert("connections", {
-            "domain": domain,
-            "wallet_id": _activeWallet!.id,
-            "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          });
-        });
+        await _didConnect(domain, title);
       } else {
         return false;
       }
     } else {
-      await _db.transaction((txn) async {
-        await txn.update("connections",
-            {"domain": domain, "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000},
-            where: "domain=? and wallet_id=?",
-            whereArgs: [domain, _activeWallet!.id]);
-      });
+      _didConnect(domain, title);
     }
     return true;
+  }
+
+  Future<void> _didConnect(String domain, String title) async {
+    await _db.transaction((txn) async {
+      txn.insert("connections", {
+        "domain": domain,
+        "wallet_id": _activeWallet!.id,
+        "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      });
+      // todo could give every app a "weight" to determine usage frequency
+      txn.query("apps", where: "url like ?", whereArgs: ["https://$domain%"]).then((apps) {
+        if (apps.isNotEmpty) {
+          for (Map app in apps) {
+            txn.update(
+              "apps",
+              {
+                "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
+                "used_count": app["used_count"] + 1,
+                "name": title,
+              },
+              where: "id=?",
+              whereArgs: [app["id"]],
+            );
+          }
+        } else {
+          print("installing app $domain");
+          txn.insert("apps", {
+            "url": "https://$domain",
+            "name": title,
+            "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
+            "used_count": 1,
+            "starred": 0,
+          });
+        }
+      });
+    });
   }
 
   Future<void> requestShowRecoveryPhrase(BuildContext context) async {
