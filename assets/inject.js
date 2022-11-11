@@ -185,7 +185,8 @@ function(key, bogusKeys) {
                 return txs;
             },
             signAndSendTransaction: async function(tx) {
-                let sig = await rpc("signAndSendTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo()});
+                let sigs = tx.signatures.map(x => ({"publicKey": x.publicKey.toBase58(), "signature": x.signature ? [...x.signature] : null}));
+                let sig = await rpc("signAndSendTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo(), sigs});
                 debugLog(sig);
                 return sig;
             },

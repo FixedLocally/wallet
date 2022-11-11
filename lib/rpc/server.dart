@@ -118,8 +118,6 @@ class RpcServer {
     }
 
     List<int> payload = args["tx"].cast<int>();
-    CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
-    Message message = Message.decompile(compiledMessage);
 
     Future<List<TokenChanges>> simulation = Utils.simulateTxs([payload], KeyManager.instance.pubKey);
     bool approved = await Utils.showConfirmBottomSheet(
@@ -138,12 +136,34 @@ class RpcServer {
       }
     }
     if (approved) {
-      String recentBlockhash = args["recentBlockhash"];
-      SignedTx signedTx = await KeyManager.instance.signMessage(message, recentBlockhash);
-      print(signedTx.signatures.first.toBase58());
+      // String recentBlockhash = args["recentBlockhash"];
+      late SignedTx signedTx;
       Signature signature = await KeyManager.instance.sign(payload);
-      print(signedTx.encode());
+      if (args["sigs"] != null) {
+        List suppliedSigs = args["sigs"];
+        List<Signature> sigs = suppliedSigs.map((e) {
+          Ed25519HDPublicKey publicKey = Ed25519HDPublicKey.fromBase58(e["publicKey"]);
+          return Signature((e["signature"] ?? []).cast<int>(), publicKey: publicKey);
+        }).toList();
+        int dummyIndex = sigs.indexWhere((element) => element.bytes.isEmpty);
+        if (dummyIndex >= 0) {
+          sigs[dummyIndex] = signature;
+        } else {
+          sigs.add(signature);
+        }
+        signedTx = SignedTx(
+          signatures: sigs,
+          messageBytes: ByteArray(payload),
+        );
+        print(signedTx.signatures);
+      } else {
+        signedTx = SignedTx(
+          signatures: [signature],
+          messageBytes: ByteArray(payload),
+        );
+      }
       print(signature.toBase58());
+      print(signedTx.encode());
       if (send) {
         try {
           String sig = await Utils.sendTransaction(signedTx);
