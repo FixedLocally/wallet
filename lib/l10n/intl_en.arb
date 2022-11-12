@@ -138,5 +138,6 @@
   "chosenRoute": "Swapping via",
   "unlockWallet": "Unlock Wallet",
   "requireAuthToUnlock": "Transactions require authentication",
-  "myApps": "My Apps"
+  "myApps": "My Apps",
+  "noRoutesFound": "No routes found"
 }

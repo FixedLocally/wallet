@@ -128,6 +128,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No Collectibles"),
         "noEmptyTokenAccounts": MessageLookupByLibrary.simpleMessage(
             "No empty token accounts found"),
+        "noRoutesFound":
+            MessageLookupByLibrary.simpleMessage("No routes found"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "pay": MessageLookupByLibrary.simpleMessage("Pay"),
         "percentFee": MessageLookupByLibrary.simpleMessage("%s%% fee"),

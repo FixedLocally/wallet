@@ -112,7 +112,7 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
       amount: amount,
       slippage: slippage,
       // feeBps: 10,
-    );
+    ).catchError((_) => <JupiterRoute>[]);
   }
 
   Future<JupiterSwapTransactions> getSwapTransactions({

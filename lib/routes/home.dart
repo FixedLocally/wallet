@@ -809,7 +809,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                             ],
                           ),
                         ),
-                        if (_routes != null)
+                        if (_routes != null && _routes!.isNotEmpty)
                           ...[
                             SizedBox(width: 8),
                             Text(
@@ -853,7 +853,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                     ),
                   ],
                 ),
-                if (_routes != null)
+                if (_routes != null && _routes!.isNotEmpty)
                   ...[
                     ListTile(
                       title: Row(
@@ -935,7 +935,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                       children: [
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: _hasEnoughBalance ? () async {
+                            onPressed: _hasEnoughBalance && _routes!.isNotEmpty ? () async {
                               FocusScope.of(context).unfocus();
                               ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
                               JupiterSwapTransactions swapTxs =
@@ -1008,7 +1008,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                               }
                             } : null,
                             child: Text(
-                              _hasEnoughBalance ? S.current.swap : S.current.insufficientBalance,
+                              _hasEnoughBalance ? (_routes!.isNotEmpty ? S.current.swap : S.current.noRoutesFound) : S.current.insufficientBalance,
                             ),
                           ),
                         ),

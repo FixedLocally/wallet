@@ -1439,6 +1439,16 @@ class S {
       args: [],
     );
   }
+
+  /// `No routes found`
+  String get noRoutesFound {
+    return Intl.message(
+      'No routes found',
+      name: 'noRoutesFound',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
