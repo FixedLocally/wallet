@@ -835,14 +835,21 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                 children: [
                   SizedBox(width: 20),
                   Text("Enable Wrapped SOL"),
-                  Switch(
-                    value: _enableWsol,
-                    onChanged: (b) {
-                      setState(() {
-                        _enableWsol = b;
-                      });
-                      Utils.prefs.setBool(Constants.kKeyEnableWsol, _enableWsol);
-                    },
+                  SizedBox(
+                    height: 24,
+                    width: 40,
+                    child: Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: _enableWsol,
+                        onChanged: (b) {
+                          setState(() {
+                            _enableWsol = b;
+                          });
+                          Utils.prefs.setBool(Constants.kKeyEnableWsol, _enableWsol);
+                        },
+                      ),
+                    ),
                   ),
                   Spacer(),
                   Text("${myBalances[_to]?.tokenAmount.uiAmountString ?? "0"} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
