@@ -914,7 +914,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                             children: [
                               Text(S.current.minReceived),
                               Spacer(),
-                              Text("${(_routes?[_chosenRoute].outAmountWithSlippage ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
+                              Text("${(_routes?[_chosenRoute].outAmount ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
                             ],
                           ),
                           Row(
@@ -938,10 +938,10 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                             onPressed: _hasEnoughBalance && _routes!.isNotEmpty ? () async {
                               FocusScope.of(context).unfocus();
                               ScaffoldMessengerState scaffold = ScaffoldMessenger.of(context);
-                              JupiterSwapTransactions swapTxs =
-                              await appWidget.getSwapTransactions(
-                                  userPublicKey: KeyManager.instance.pubKey,
-                                  route: _routes![_chosenRoute]);
+                              JupiterSwapTransactions swapTxs = await appWidget.getSwapTransactions(
+                                userPublicKey: KeyManager.instance.pubKey,
+                                route: _routes![_chosenRoute],
+                              );
                               List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction]
                                   .whereNotNull.map(base64Decode).map((x) => x.sublist(65)).toList();
                               Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey);
