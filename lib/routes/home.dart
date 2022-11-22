@@ -54,6 +54,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
   int _chosenRoute = -1;
   bool _hasEnoughBalance = false;
   bool _locked = false;
+  bool _enableWsol = false;
 
   @override
   void initState() {
@@ -73,6 +74,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
     });
     _from = Utils.prefs.getString(Constants.kKeySwapFrom) ?? nativeSol;
     _to = Utils.prefs.getString(Constants.kKeySwapTo) ?? usdcMint;
+    _enableWsol = Utils.prefs.getBool(Constants.kKeyEnableWsol) ?? false;
     WidgetsBinding.instance.addObserver(this);
     if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -829,12 +831,23 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
               ],
             ),
             if (_to != null)
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 20.0),
-                  child: Text("${myBalances[_to]?.tokenAmount.uiAmountString ?? "0"} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
-                ),
+              Row(
+                children: [
+                  SizedBox(width: 20),
+                  Text("Enable Wrapped SOL"),
+                  Switch(
+                    value: _enableWsol,
+                    onChanged: (b) {
+                      setState(() {
+                        _enableWsol = b;
+                      });
+                      Utils.prefs.setBool(Constants.kKeyEnableWsol, _enableWsol);
+                    },
+                  ),
+                  Spacer(),
+                  Text("${myBalances[_to]?.tokenAmount.uiAmountString ?? "0"} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
+                  SizedBox(width: 20),
+                ],
               ),
             if (_fromAmtController.text.isNotEmpty)
               if (_routes != null) ...[
@@ -941,6 +954,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                               JupiterSwapTransactions swapTxs = await appWidget.getSwapTransactions(
                                 userPublicKey: KeyManager.instance.pubKey,
                                 route: _routes![_chosenRoute],
+                                wrapUnwrapSOL: !_enableWsol,
                               );
                               List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction]
                                   .whereNotNull.map(base64Decode).map((x) => x.sublist(65)).toList();

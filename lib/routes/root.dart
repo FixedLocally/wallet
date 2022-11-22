@@ -118,10 +118,12 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
   Future<JupiterSwapTransactions> getSwapTransactions({
     required String userPublicKey,
     required JupiterRoute route,
+    bool wrapUnwrapSOL = true,
   }) async {
     return _jupClient.getSwapTransactions(
       userPublicKey: userPublicKey,
       route: route,
+      wrapUnwrapSOL: wrapUnwrapSOL,
       // feeBps: 10,
     );
   }
