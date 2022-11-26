@@ -31,8 +31,8 @@ class _GenerateSeedRouteState extends State<GenerateSeedRoute> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: ListView(
+          // mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
