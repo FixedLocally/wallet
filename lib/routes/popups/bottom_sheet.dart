@@ -58,7 +58,16 @@ class _ConfirmBottomSheetState extends State<ConfirmBottomSheet> {
             ],
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: widget.bodyBuilder(context),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height / 2 - 100,
+                    ),
+                    child: SingleChildScrollView(child: widget.bodyBuilder(context)),
+                  );
+                },
+              ),
             ),
             SizedBox(height: 8),
             if (widget.doubleConfirm != null) ...[
