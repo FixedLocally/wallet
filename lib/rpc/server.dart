@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
+import 'package:sprintf/sprintf.dart';
 
+import '../generated/l10n.dart';
 import '../utils/utils.dart';
+import '../widgets/domain_info.dart';
+import '../widgets/text.dart';
 import 'event.dart';
 import 'key_manager.dart';
 import 'response.dart';
@@ -40,6 +45,8 @@ class RpcServer {
         return _signAllTransactions(contextHolder, args, false);
       case "signAndSendTransaction":
         return _signTransaction(contextHolder, args, true);
+      case "signMessage":
+        return _signMessage(contextHolder, args);
     }
     return RpcResponse.error(RpcConstants.kMethodNotFound);
   }
@@ -178,6 +185,68 @@ class RpcServer {
           return RpcResponse.error(e.code, e.message);
         }
       }
+      return RpcResponse.primitive({
+        "signature": {"type": null, "value": signature.bytes},
+        "publicKey": {
+          "type": "PublicKey",
+          "value": [KeyManager.instance.pubKey]
+        },
+      });
+    } else {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
+  }
+
+  static Future<RpcResponse> _signMessage(ContextHolder contextHolder, Map args) async {
+    RpcResponse? error = _sigPreChecks(contextHolder);
+    if (error != null) {
+      return error;
+    }
+    if (args["message"] == null) {
+      return RpcResponse.error(RpcConstants.kInvalidInput);
+    }
+
+    List<int> payload = args["message"].cast<int>();
+    String msg = utf8.decode(payload);
+
+    bool approved = await Utils.showConfirmBottomSheet(
+      context: contextHolder.context!,
+      confirmText: S.current.approve,
+      cancelText: S.current.cancel,
+      bodyBuilder: (context) {
+        return Column(
+          children: [
+            if (args["domain"] != null && args["title"] != null && args["logo"] != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DomainInfoWidget(
+                  domain: args["domain"],
+                  title: args["title"],
+                  logoUrls: args["logo"].cast<String>(),
+                ),
+              ),
+            HighlightedText(
+              text: sprintf(S.of(context).signMessageHeadline,
+                  [KeyManager.instance.walletName]),
+            ),
+            Text(msg),
+          ],
+        );
+      },
+    );
+    // auto reject mocked requests
+    if (KeyManager.instance.mockPubKey != null) {
+      return RpcResponse.error(RpcConstants.kUserRejected);
+    }
+    if (approved) {
+      if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
+        approved = await KeyManager.instance.authenticateUser(contextHolder.context!);
+      }
+    }
+    if (approved) {
+      Signature signature = await KeyManager.instance.sign(payload);
+
+      print(signature.toBase58());
       return RpcResponse.primitive({
         "signature": {"type": null, "value": signature.bytes},
         "publicKey": {

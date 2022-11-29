@@ -48,7 +48,7 @@ function(key, bogusKeys) {
         function parseRpcResult(result) {
             let _result;
             debugLog("parse", result);
-            if ("object" !== typeof result) return result;
+            if (!result || "object" !== typeof result) return result;
             if (result.type != null) {
                 // constructor
                 _result = newCall(solanaWeb3[result.type], result.value);
@@ -189,6 +189,11 @@ function(key, bogusKeys) {
                 let sig = await rpc("signAndSendTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo(), sigs});
                 debugLog(sig);
                 return sig;
+            },
+            signMessage: async function(message) {
+                let signature = await rpc("signMessage", {"message": [...message], title: title(), logo: logo()});
+                signature.signature = new Uint8Array(signature.signature);
+                return signature;
             },
             on: function(trigger, callback) {
                 let callbacks = eventHandlers[trigger] || [];

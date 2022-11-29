@@ -1449,6 +1449,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Is requesting to sign the message below with your #%s# wallet:`
+  String get signMessageHeadline {
+    return Intl.message(
+      'Is requesting to sign the message below with your #%s# wallet:',
+      name: 'signMessageHeadline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approve`
+  String get approve {
+    return Intl.message(
+      'Approve',
+      name: 'approve',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

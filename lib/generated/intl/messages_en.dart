@@ -26,6 +26,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "active": MessageLookupByLibrary.simpleMessage("Active"),
         "addressCopied": MessageLookupByLibrary.simpleMessage("Address copied"),
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
+        "approve": MessageLookupByLibrary.simpleMessage("Approve"),
         "approveTransactionTitle":
             MessageLookupByLibrary.simpleMessage("Approve transaction?"),
         "areYouSure": MessageLookupByLibrary.simpleMessage("Are you sure?"),
@@ -178,6 +179,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "showPrivateKeyContent": MessageLookupByLibrary.simpleMessage(
             "Do NOT share your private key, having access to your private key means having full access to your funds."),
         "signMessage": MessageLookupByLibrary.simpleMessage("Sign Message"),
+        "signMessageHeadline": MessageLookupByLibrary.simpleMessage(
+            "Is requesting to sign the message below with your #%s# wallet:"),
         "signMessageHint":
             MessageLookupByLibrary.simpleMessage("Message to sign"),
         "signMessagePrompt":
