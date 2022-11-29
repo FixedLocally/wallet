@@ -27,8 +27,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "addressCopied": MessageLookupByLibrary.simpleMessage("Address copied"),
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "approve": MessageLookupByLibrary.simpleMessage("Approve"),
-        "approveTransactionTitle":
-            MessageLookupByLibrary.simpleMessage("Approve transaction?"),
+        "approveTransactionSubtitle":
+            MessageLookupByLibrary.simpleMessage("Estimated asset changes:"),
+        "approveTransactionTitle": MessageLookupByLibrary.simpleMessage(
+            "Is requesting to sign a transaction with your #%s# wallet."),
         "areYouSure": MessageLookupByLibrary.simpleMessage("Are you sure?"),
         "bulkTxWarning": MessageLookupByLibrary.simpleMessage(
             "Warning: This website is requesting your approval to %s transactions, if you are not performing any bulk operations, please reject this request and contact the website\'s developer."),

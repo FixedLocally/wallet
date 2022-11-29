@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:sprintf/sprintf.dart';
 
 import '../generated/l10n.dart';
+import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
 import 'domain_info.dart';
+import 'text.dart';
 
 class ApproveTransactionWidget extends StatelessWidget {
   final String? domain;
@@ -32,7 +35,10 @@ class ApproveTransactionWidget extends StatelessWidget {
                 title: title!,
                 logoUrls: logoUrls!,
               ),
-            Text(S.current.approveTransactionTitle),
+            HighlightedText(
+              text: sprintf(S.current.approveTransactionTitle, [KeyManager.instance.walletName]),
+            ),
+            Text(S.current.approveTransactionSubtitle),
             if (snapshot.hasData)
               ...snapshot.data!.map((e) => e.widget(context))
             else if (snapshot.hasError)

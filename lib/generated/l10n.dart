@@ -720,11 +720,21 @@ class S {
     );
   }
 
-  /// `Approve transaction?`
+  /// `Is requesting to sign a transaction with your #%s# wallet.`
   String get approveTransactionTitle {
     return Intl.message(
-      'Approve transaction?',
+      'Is requesting to sign a transaction with your #%s# wallet.',
       name: 'approveTransactionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Estimated asset changes:`
+  String get approveTransactionSubtitle {
+    return Intl.message(
+      'Estimated asset changes:',
+      name: 'approveTransactionSubtitle',
       desc: '',
       args: [],
     );
