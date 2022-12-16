@@ -151,18 +151,23 @@ function(key, bogusKeys) {
             signTransaction: async function(tx) {
                 let signature = await rpc("signTransaction", {"tx": [...tx.compileMessage().serialize()], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo()});
                 signature.signature = new Uint8Array(signature.signature);
-                debugLog("pre", tx);
+                debugLog("pre", tx.serialize({verifySignatures: false}).toString("base64"));
+                let found = 0;
                 if (tx.signatures.length) {
-                    tx.signatures.map(sig => {
+                    tx.signatures.map((sig, i) => {
                         if (sig.publicKey.toBase58() === signature.publicKey.toBase58()) {
                             sig.signature = signature.signature;
+                            ++found;
                         }
                     });
+                    if (!found) {
+                        tx.signatures.push(signature);
+                    }
                 } else {
                     tx.signatures = [signature];
                 }
 //                tx.signers = [signature.publicKey];
-                debugLog("post", tx);
+                debugLog("post", tx.serialize({verifySignatures: false}).toString("base64"));
                 return tx;
             },
             signAllTransactions: async function(txs) {
@@ -170,12 +175,17 @@ function(key, bogusKeys) {
                 for (let i = 0; i < signatures.length; ++i) {
                     signatures[i].signature = new Uint8Array(signatures[i].signature);
                     debugLog("multi pre", txs[i], signatures[i]);
+                    let found = 0;
                     if (txs[i].signatures.length) {
                         txs[i].signatures.map(sig => {
                             if (sig.publicKey.toBase58() === signatures[i].publicKey.toBase58()) {
                                 sig.signature = signatures[i].signature;
+                                ++found;
                             }
                         });
+                        if (!found) {
+                            txs[i].signatures.push(signatures[i]);
+                        }
                     } else {
                         txs[i].signatures = [signatures[i]];
                     }
