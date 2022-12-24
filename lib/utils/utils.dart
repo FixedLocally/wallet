@@ -26,7 +26,7 @@ const String _priceApiUrl = "https://validator.utopiamint.xyz/api/price/";
 const String _tokenMetadataApiUrl = "https://validator.utopiamint.xyz/api/token/";
 const String _yieldApiUrl = "https://validator.utopiamint.xyz/api/yield";
 const nativeSol = "native-sol";
-const nativeSolMint = "So11111111111111111111111111111111111111112";
+const wrappedSolMint = "So11111111111111111111111111111111111111112";
 const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 class Utils {
@@ -384,7 +384,7 @@ class Utils {
       account: pubKey,
     ));
     Set<String> mints = rawResults.map((e) => e.mint).toSet();
-    mints.add(nativeSolMint);
+    mints.add(wrappedSolMint);
     Map<String, dynamic> prices = await _getCoinGeckoPrices(mints.toList());
     List<SplTokenAccountDataInfoWithUsd> results = rawResults.map((e) {
       String uiAmountString = e.tokenAmount.uiAmountString ?? "0";
@@ -392,8 +392,8 @@ class Utils {
       num unitPrice = prices[e.mint]?["usd"] ?? -1.0;
       num dailyChangePercent = prices[e.mint]?["usd_24h_change"] ?? 0.0;
       if (e.mint == nativeSol) {
-        unitPrice = prices[nativeSolMint]?["usd"] ?? -1.0;
-        dailyChangePercent = prices[nativeSolMint]?["usd_24h_change"] ?? 0.0;
+        unitPrice = prices[wrappedSolMint]?["usd"] ?? -1.0;
+        dailyChangePercent = prices[wrappedSolMint]?["usd_24h_change"] ?? 0.0;
       }
       double? usd = unitPrice >= 0 ? unitPrice * amount : null;
       return SplTokenAccountDataInfoWithUsd(
