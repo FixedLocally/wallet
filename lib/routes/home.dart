@@ -1078,17 +1078,21 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
         bool burn = false;
         switch (option) {
           case 0:
+            // receive token
             nav.push(MaterialPageRoute(
               builder: (ctx) => const DepositTokenRoute(),
             ));
             break;
           case 1:
+            // send token
             _pushSendToken(entry);
             break;
           case 2:
+            // stake SOL
             nav.push(MaterialPageRoute(builder: (_) => ValidatorListRoute()));
             break;
           case 3:
+            // burn and close token acct
             burn = await Utils.showConfirmBottomSheet(
               context: context,
               title: sprintf(S.current.burnConfirm, [tokenDetails[entry.mint]?["symbol"] ?? entry.mint.shortened]),
@@ -1096,6 +1100,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             );
             break;
           case 4:
+            // close token acct
             burn = await Utils.showConfirmBottomSheet(
               context: context,
               title: S.current.closeTokenAccount,
@@ -1103,6 +1108,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             );
             break;
           case 5:
+            // load yield opportunities
             Utils.showLoadingDialog(
               context: context,
               future: Utils.getYieldOpportunities(entry.mint),
@@ -1134,10 +1140,15 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
               });
             });
             break;
+          case 6:
+            // unwrap SOL
+            burn = true;
+            break;
         }
         if (burn) {
           List<Instruction> ixs = entry.burnAndCloseIxs();
-          await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: S.current.burningTokens);
+          String msg = entry.burnAndCloseMessage();
+          await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs), text: msg);
           _tokenRefresherKey.currentState?.show();
           appWidget.startLoadingBalances(KeyManager.instance.pubKey);
         }
@@ -1454,11 +1465,18 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
           )
         else
           if (balance.tokenAmount.amount != "0")
+            if (balance.mint == wrappedSolMint)
             BottomSheetAction(
-              leading: const Icon(Icons.close),
-              title: S.current.burn,
-              value: 3,
+              leading: const Icon(Icons.star),
+              title: S.current.unwrapSol,
+              value: 6,
             )
+          else
+              BottomSheetAction(
+                leading: const Icon(Icons.close),
+                title: S.current.burn,
+                value: 3,
+              )
           else
             BottomSheetAction(
               leading: const Icon(Icons.close),
@@ -1502,8 +1520,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
     });
     String fromMint = from;
     String toMint = to;
-    fromMint = fromMint == nativeSol ? nativeSolMint : fromMint;
-    toMint = toMint == nativeSol ? nativeSolMint : toMint;
+    fromMint = fromMint == nativeSol ? wrappedSolMint : fromMint;
+    toMint = toMint == nativeSol ? wrappedSolMint : toMint;
     _loadedAmt = _fromAmtController.text;
     double amt = double.tryParse(_fromAmtController.text) ?? 0.0;
     int decimals = tokenDetails[from]!["decimals"]!;
@@ -1750,4 +1768,3 @@ class _CloseEmptyAccountsDialogState extends State<_CloseEmptyAccountsDialog> wi
     );
   }
 }
-

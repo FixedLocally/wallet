@@ -788,7 +788,7 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
 
   List<Instruction> burnAndCloseIxs() {
     List<Instruction> ixs = [];
-    if (tokenAmount.amount != "0") {
+    if (tokenAmount.amount != "0" && mint != wrappedSolMint) {
       ixs.add(TokenInstruction.burn(
         amount: int.parse(tokenAmount.amount),
         accountToBurnFrom: Ed25519HDPublicKey(base58decode(account)),
@@ -802,6 +802,16 @@ class SplTokenAccountDataInfoWithUsd extends SplTokenAccountDataInfo {
       owner: Ed25519HDPublicKey(base58decode(owner)),
     ));
     return ixs;
+  }
+  
+  String burnAndCloseMessage() {
+    if (mint == wrappedSolMint) {
+      return S.current.unwrappingSol;
+    }
+    if (tokenAmount.amount != "0") {
+      return S.current.burningTokens;
+    }
+    return S.current.closingAccount;
   }
 
   @override

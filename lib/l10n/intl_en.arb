@@ -142,5 +142,8 @@
   "myApps": "My Apps",
   "noRoutesFound": "No routes found",
   "signMessageHeadline": "Is requesting to sign the message below with your #%s# wallet:",
-  "approve": "Approve"
+  "approve": "Approve",
+  "unwrapSol": "Unwrap SOL",
+  "closingAccount": "Closing Account...",
+  "unwrappingSol": "Unwrapping SOL..."
 }

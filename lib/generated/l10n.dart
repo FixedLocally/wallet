@@ -1479,6 +1479,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Unwrap SOL`
+  String get unwrapSol {
+    return Intl.message(
+      'Unwrap SOL',
+      name: 'unwrapSol',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Closing Account...`
+  String get closingAccount {
+    return Intl.message(
+      'Closing Account...',
+      name: 'closingAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unwrapping SOL...`
+  String get unwrappingSol {
+    return Intl.message(
+      'Unwrapping SOL...',
+      name: 'unwrappingSol',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

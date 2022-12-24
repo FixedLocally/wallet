@@ -57,6 +57,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Close token account"),
         "closeTokenAccountContent": MessageLookupByLibrary.simpleMessage(
             "Another contract interaction may recreate this account."),
+        "closingAccount":
+            MessageLookupByLibrary.simpleMessage("Closing Account..."),
         "collectibles": MessageLookupByLibrary.simpleMessage("Collectibles"),
         "connect": MessageLookupByLibrary.simpleMessage("Connect"),
         "connectWallet": MessageLookupByLibrary.simpleMessage("Connect Wallet"),
@@ -216,6 +218,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Transaction confirmed"),
         "unlockWallet": MessageLookupByLibrary.simpleMessage("Unlock Wallet"),
         "unstake": MessageLookupByLibrary.simpleMessage("Unstake"),
+        "unwrapSol": MessageLookupByLibrary.simpleMessage("Unwrap SOL"),
+        "unwrappingSol":
+            MessageLookupByLibrary.simpleMessage("Unwrapping SOL..."),
         "viewOnSolscan":
             MessageLookupByLibrary.simpleMessage("View on SolScan"),
         "visitExternalUrl":
