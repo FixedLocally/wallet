@@ -1509,6 +1509,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Sending...`
+  String get sending {
+    return Intl.message(
+      'Sending...',
+      name: 'sending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are about to send %s %s to %s.`
+  String get sendTokenConfirmation {
+    return Intl.message(
+      'You are about to send %s %s to %s.',
+      name: 'sendTokenConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

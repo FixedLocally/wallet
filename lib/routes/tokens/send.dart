@@ -89,7 +89,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text('Send $symbol'),
+        title: Text(sprintf(S.current.sendToken, [symbol])),
       ),
       body: Center(
         child: Padding(
@@ -250,7 +250,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                             bool confirm = await Utils.showConfirmBottomSheet(
                               context: context,
                               title: sprintf(S.current.sendToken, [symbol]),
-                              bodyBuilder: (_) => Text("You are about to send $_amount $symbol to $_recipient."), // todo
+                              bodyBuilder: (_) => Text(sprintf(S.of(context).sendTokenConfirmation, [_amount, symbol, _recipient])),
                             );
                             if (confirm) {
                               Completer<String> completer = Completer();
@@ -290,7 +290,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                                 String tx = await Utils.showLoadingDialog(
                                   context: context,
                                   future: completer.future,
-                                  text: "Sending...",
+                                  text: S.current.sending,
                                 );
                                 if (tx.isNotEmpty) {
                                   navigator.pop(true);

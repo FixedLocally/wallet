@@ -174,6 +174,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendToken": MessageLookupByLibrary.simpleMessage("Send %s"),
+        "sendTokenConfirmation": MessageLookupByLibrary.simpleMessage(
+            "You are about to send %s %s to %s."),
+        "sending": MessageLookupByLibrary.simpleMessage("Sending..."),
         "sendingTx":
             MessageLookupByLibrary.simpleMessage("Sending transaction..."),
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
