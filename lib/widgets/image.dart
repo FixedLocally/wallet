@@ -74,7 +74,7 @@ class _MultiImageState extends State<MultiImage> {
         height: widget.size,
         width: widget.size,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Icon(Icons.language, size: (widget.size ?? 48)),
+        errorBuilder: (_, __, ___) => Icon(Icons.broken_image, size: (widget.size ?? 48) / 2),
       );
     } else if (uri != null) {
       _builder = (_) => CachedNetworkImage(
@@ -82,6 +82,7 @@ class _MultiImageState extends State<MultiImage> {
         height: widget.size,
         width: widget.size,
         fit: BoxFit.cover,
+        errorWidget: (_, __, ___) => Icon(Icons.broken_image, size: (widget.size ?? 48) / 2),
       );
     }
   }
