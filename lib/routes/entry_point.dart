@@ -26,6 +26,7 @@ class _EntryPointRouteState extends State<EntryPointRoute> {
             return const HomeRoute();
           }
         },
+        settings: RouteSettings(name: "/${KeyManager.instance.isEmpty ? "setup" : "home"}"),
       ));
     });
   }

@@ -81,6 +81,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
               builder: (context) => ImageRoute(
                 image: widget.tokenDetails["image"],
               ),
+              settings: const RouteSettings(name: "/image"),
             ),
           );
         },
@@ -148,6 +149,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => QrScannerRoute(),
+                              settings: const RouteSettings(name: "/scan"),
                             ),
                           );
                           if (address != null) {

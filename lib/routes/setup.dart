@@ -31,7 +31,10 @@ class _SetupRouteState extends State<SetupRoute> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => RestoreSeedRoute()),
+                  MaterialPageRoute(
+                    builder: (_) => RestoreSeedRoute(),
+                    settings: const RouteSettings(name: "/restore"),
+                  ),
                 );
               },
             ),
@@ -42,8 +45,10 @@ class _SetupRouteState extends State<SetupRoute> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => GenerateSeedRoute(
-                    mnemonic: mnemonic.split(" "),
-                  )),
+                      mnemonic: mnemonic.split(" "),
+                    ),
+                    settings: const RouteSettings(name: "/create_wallet"),
+                  ),
                 );
               },
             ),

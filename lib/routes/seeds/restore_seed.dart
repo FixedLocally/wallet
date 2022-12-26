@@ -116,7 +116,9 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) =>
-                              ImportAccountsRoute(mnemonic: mnemonic)),
+                                ImportAccountsRoute(mnemonic: mnemonic),
+                            settings: const RouteSettings(name: "/import"),
+                          ),
                         );
                       }
                       // await KeyManager.instance.insertSeed(widget.mnemonic.join(" "));

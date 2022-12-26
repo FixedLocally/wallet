@@ -78,7 +78,13 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
     WidgetsBinding.instance.addObserver(this);
     if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.push(context, MaterialPageRoute(builder: (ctx) => const LockedRoute())).then((value) => _locked = false);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (ctx) => const LockedRoute(),
+            settings: const RouteSettings(name: "/lock"),
+          ),
+        ).then((value) => _locked = false);
         _locked = true;
       });
     }
@@ -92,7 +98,13 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
     if (state == AppLifecycleState.paused) {
       if (Utils.prefs.getBool(Constants.kKeyRequireAuth) ?? false) {
         if (!_locked) {
-          Navigator.push(context, MaterialPageRoute(builder: (ctx) => const LockedRoute())).then((value) => _locked = false);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (ctx) => const LockedRoute(),
+              settings: const RouteSettings(name: "/lock"),
+            ),
+          ).then((value) => _locked = false);
           _locked = true;
         }
       }
@@ -320,6 +332,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             title: title,
             initialUrl: url,
           ),
+          settings: const RouteSettings(name: "/browser"),
         )).then((value) {
           setState(() {});
         });
@@ -427,6 +440,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                           title: text,
                           initialUrl: uri.toString(),
                         ),
+                        settings: const RouteSettings(name: "/browser"),
                       ));
                       _searchController.clear();
                     }
@@ -547,6 +561,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                                   ),
                                   body: _balanceList(themeData, tokensOnly: true),
                                 ),
+                                settings: const RouteSettings(name: "/send_choose"),
                               ),
                             );
                           },
@@ -569,10 +584,12 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                         child: RawMaterialButton(
                           onPressed: () {
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DepositTokenRoute(),
-                                ));
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DepositTokenRoute(),
+                                settings: const RouteSettings(name: "/deposit"),
+                              ),
+                            );
                           },
                           elevation: 2.0,
                           padding: EdgeInsets.all(6.0),
@@ -1081,6 +1098,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             // receive token
             nav.push(MaterialPageRoute(
               builder: (ctx) => const DepositTokenRoute(),
+              settings: const RouteSettings(name: "/deposit"),
             ));
             break;
           case 1:
@@ -1089,7 +1107,10 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             break;
           case 2:
             // stake SOL
-            nav.push(MaterialPageRoute(builder: (_) => ValidatorListRoute()));
+            nav.push(MaterialPageRoute(
+              builder: (_) => ValidatorListRoute(),
+              settings: const RouteSettings(name: "/validators"),
+            ));
             break;
           case 3:
             // burn and close token acct
@@ -1135,6 +1156,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                       decimals: entry.tokenAmount.decimals,
                       symbol: tokenDetails[entry.mint]?["symbol"] ?? entry.mint.shortened,
                     ),
+                    settings: const RouteSettings(name: "/deposit_yield"),
                   ),
                 );
               });
@@ -1333,6 +1355,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                                 tokenDetails:
                                     tokenDetails[entry.value.mint] ?? {},
                               ),
+                              settings: const RouteSettings(name: "/nft_details"),
                             ),
                           ) ??
                           false;
@@ -1361,6 +1384,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
               context,
               MaterialPageRoute(
                 builder: (ctx) => WalletSettingsRoute(),
+                settings: const RouteSettings(name: "/settings/wallet"),
               ),
             ).then((value) {
               setState(() {});
@@ -1374,6 +1398,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
               context,
               MaterialPageRoute(
                 builder: (ctx) => SecuritySettingsRoute(),
+                settings: const RouteSettings(name: "/settings/security"),
               ),
             ).then((value) {
               setState(() {});
@@ -1494,7 +1519,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
   }
 
   Future<void> _pushSendToken(SplTokenAccountDataInfoWithUsd balance) async {
-    bool sent = await Navigator.pushReplacement(
+    bool sent = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (ctx) =>
@@ -1502,6 +1527,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
               balance: balance,
               tokenDetails: tokenDetails[balance.mint] ?? {},
             ),
+        settings: const RouteSettings(name: "/sendToken"),
       ),
     ) ?? false;
     if (sent) {

@@ -534,6 +534,7 @@ class KeyManager {
           ),
         );
       },
+      settings: const RouteSettings(name: "/show_secret"),
     ));
   }
 
@@ -556,6 +557,7 @@ class KeyManager {
           ),
         );
       },
+      settings: const RouteSettings(name: "/show_secret"),
     ));
   }
 

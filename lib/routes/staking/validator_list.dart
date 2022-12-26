@@ -149,12 +149,15 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
                 title: Text(_stakes == null ? S.current.loading : S.current.manageStakeAccounts),
                 onTap: () {
                   if (_stakes == null || _epoch == null) return;
-                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => StakeAccountsRoute(
-                    voteIdentities: _voteIdentities,
-                    stakes: _stakes!,
-                    validatorInfos: _validatorInfos,
-                    epoch: _epoch!,
-                  )));
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => StakeAccountsRoute(
+                      voteIdentities: _voteIdentities,
+                      stakes: _stakes!,
+                      validatorInfos: _validatorInfos,
+                      epoch: _epoch!,
+                    ),
+                    settings: const RouteSettings(name: "/stake_accounts"),
+                  ));
                 },
               );
             }
@@ -196,7 +199,15 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
                   icon: Icon(Icons.open_in_new_rounded),
                   tooltip: S.current.visitWebsite,
                   onPressed: website != null ? () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => DAppRoute(title: validatorInfo?["name"], initialUrl: website)));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DAppRoute(
+                                  title: validatorInfo?["name"],
+                                  initialUrl: website),
+                              settings: const RouteSettings(name: "/browser"),
+                            ),
+                          );
                   } : null,
                 ),
               ],

@@ -150,6 +150,7 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
                       title: "",
                       initialUrl: "https://solscan.io/account/$stakeKey",
                     ),
+                    settings: const RouteSettings(name: "/browser"),
                   ));
                   break;
                 default:

@@ -3,7 +3,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'generated/l10n.dart';
 import 'routes/entry_point.dart';
+import 'routes/observer.dart';
 import 'routes/root.dart';
+
+final RouteObserver<ModalRoute> routeObserver = MyRouteObserver();
 
 void main() {
   runApp(const WalletApp());
@@ -71,7 +74,7 @@ class WalletApp extends StatelessWidget {
     );
     return WalletAppWidget(
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Mint Wallet',
         darkTheme: darkTheme,
         themeMode: ThemeMode.dark,
         localizationsDelegates: const [
@@ -80,6 +83,7 @@ class WalletApp extends StatelessWidget {
         ],
         supportedLocales: S.delegate.supportedLocales,
         home: const EntryPointRoute(),
+        navigatorObservers: [routeObserver],
       ),
     );
   }

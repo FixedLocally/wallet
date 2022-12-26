@@ -89,6 +89,7 @@ class _GenerateSeedRouteState extends State<GenerateSeedRoute> {
                           builder: (ctx) {
                             return const HomeRoute();
                           },
+                          settings: const RouteSettings(name: "/home"),
                         ));
                       }
                     },

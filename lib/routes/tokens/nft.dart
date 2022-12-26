@@ -64,6 +64,7 @@ class NftDetailsRoute extends StatelessWidget {
                         title: "",
                         initialUrl: url!,
                       ),
+                      settings: const RouteSettings(name: "/browser"),
                     ),
                   );
                   break;
@@ -75,6 +76,7 @@ class NftDetailsRoute extends StatelessWidget {
                         title: "",
                         initialUrl: "https://solscan.io/token/${tokenDetails["mint"]}",
                       ),
+                      settings: const RouteSettings(name: "/browser"),
                     ),
                   );
                   break;
