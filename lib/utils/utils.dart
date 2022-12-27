@@ -20,6 +20,7 @@ import '../models/models.dart';
 import '../routes/popups/bottom_sheet.dart';
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
+import 'extensions.dart';
 
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
 const String _priceApiUrl = "https://validator.utopiamint.xyz/api/price/";
@@ -123,17 +124,18 @@ class Utils {
     String mint = base58encode(rawMint);
     List<int> rawOwner = data.sublist(32, 64);
     String owner = base58encode(rawOwner);
-    List<int> rawAmount = data.sublist(64, 72);
-    int amount = Int8List.fromList(rawAmount).buffer.asUint64List().first;
+    BigInt amount = BigInt.from(Int8List.fromList(data.sublist(64, 72)).buffer.asUint64List().first);
+    if (amount < BigInt.zero) amount += BigInt.parse("10000000000000000", radix: 16);
     List<int> rawDelegate = data.sublist(72, 108);
-    String? delegate = rawDelegate.sublist(0, 4).any((e) => e != 0) ? null : base58encode(rawDelegate.sublist(4));
+    String? delegate = rawDelegate.sublist(0, 4).any((e) => e != 0) ? base58encode(rawDelegate.sublist(4)) : null;
     List<int> rawState = data.sublist(108, 109);
     List<int> rawIsNative = data.sublist(109, 121);
     bool isNative = rawIsNative.sublist(0, 4).any((e) => e != 0);
-    // List<int> _delegatedAmount = data.sublist(121, 129);
-    // int? delegatedAmount = _delegatedAmount.sublist(0, 4).any((e) => e != 0) ? null : Int8List.fromList(_delegatedAmount).buffer.asUint64List().first;
+    BigInt rawDelegatedAmount = BigInt.from(Int8List.fromList(data.sublist(121, 129)).buffer.asUint64List().first);
+    if (rawDelegatedAmount < BigInt.zero) rawDelegatedAmount += BigInt.parse("10000000000000000", radix: 16);
+    BigInt? delegatedAmount = delegate != null ? rawDelegatedAmount : null;
     // List<int> _closeAuthority = data.sublist(129, 165);
-    // String? closeAuthority = _closeAuthority.sublist(0, 4).any((e) => e != 0) ? null : base58encode(_closeAuthority.sublist(4));
+    // String? closeAuthority = _closeAuthority.sublist(0, 4).any((e) => e != 0) ? base58encode(_closeAuthority.sublist(4)) : null;
     Account? mintAcct = await _solanaClient.rpcClient.getAccountInfo(
       mint,
       commitment: Commitment.confirmed,
@@ -144,11 +146,11 @@ class Utils {
     return SplTokenAccountDataInfo(
       mint: mint,
       owner: owner,
-      tokenAmount: TokenAmount(amount: "$amount", decimals: decimals, uiAmountString: "${amount / pow(10, decimals)}"),
+      tokenAmount: TokenAmount(amount: "$amount", decimals: decimals, uiAmountString: amount.addDecimals(decimals)),
       delegate: delegate,
       state: "${rawState[0]}",
       isNative: isNative,
-      // delegatedAmount: delegatedAmount,
+      delegateAmount: delegatedAmount != null ? TokenAmount(amount: "$delegatedAmount", decimals: decimals, uiAmountString: delegatedAmount.addDecimals(decimals)) : null,
       // closeAuthority: closeAuthority,
     );
   }
