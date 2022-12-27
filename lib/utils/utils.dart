@@ -20,6 +20,7 @@ import '../models/models.dart';
 import '../routes/popups/bottom_sheet.dart';
 import '../rpc/constants.dart';
 import '../rpc/key_manager.dart';
+import '../widgets/text.dart';
 import 'extensions.dart';
 
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
@@ -209,7 +210,6 @@ class Utils {
         addresses: addresses,
       ),
     );
-    print("simulation: accounts $addresses");
     Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed);
     List results = await Future.wait([statusFuture, solBalanceFuture]).catchError((_) {
       print(_);
@@ -233,7 +233,7 @@ class Utils {
         if (data.length == RpcConstants.kTokenAccountLength) {
           tokenAccounts.add(addresses[i]);
           updatedAcctFutures.add(Utils.parseTokenAccount(data));
-          print("updated account: ${addresses[i]} $data");
+          // print("updated account: ${addresses[i]} $data");
           if (accountMap[addresses[i]] != null) {
             preBalanceFutures.add(Utils.parseTokenAccount((accountMap[addresses[i]]!.data as BinaryAccountData).data));
           } else {
@@ -253,20 +253,20 @@ class Utils {
     for (int i = 0; i < count; ++i) {
       double oldAmt = double.parse(preBalances[i]?.tokenAmount.uiAmountString ?? "0");
       double newAmt = double.parse(updatedAccts[i].tokenAmount.uiAmountString!);
-      print("processing account ${tokenAccounts[i]}");
-      if (preBalances[i]?.owner == owner) {
-        print("owner match");
-        if (updatedAccts[i].owner == preBalances[i]?.owner) {
-          print("updated owner match");
+      // print("processing account ${tokenAccounts[i]}");
+      if (preBalances[i]?.owner == owner || preBalances[i] == null) {
+        // print("owner match");
+        if (updatedAccts[i].owner == owner) {
+          // print("updated owner match");
           changes[tokenAccounts[i]] = newAmt - oldAmt;
         } else {
-          print("updated owner mismatch ${updatedAccts[i].owner}");
+          // print("updated owner mismatch ${updatedAccts[i].owner}");
           // setAuthority'd - new balance is 0
           changes[tokenAccounts[i]] = -oldAmt;
         }
         if (preBalances[i]?.delegate != updatedAccts[i].delegate) {
-          print("updated delegation ${updatedAccts[i].delegate} <= ${preBalances[i]?.delegate}");
-          print("updated delegated amount ${updatedAccts[i].delegateAmount?.uiAmountString} <= ${preBalances[i]?.delegateAmount?.uiAmountString}");
+          // print("updated delegation ${updatedAccts[i].delegate} <= ${preBalances[i]?.delegate}");
+          // print("updated delegated amount ${updatedAccts[i].delegateAmount?.uiAmountString} <= ${preBalances[i]?.delegateAmount?.uiAmountString}");
           // delegated - new balance is decreased by delegate amount
           delegations[tokenAccounts[i]] = (delegations[tokenAccounts[i]] ?? 0.0) + double.parse(updatedAccts[i].delegateAmount?.uiAmountString ?? "0");
         }
@@ -750,7 +750,16 @@ class TokenChanges {
             String symbol = tokens[mint]?["symbol"] ?? mint;
             symbol = symbol.isNotEmpty ? symbol : "${mint.substring(0, 5)}...";
             if (value != 0) {
-              return MapEntry(key, Text("$symbol: ${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}"));
+              return MapEntry(
+                key,
+                HighlightedText(
+                  text: "$symbol: #${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}#",
+                  highlightStyle: TextStyle(
+                    color: value > 0 ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
             } else {
               return MapEntry(key, const SizedBox.shrink());
             }
@@ -761,12 +770,27 @@ class TokenChanges {
             String symbol = tokens[mint]?["symbol"] ?? mint;
             symbol = symbol.isNotEmpty ? symbol : "${mint.substring(0, 5)}...";
             if (updatedAccounts[key]?.delegateAmount != null) {
-              return MapEntry(key, Text(sprintf(S.current.approveToTransfer, [updatedAccounts[key]?.delegateAmount?.uiAmountString, symbol, updatedAccounts[key]?.delegate?.shortened])));
+              return MapEntry(
+                key,
+                HighlightedText(
+                  text: sprintf(S.current.approveToTransfer, [
+                    updatedAccounts[key]?.delegateAmount?.uiAmountString,
+                    symbol,
+                    updatedAccounts[key]?.delegate?.shortened
+                  ]),
+                ),
+              );
             } else {
               return MapEntry(key, const SizedBox.shrink());
             }
           }).values,
-          Text("SOL: ${solOffset > 0 ? "+" : ""}${(solOffset / lamportsPerSol).toStringAsFixed(6)}"),
+          HighlightedText(
+            text: "SOL: #${solOffset > 0 ? "+" : ""}${(solOffset / lamportsPerSol).toStringAsFixed(6)}#",
+            highlightStyle: TextStyle(
+              color: solOffset > 0 ? Colors.green : Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       );
     }
