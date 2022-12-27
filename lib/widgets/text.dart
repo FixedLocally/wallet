@@ -4,6 +4,7 @@ class HighlightedText extends StatelessWidget {
   final String text;
   final TextStyle highlightStyle;
   final TextStyle normalStyle;
+  final TextAlign textAlign;
 
   const HighlightedText({
     super.key,
@@ -12,6 +13,7 @@ class HighlightedText extends StatelessWidget {
       fontWeight: FontWeight.bold,
     ),
     this.normalStyle = const TextStyle(),
+    this.textAlign = TextAlign.start,
   });
 
   @override
@@ -46,7 +48,7 @@ class HighlightedText extends StatelessWidget {
       children.add(TextSpan(text: text.substring(start, end), style: normalStyle));
     }
     return RichText(
-      // mainAxisSize: MainAxisSize.min,
+      textAlign: textAlign,
       text: TextSpan(
         style: (Theme.of(context).textTheme.bodyText2 ?? TextStyle()).merge(normalStyle),
         children: children,

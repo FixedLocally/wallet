@@ -760,6 +760,7 @@ class TokenChanges {
                   ]),
                   highlightStyle: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
                   normalStyle: TextStyle(color: Colors.amber),
+                  textAlign: TextAlign.center,
                 ),
               );
             } else {
