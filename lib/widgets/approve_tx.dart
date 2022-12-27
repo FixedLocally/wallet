@@ -30,15 +30,17 @@ class ApproveTransactionWidget extends StatelessWidget {
           children: [
             SizedBox(height: 8),
             if (domain != null && title != null && logoUrls != null)
-              DomainInfoWidget(
-                domain: domain!,
-                title: title!,
-                logoUrls: logoUrls!,
-              ),
-            HighlightedText(
-              text: sprintf(S.current.approveTransactionTitle, [KeyManager.instance.walletName]),
-            ),
-            SizedBox(height: 8),
+              ...[
+                DomainInfoWidget(
+                  domain: domain!,
+                  title: title!,
+                  logoUrls: logoUrls!,
+                ),
+                HighlightedText(
+                  text: sprintf(S.current.approveTransactionTitle, [KeyManager.instance.walletName]),
+                ),
+                SizedBox(height: 8),
+              ],
             Text(S.current.approveTransactionSubtitle),
             if (snapshot.hasData)
               ...snapshot.data!.map((e) => e.widget(context))

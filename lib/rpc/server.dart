@@ -129,6 +129,8 @@ class RpcServer {
     Future<List<TokenChanges>> simulation = Utils.simulateTxs([payload], KeyManager.instance.pubKey);
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
+      confirmText: S.current.approve,
+      cancelText: S.current.cancel,
       bodyBuilder: (context) {
         return ApproveTransactionWidget(simulation: simulation, domain: args["domain"], title: args["title"], logoUrls: args["logo"].cast<String>());
       },
@@ -286,6 +288,8 @@ class RpcServer {
     Future<List<TokenChanges>> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey);
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
+      confirmText: S.current.approve,
+      cancelText: S.current.cancel,
       bodyBuilder: (context) {
         return ApproveTransactionWidget(simulation: simulation, domain: args["domain"], title: args["title"], logoUrls: args["logo"].cast<String>());
       },

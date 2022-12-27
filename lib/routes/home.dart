@@ -985,6 +985,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                               Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey);
                               bool approved = await Utils.showConfirmBottomSheet(
                                 context: context,
+                                confirmText: S.current.approve,
+                                cancelText: S.current.cancel,
                                 bodyBuilder: (context) {
                                   return ApproveTransactionWidget(simulation: simulation);
                                 },

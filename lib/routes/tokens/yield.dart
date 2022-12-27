@@ -178,6 +178,8 @@ class _YieldDepositRouteState extends State<YieldDepositRoute> with UsesSharedDa
                 Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs.map((e) => e.sublist(65)).toList(), KeyManager.instance.pubKey);
                 bool approved = await Utils.showConfirmBottomSheet(
                   context: context,
+                  confirmText: S.current.approve,
+                  cancelText: S.current.cancel,
                   bodyBuilder: (context) {
                     return ApproveTransactionWidget(simulation: simulation);
                   },
