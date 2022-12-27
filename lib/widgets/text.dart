@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 class HighlightedText extends StatelessWidget {
   final String text;
+  final TextStyle highlightStyle;
 
   const HighlightedText({
     super.key,
     required this.text,
+    this.highlightStyle = const TextStyle(
+      fontWeight: FontWeight.bold,
+    ),
   });
 
   @override
@@ -27,7 +31,7 @@ class HighlightedText extends StatelessWidget {
         if (end < text.length) {
           children.add(TextSpan(
             text: text.substring(start, end),
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: highlightStyle,
           ));
           start = end + 1;
           end = start;
