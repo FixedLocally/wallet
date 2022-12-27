@@ -744,26 +744,6 @@ class TokenChanges {
     } else {
       return Column(
         children: [
-          ...changes.map((key, value) {
-            String mint = updatedAccounts[key]!.mint;
-            // String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
-            String symbol = tokens[mint]?["symbol"] ?? mint;
-            symbol = symbol.isNotEmpty ? symbol : "${mint.substring(0, 5)}...";
-            if (value != 0) {
-              return MapEntry(
-                key,
-                HighlightedText(
-                  text: "$symbol: #${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}#",
-                  highlightStyle: TextStyle(
-                    color: value > 0 ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              );
-            } else {
-              return MapEntry(key, const SizedBox.shrink());
-            }
-          }).values,
           ...delegations.map((key, value) {
             String mint = updatedAccounts[key]!.mint;
             // String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
@@ -791,6 +771,26 @@ class TokenChanges {
               fontWeight: FontWeight.bold,
             ),
           ),
+          ...changes.map((key, value) {
+            String mint = updatedAccounts[key]!.mint;
+            // String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
+            String symbol = tokens[mint]?["symbol"] ?? mint;
+            symbol = symbol.isNotEmpty ? symbol : "${mint.substring(0, 5)}...";
+            if (value != 0) {
+              return MapEntry(
+                key,
+                HighlightedText(
+                  text: "$symbol: #${value > 0 ? "+" : ""}${value.toStringAsFixed(6)}#",
+                  highlightStyle: TextStyle(
+                    color: value > 0 ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            } else {
+              return MapEntry(key, const SizedBox.shrink());
+            }
+          }).values,
         ],
       );
     }
