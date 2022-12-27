@@ -28,7 +28,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "approve": MessageLookupByLibrary.simpleMessage("Approve"),
         "approveToTransfer": MessageLookupByLibrary.simpleMessage(
-            "Allow %3\$s to spend up to %1\$s %2\$s"),
+            "Allow #%3\$s# to spend up to #%1\$s %2\$s#"),
         "approveTransactionSubtitle":
             MessageLookupByLibrary.simpleMessage("Estimated asset changes:"),
         "approveTransactionTitle": MessageLookupByLibrary.simpleMessage(
