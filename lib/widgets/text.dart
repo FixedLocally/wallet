@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class HighlightedText extends StatelessWidget {
   final String text;
   final TextStyle highlightStyle;
+  final TextStyle normalStyle;
 
   const HighlightedText({
     super.key,
@@ -10,6 +11,7 @@ class HighlightedText extends StatelessWidget {
     this.highlightStyle = const TextStyle(
       fontWeight: FontWeight.bold,
     ),
+    this.normalStyle = const TextStyle(),
   });
 
   @override
@@ -41,12 +43,12 @@ class HighlightedText extends StatelessWidget {
       }
     }
     if (end > start) {
-      children.add(TextSpan(text: text.substring(start, end)));
+      children.add(TextSpan(text: text.substring(start, end), style: normalStyle));
     }
     return RichText(
       // mainAxisSize: MainAxisSize.min,
       text: TextSpan(
-        style: Theme.of(context).textTheme.bodyText2,
+        style: (Theme.of(context).textTheme.bodyText2 ?? TextStyle()).merge(normalStyle),
         children: children,
       ),
     );

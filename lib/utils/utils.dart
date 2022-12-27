@@ -758,6 +758,8 @@ class TokenChanges {
                     symbol,
                     updatedAccounts[key]?.delegate?.shortened
                   ]),
+                  highlightStyle: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                  normalStyle: TextStyle(color: Colors.amber),
                 ),
               );
             } else {
