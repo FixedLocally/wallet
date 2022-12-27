@@ -42,3 +42,14 @@ extension Debouncable<T> on ValueNotifier<T> {
     });
   }
 }
+
+extension Decimals on BigInt {
+  String addDecimals(int decimals) {
+    String str = toString();
+    if (str.length <= decimals) {
+      return "0.${"0" * (decimals - str.length)}$str";
+    } else {
+      return "${str.substring(0, str.length - decimals)}.${str.substring(str.length - decimals)}";
+    }
+  }
+}
