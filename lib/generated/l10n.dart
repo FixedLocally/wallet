@@ -1529,6 +1529,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Allow %3$s to spend up to %1$s %2$s`
+  String get approveToTransfer {
+    return Intl.message(
+      'Allow %3\$s to spend up to %1\$s %2\$s',
+      name: 'approveToTransfer',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

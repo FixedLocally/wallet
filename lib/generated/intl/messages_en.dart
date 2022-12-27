@@ -27,6 +27,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addressCopied": MessageLookupByLibrary.simpleMessage("Address copied"),
         "amount": MessageLookupByLibrary.simpleMessage("Amount"),
         "approve": MessageLookupByLibrary.simpleMessage("Approve"),
+        "approveToTransfer": MessageLookupByLibrary.simpleMessage(
+            "Allow %3\$s to spend up to %1\$s %2\$s"),
         "approveTransactionSubtitle":
             MessageLookupByLibrary.simpleMessage("Estimated asset changes:"),
         "approveTransactionTitle": MessageLookupByLibrary.simpleMessage(

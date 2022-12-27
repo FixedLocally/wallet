@@ -147,5 +147,6 @@
   "closingAccount": "Closing Account...",
   "unwrappingSol": "Unwrapping SOL...",
   "sending": "Sending...",
-  "sendTokenConfirmation": "You are about to send %s %s to %s."
+  "sendTokenConfirmation": "You are about to send %s %s to %s.",
+  "approveToTransfer": "Allow %3$s to spend up to %1$s %2$s"
 }
