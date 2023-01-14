@@ -982,7 +982,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                               );
                               List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction]
                                   .whereNotNull.map(base64Decode).map((x) => x.sublist(65)).toList();
-                              Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey);
+                              // todo use jup versioned tx
+                              Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey, txs.map((e) => -1).toList());
                               bool approved = await Utils.showConfirmBottomSheet(
                                 context: context,
                                 confirmText: S.current.approve,

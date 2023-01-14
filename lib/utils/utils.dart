@@ -243,7 +243,7 @@ class Utils {
         }
       }
     }
-    int postSolBalance = status.accounts?.last?.lamports ?? 0;
+    int postSolBalance = status.accounts?.last.lamports ?? 0;
     List result = await Future.wait([Future.wait(updatedAcctFutures), Future.wait(preBalanceFutures)]);
     List<SplTokenAccountDataInfo> updatedAccts = result[0];
     List<SplTokenAccountDataInfo?> preBalances = result[1];
@@ -276,14 +276,23 @@ class Utils {
     return TokenChanges(changes, delegations, updatedAcctsMap, await getTokens(updatedAcctsMap.values.map((e) => e.mint).toList()), postSolBalance - preSolBalance);
   }
 
-  static Future<List<TokenChanges>> simulateTxs(List<List<int>> rawMessage, String owner) async {
+  static Future<TokenChanges> simulateVersionedTx(List<int> rawMessage, String owner) async {
+    // todo actually deseralise it
+    return simulateTx(rawMessage, owner);
+  }
+
+  static Future<List<TokenChanges>> simulateTxs(List<List<int>> rawMessage, String owner, List<int> versions) async {
     List<TokenChanges> changes = [];
     if (rawMessage.length > 10) {
       return [TokenChanges.error("tooManyTransactions:${rawMessage.length}", true)];
     }
     for (int i = 0; i < rawMessage.length; ++i) {
       // sequentially
-      changes.add(await simulateTx(rawMessage[i], owner));
+      if (versions[i] >= 0) {
+        changes.add(await simulateVersionedTx(rawMessage[i], owner));
+      } else {
+        changes.add(await simulateTx(rawMessage[i], owner));
+      }
     }
     return changes;
   }

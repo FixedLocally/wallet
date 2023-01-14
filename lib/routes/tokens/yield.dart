@@ -175,7 +175,7 @@ class _YieldDepositRouteState extends State<YieldDepositRoute> with UsesSharedDa
                   future: widget.opportunity
                       .getTxs(KeyManager.instance.pubKey, amt),
                 );
-                Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs.map((e) => e.sublist(65)).toList(), KeyManager.instance.pubKey);
+                Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs.map((e) => e.sublist(65)).toList(), KeyManager.instance.pubKey, [-1]);
                 bool approved = await Utils.showConfirmBottomSheet(
                   context: context,
                   confirmText: S.current.approve,

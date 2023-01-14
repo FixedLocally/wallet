@@ -125,8 +125,9 @@ class RpcServer {
     }
 
     List<int> payload = args["tx"].cast<int>();
+    int version = args["version"] ?? -1;
 
-    Future<List<TokenChanges>> simulation = Utils.simulateTxs([payload], KeyManager.instance.pubKey);
+    Future<List<TokenChanges>> simulation = Utils.simulateTxs([payload], KeyManager.instance.pubKey, [version]);
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
       confirmText: S.current.approve,
@@ -275,6 +276,7 @@ class RpcServer {
     List<Message> messages = [];
     List<List<int>> payloads = [];
     List<String> blockhashes = [];
+    List<int> versions = [];
     for (var e in txs) {
       List<int> payload = e["tx"].cast<int>();
       CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
@@ -283,9 +285,10 @@ class RpcServer {
       messages.add(message);
       payloads.add(payload);
       blockhashes.add(e["recentBlockhash"]);
+      versions.add(e["version"] ?? -1);
     }
 
-    Future<List<TokenChanges>> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey);
+    Future<List<TokenChanges>> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey, versions);
     bool approved = await Utils.showConfirmBottomSheet(
       context: contextHolder.context!,
       confirmText: S.current.approve,
