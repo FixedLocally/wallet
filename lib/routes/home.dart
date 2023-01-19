@@ -1386,7 +1386,13 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (ctx) => WalletSettingsRoute(),
+                builder: (ctx) => WalletSettingsRoute(
+                  onCreateWallet: () {
+                    setState(() {
+                      _page = 1;
+                    });
+                  }
+                ),
                 settings: const RouteSettings(name: "/settings/wallet"),
               ),
             ).then((value) {

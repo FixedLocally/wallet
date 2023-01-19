@@ -31,7 +31,9 @@ class ScaffoldRoute extends StatelessWidget {
 }
 
 class WalletSettingsRoute extends StatefulWidget {
-  const WalletSettingsRoute({Key? key}) : super(key: key);
+  final VoidCallback onCreateWallet;
+
+  const WalletSettingsRoute({Key? key, required this.onCreateWallet}) : super(key: key);
 
   @override
   State<WalletSettingsRoute> createState() => _WalletSettingsRouteState();
@@ -67,10 +69,8 @@ class _WalletSettingsRouteState extends State<WalletSettingsRoute> {
               NavigatorState nav = Navigator.of(context);
               await Utils.showLoadingDialog(context: context, future: KeyManager.instance.createWallet(), text: S.current.creatingWallet);
               // ditch everything
-              while (nav.canPop()) {
-                nav.pop();
-              }
-              nav.push(MaterialPageRoute(builder: (_) => HomeRoute()));
+              nav.popUntil((route) => route.settings.name == "/home");
+              widget.onCreateWallet();
             },
             title: Text(S.current.createWallet),
           ),
