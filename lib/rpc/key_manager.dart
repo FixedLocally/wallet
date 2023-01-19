@@ -227,29 +227,29 @@ class KeyManager {
     _ready = true;
   }
 
-  Future<void> insertSeed(String mnemonic) async {
+  Future<void> insertSeed(String mnemonic, [int first = 0]) async {
     assert(_ready);
     List<int> seed = bip39.mnemonicToSeed(mnemonic);
     List<int> spareSeed = bip39.mnemonicToSeed(bip39.generateMnemonic());
     String seedHash = sha256.convert([...seed, ...spareSeed]).bytes.sublist(0, 4).map((e) => e.toRadixString(16).padLeft(2, "0")).join("");
     Ed25519HDKeyPair keypair = await compute(
       _generateKey,
-      [seed, derivationPathTemplate.replaceAll("%s", "0")],
+      [seed, derivationPathTemplate.replaceAll("%s", "$first")],
     );
     const FlutterSecureStorage().write(
       key: "seed_$seedHash",
-      value: "${seed.join(",")};0",
+      value: "${seed.join(",")};$first",
     );
     const FlutterSecureStorage().write(
       key: "mnemonic_$seedHash",
       value: mnemonic,
     );
     ManagedKey newKey = ManagedKey(
-      name: sprintf(S.current.walletNum, [0]),
+      name: sprintf(S.current.walletNum, [first]),
       pubKey: keypair.publicKey.toBase58(),
       keyType: "seed",
       keyHash: seedHash,
-      keyPath: derivationPathTemplate.replaceAll("%s", "0"),
+      keyPath: derivationPathTemplate.replaceAll("%s", "$first"),
       active: true,
     );
     await _db.transaction((txn) async {
@@ -290,7 +290,7 @@ class KeyManager {
     return compute(_signTx, [wallet, message, recentBlockhash]);
   }
 
-  Future<ManagedKey> createWallet() async {
+  Future<ManagedKey> createWallet([int? overrideIndex]) async {
     // get seed
     String seedHash = _wallets.where((element) => element.keyType == "seed").map((element) => element.keyHash).first;
     String? seed = await const FlutterSecureStorage().read(key: "seed_$seedHash");
@@ -299,7 +299,8 @@ class KeyManager {
     int index = 0;
     if (seedSegments.length > 1) index = int.parse(seedSegments[1]);
     ++index;
-    String path = derivationPathTemplate.replaceAll("%s", index.toString());
+    index = overrideIndex ?? index;
+    String path = derivationPathTemplate.replaceAll("%s", (index).toString());
     Wallet wallet = await compute(
       _generateKey,
       [seedSegments.first.split(",").map(int.parse).toList(), path],

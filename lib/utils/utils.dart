@@ -434,6 +434,12 @@ class Utils {
     return results;
   }
 
+  static Future<List<int>> getSolBalances(List<String> addresses) async {
+    return _solanaClient.rpcClient.getMultipleAccounts(addresses).then((value) {
+      return value.map((e) => e?.lamports ?? 0).toList();
+    });
+  }
+
   static Future<List<YieldOpportunity>> getYieldOpportunities(String mint) async {
     Map resp = jsonDecode(await httpGet("$_yieldApiUrl/$mint"));
     return resp["yield"].map<YieldOpportunity>((e) => YieldOpportunity.fromJson(e)).toList();
