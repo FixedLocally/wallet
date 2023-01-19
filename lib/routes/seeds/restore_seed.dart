@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:bip39/src/wordlists/english.dart';
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:flutter/services.dart';
 
 import '../../generated/l10n.dart';
 import '../../utils/utils.dart';
@@ -17,6 +21,7 @@ class RestoreSeedRoute extends StatefulWidget {
 class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
   late List<TextEditingController> _controllers;
   late List<FocusNode> _focusNodes;
+  late TextSelectionControls _selectionControls;
 
   @override
   void initState() {
@@ -29,6 +34,15 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
       });
       return controller;
     });
+    if (Platform.isIOS) {
+      _selectionControls = AppCupertinoTextSelectionControls(
+        onPaste: onPaste,
+      );
+    } else {
+      _selectionControls = AppMaterialTextSelectionControls(
+        onPaste: onPaste,
+      );
+    }
   }
 
   void _checkWord(int index) {
@@ -44,6 +58,8 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
           FocusScope.of(context).unfocus();
         }
       }
+    } else {
+      paste(content);
     }
   }
 
@@ -56,8 +72,8 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: ListView(
+          // mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -85,6 +101,7 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
                             child: TextField(
                               controller: _controllers[index * 2 + i],
                               focusNode: _focusNodes[index * 2 + i],
+                              selectionControls: _selectionControls,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                               ),
@@ -140,5 +157,64 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
         ),
       ),
     );
+  }
+
+  Future<bool> onPaste(TextSelectionDelegate delegate) {
+    return Clipboard.getData(Clipboard.kTextPlain).then((value) {
+      print("paste: ${value}");
+      if (value != null) {
+        return paste(value.text);
+      }
+      return false;
+    });
+  }
+
+  bool paste(String? s) {
+    if (s == null) return false;
+    List<String> words = s.split(" ");
+    if (words.length == 12) {
+      for (int i = 0; i < 12; ++i) {
+        _controllers[i].text = words[i];
+      }
+      for (final e in _focusNodes) {
+        e.unfocus();
+      }
+      return true;
+    }
+    return false;
+  }
+}
+
+class AppCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
+  AppCupertinoTextSelectionControls({
+    required this.onPaste,
+  });
+  Future<bool> Function(TextSelectionDelegate) onPaste;
+
+  @override
+  Future<void> handlePaste(final TextSelectionDelegate delegate) async {
+    if (await onPaste(delegate)) {
+      delegate.hideToolbar();
+      return;
+    } else {
+      super.handlePaste(delegate);
+    }
+  }
+}
+
+class AppMaterialTextSelectionControls extends MaterialTextSelectionControls {
+  AppMaterialTextSelectionControls({
+    required this.onPaste,
+  });
+  Future<bool> Function(TextSelectionDelegate) onPaste;
+
+  @override
+  Future<void> handlePaste(final TextSelectionDelegate delegate) async {
+    if (await onPaste(delegate)) {
+      delegate.hideToolbar();
+      return;
+    } else {
+      super.handlePaste(delegate);
+    }
   }
 }

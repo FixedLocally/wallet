@@ -96,6 +96,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "home": MessageLookupByLibrary.simpleMessage("Home"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
         "importWallet": MessageLookupByLibrary.simpleMessage("Import Wallet"),
+        "importWalletListHint": MessageLookupByLibrary.simpleMessage(
+            "Check the accounts you want to import"),
         "importedWallet":
             MessageLookupByLibrary.simpleMessage("Imported Wallet"),
         "inactive": MessageLookupByLibrary.simpleMessage("Inactive"),

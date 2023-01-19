@@ -1539,6 +1539,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Check the accounts you want to import`
+  String get importWalletListHint {
+    return Intl.message(
+      'Check the accounts you want to import',
+      name: 'importWalletListHint',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
