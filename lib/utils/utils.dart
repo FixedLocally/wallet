@@ -320,9 +320,10 @@ class Utils {
   static Future<Account?> getAccount(
     String pubkey, {
     Commitment commitment = Commitment.confirmed,
-    encoding = Encoding.base64,
+    Encoding encoding = Encoding.base64,
+    DataSlice? dataSlice,
   }) async {
-    return _solanaClient.rpcClient.getAccountInfo(pubkey, commitment: commitment, encoding: encoding);
+    return _solanaClient.rpcClient.getAccountInfo(pubkey, commitment: commitment, encoding: encoding, dataSlice: dataSlice);
   }
 
   static Future<VoteAccounts> getVoteAccounts() {
