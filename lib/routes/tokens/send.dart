@@ -12,6 +12,7 @@ import 'package:sprintf/sprintf.dart';
 import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
 import '../../utils/extensions.dart';
+import '../../utils/sns.dart';
 import '../../utils/utils.dart';
 import '../../widgets/image.dart';
 import '../image.dart';
@@ -41,6 +42,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
   late TextEditingController _amountController;
 
   String _recipient = "";
+  String? _snsRecipient;
   String _amount = "";
 
   String? _recipientError;
@@ -118,6 +120,28 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                             setState(() {
                               _recipient = value;
                             });
+                            if (value.endsWith(".sol")) {
+                              // could be a SNS name
+                              print("could be a SNS name");
+                              SnsResolver.resolve(value).then((value) {
+                                print("value -> ${value.owner?.toBase58()}");
+                                if (value.owner == null) {
+                                  setState(() {
+                                    _snsRecipient = null;
+                                    _recipientError = S.current.invalidAddress;
+                                  });
+                                } else {
+                                  setState(() {
+                                    _snsRecipient = value.owner!.toBase58();
+                                    _recipientError = null;
+                                  });
+                                }
+                              });
+                            } else {
+                              setState(() {
+                                _snsRecipient = null;
+                              });
+                            }
                           },
                         ),
                       ),
@@ -163,6 +187,14 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                     ],
                   ),
                 ),
+                if (_snsRecipient != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _snsRecipient!,
+                      style: themeData.textTheme.caption,
+                    ),
+                  ),
                 if (_recipientError != null)
                   Align(
                     alignment: Alignment.centerLeft,
@@ -209,7 +241,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                       SizedBox(width: 8),
                       TextButton(
                         style: TextButton.styleFrom(
-                          primary: themeData.colorScheme.onPrimary,
+                          foregroundColor: themeData.colorScheme.onPrimary,
                           backgroundColor: themeData.colorScheme.primary,
                           visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                           shape: const RoundedRectangleBorder(
@@ -260,12 +292,12 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                               if (widget.balance.mint == nativeSol) {
                                 ixs.add(SystemInstruction.transfer(
                                   fundingAccount: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
-                                  recipientAccount: Ed25519HDPublicKey.fromBase58(_recipient),
+                                  recipientAccount: Ed25519HDPublicKey.fromBase58(_snsRecipient ?? _recipient),
                                   lamports: (double.parse(_amount) * lamportsPerSol).floor(),
                                 ));
                               } else {
                                 // check if destination exists
-                                Ed25519HDPublicKey recipient = Ed25519HDPublicKey.fromBase58(_recipient);
+                                Ed25519HDPublicKey recipient = Ed25519HDPublicKey.fromBase58(_snsRecipient ?? _recipient);
                                 Ed25519HDPublicKey mint = Ed25519HDPublicKey.fromBase58(widget.balance.mint);
                                 Ed25519HDPublicKey destTokenAcct = await findAssociatedTokenAddress(
                                   owner: recipient,
@@ -336,8 +368,12 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
     if (amt <= 0) _amountError = S.current.invalidAmount;
     if (amt > double.parse(widget.balance.tokenAmount.uiAmountString!)) _amountError = S.current.insufficientFunds;
     // validate recipient
-    List<int> data = base58decode(_recipient);
-    if (data.length != 32) _recipientError = S.current.invalidAddress;
+    try {
+      List<int> data = base58decode(_snsRecipient ?? _recipient);
+      if (data.length != 32) _recipientError = S.current.invalidAddress;
+    } catch (e) {
+      _recipientError = S.current.invalidAddress;
+    }
     setState(() {});
     return _recipientError == null && _amountError == null;
   }
