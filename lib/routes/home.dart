@@ -17,6 +17,7 @@ import '../rpc/constants.dart';
 import '../rpc/errors/errors.dart';
 import '../rpc/key_manager.dart';
 import '../utils/extensions.dart';
+import '../utils/sns.dart';
 import '../utils/utils.dart';
 import '../widgets/approve_tx.dart';
 import '../widgets/bottom_sheet.dart';
@@ -141,6 +142,10 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                   value: 'copy',
                   child: Text(S.current.copyAddress),
                 ),
+                PopupMenuItem(
+                  value: 'resolve_sns',
+                  child: Text(S.current.resolveSnsDomain),
+                ),
               ];
             },
             onSelected: (s) async {
@@ -152,7 +157,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                     label: S.current.signMessageHint,
                   );
                   if (message != null) {
-                    Future<Signature> sigFuture = KeyManager.instance.sign(message.codeUnits);
+                    Future<Signature> sigFuture = KeyManager.instance.sign(
+                        message.codeUnits);
                     showDialog(
                       context: context,
                       builder: (ctx) {
@@ -163,8 +169,11 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                             builder: (ctx, snapshot) {
                               if (snapshot.hasData) {
                                 return Text(
-                                  "Base58: ${base58encode(snapshot.data!.bytes)}\n\n"
-                                      "Hex: ${snapshot.data!.bytes.map((e) => e.toRadixString(16).padLeft(2, '0')).join()}",
+                                  "Base58: ${base58encode(
+                                      snapshot.data!.bytes)}\n\n"
+                                      "Hex: ${snapshot.data!.bytes.map((e) =>
+                                      e.toRadixString(16).padLeft(2, '0'))
+                                      .join()}",
                                 );
                               } else {
                                 return Text(S.current.signing);
@@ -209,7 +218,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                               Navigator.pop(ctx);
                               setState(() {});
                             },
-                            child: const Text("OK"),
+                            child: Text(S.current.ok),
                           ),
                         ],
                       );
@@ -221,13 +230,62 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                   setState(() {});
                   break;
                 case 'copy':
-                  Clipboard.setData(ClipboardData(text: KeyManager.instance.pubKey));
+                  Clipboard.setData(
+                      ClipboardData(text: KeyManager.instance.pubKey));
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(S.current.addressCopied),
                     ),
                   );
                   break;
+                case 'resolve_sns':
+                  String? domain = await Utils.showInputDialog(
+                    context: context,
+                    prompt: S.current.resolveSnsDomain,
+                    label: S.current.solDomain,
+                  );
+                  if (domain == null) break;
+                  Future<DomainResolution> keyFuture = SnsResolver.resolve(domain);
+                  showDialog(
+                    context: context,
+                    builder: (ctx) {
+                      return AlertDialog(
+                        title: Text(S.current.resolveSnsDomain),
+                        content: FutureBuilder<DomainResolution>(
+                          future: keyFuture,
+                          builder: (ctx, snapshot) {
+                            if (snapshot.hasData) {
+                              if (snapshot.data != null) {
+                                return Text(
+                                  sprintf(S.current.snsResolveResult, [snapshot.data!.domainKey.pubkey.toBase58(), snapshot.data!.owner?.toBase58()]),
+                                );
+                              } else {
+                                return Text(S.current.failedToResolveDomain);
+                              }
+                            } else {
+                              return Text(S.of(context).resolving);
+                            }
+                          },
+                        ),
+                        actions: [
+                          TextButton(
+                            child: Text(S.current.ok),
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                            },
+                          ),
+                          // TextButton(
+                          //   child: Text(S.current.copy),
+                          //   onPressed: () {
+                          //     Clipboard.setData(
+                          //         ClipboardData(text: snapshot.data?.toBase58()));
+                          //     Navigator.of(ctx).pop();
+                          //   },
+                          // ),
+                        ],
+                      );
+                    },
+                  );
               }
             },
           ),
@@ -655,7 +713,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
       return TextButtonTheme(
         data: TextButtonThemeData(
           style: TextButton.styleFrom(
-            primary: themeData.colorScheme.onPrimary,
+            foregroundColor: themeData.colorScheme.onPrimary,
             backgroundColor: themeData.colorScheme.primary,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
