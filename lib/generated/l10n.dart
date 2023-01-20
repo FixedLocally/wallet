@@ -1549,6 +1549,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Resolve SNS domain`
+  String get resolveSnsDomain {
+    return Intl.message(
+      'Resolve SNS domain',
+      name: 'resolveSnsDomain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `.sol domain`
+  String get solDomain {
+    return Intl.message(
+      '.sol domain',
+      name: 'solDomain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to resolve domain`
+  String get failedToResolveDomain {
+    return Intl.message(
+      'Failed to resolve domain',
+      name: 'failedToResolveDomain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Domain address: %s\nDomain owner: %s`
+  String get snsResolveResult {
+    return Intl.message(
+      'Domain address: %s\nDomain owner: %s',
+      name: 'snsResolveResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resolving`
+  String get resolving {
+    return Intl.message(
+      'Resolving',
+      name: 'resolving',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

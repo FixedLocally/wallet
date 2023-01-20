@@ -92,6 +92,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Export Private Key"),
         "exportSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Export Secret Recovery Phrase"),
+        "failedToResolveDomain":
+            MessageLookupByLibrary.simpleMessage("Failed to resolve domain"),
         "halfCap": MessageLookupByLibrary.simpleMessage("HALF"),
         "home": MessageLookupByLibrary.simpleMessage("Home"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
@@ -161,6 +163,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Transactions require authentication"),
         "resetSecretRecoveryPhrase": MessageLookupByLibrary.simpleMessage(
             "Reset Secret Recovery Phrase"),
+        "resolveSnsDomain":
+            MessageLookupByLibrary.simpleMessage("Resolve SNS domain"),
+        "resolving": MessageLookupByLibrary.simpleMessage("Resolving"),
         "revoke": MessageLookupByLibrary.simpleMessage("Revoke"),
         "revokingDelegation":
             MessageLookupByLibrary.simpleMessage("Revoking delegation..."),
@@ -198,6 +203,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter the message to sign:"),
         "signature": MessageLookupByLibrary.simpleMessage("Signature"),
         "signing": MessageLookupByLibrary.simpleMessage("Signing..."),
+        "snsResolveResult": MessageLookupByLibrary.simpleMessage(
+            "Domain address: %s\nDomain owner: %s"),
+        "solDomain": MessageLookupByLibrary.simpleMessage(".sol domain"),
         "stake": MessageLookupByLibrary.simpleMessage("Stake"),
         "stakeAccount": MessageLookupByLibrary.simpleMessage("Stake Account"),
         "stakeAccounts": MessageLookupByLibrary.simpleMessage("Stake Accounts"),
