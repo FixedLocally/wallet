@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -579,7 +578,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                     "\$ ${totalUsd.toStringAsFixed(2)}",
                     style: const TextStyle(
                       fontSize: 40,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Row(
@@ -1009,7 +1008,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                             children: [
                               Text(S.current.minReceived),
                               Spacer(),
-                              Text("${(_routes?[_chosenRoute].outAmount ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
+                              Text("${(_routes?[_chosenRoute].otherAmountThreshold ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
                             ],
                           ),
                           Row(

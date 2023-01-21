@@ -44,7 +44,7 @@ class WalletApp extends StatelessWidget {
         onPrimary: Color(0xff101e1c),
         primaryContainer: Color(0xff22654d),
         onPrimaryContainer: Color(0xffd8e7e2),
-        secondary: Color(0xff58deff),
+        secondary: Color(0xff1dc5c0),
         onSecondary: Color(0xff101e1e),
         secondaryContainer: Color(0xff235866),
         onSecondaryContainer: Color(0xffd8e4e8),
