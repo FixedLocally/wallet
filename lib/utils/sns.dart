@@ -71,11 +71,11 @@ Future<Ed25519HDPublicKey> _getNameAccountKey(List<int> hashedName, Ed25519HDPub
   return nameAccountKey;
 }
 
-Future<_Derive> _derive(String name, [Ed25519HDPublicKey? parent]) async {
+Future<_Derive> _derive(String name, [Ed25519HDPublicKey parent = ROOT_DOMAIN_ACCOUNT]) async {
   // print("Deriving name $name from parent ${parent?.toBase58()}");
   List<int> hashed = await _getHashedName(name);
   // print("Hashed name $hashed");
-  Ed25519HDPublicKey pubkey = await _getNameAccountKey(hashed, null, parent ?? _nameProgramId);
+  Ed25519HDPublicKey pubkey = await _getNameAccountKey(hashed, null, parent);
   return _Derive(pubkey: pubkey, hashed: hashed);
 }
 
@@ -99,7 +99,7 @@ Future<DomainKey> _getDomainKey(String domain) async {
   } else if (splitted.length >= 3) {
     throw "Invalid derivation input";
   }
-  _Derive result = await _derive(domain, ROOT_DOMAIN_ACCOUNT);
+  _Derive result = await _derive(domain);
   // return { ...result, isSub: false, parent: undefined };
   // print("result ${result.pubkey}");
   return DomainKey(
