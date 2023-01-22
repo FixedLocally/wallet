@@ -154,5 +154,6 @@
   "solDomain": ".sol domain",
   "failedToResolveDomain": "Failed to resolve domain",
   "snsResolveResult": "Domain address: %s\nDomain owner: %s",
-  "resolving": "Resolving"
+  "resolving": "Resolving",
+  "enableWrappedSol": "Enable wSOL"
 }

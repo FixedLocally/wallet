@@ -56,3 +56,24 @@ class HighlightedText extends StatelessWidget {
     );
   }
 }
+
+class SemiboldText extends StatelessWidget {
+  final String text;
+  final TextStyle style;
+  final TextAlign textAlign;
+
+  const SemiboldText(this.text, {
+    super.key,
+    this.style = const TextStyle(),
+    this.textAlign = TextAlign.start,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      textAlign: textAlign,
+      style: const TextStyle(fontWeight: FontWeight.w600).merge(style),
+    );
+  }
+}

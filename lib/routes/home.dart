@@ -22,6 +22,7 @@ import '../widgets/approve_tx.dart';
 import '../widgets/bottom_sheet.dart';
 import '../widgets/header.dart';
 import '../widgets/image.dart';
+import '../widgets/text.dart';
 import '../widgets/text_icon.dart';
 import 'locked.dart';
 import 'mixins/inherited.dart';
@@ -578,7 +579,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                     "\$ ${totalUsd.toStringAsFixed(2)}",
                     style: const TextStyle(
                       fontSize: 40,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   Row(
@@ -589,6 +590,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                         style: TextStyle(
                           fontSize: 20,
                           color: color,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -597,6 +599,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                         style: TextStyle(
                           fontSize: 20,
                           color: color,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -623,16 +626,17 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                             );
                           },
                           elevation: 2.0,
+                          fillColor: themeData.colorScheme.primary,
                           padding: EdgeInsets.all(6.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(99.0),
-                            side: BorderSide(
-                              color: themeData.colorScheme.onSurface,
-                              width: 2,
-                            ),
+                            // side: BorderSide(
+                            //   color: themeData.colorScheme.onSurface,
+                            //   width: 2,
+                            // ),
                           ),
                           child: Text(S.current.send,
-                              style: TextStyle(fontSize: 17)),
+                              style: TextStyle(fontSize: 17, color: themeData.colorScheme.onPrimary)),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -649,16 +653,17 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                             );
                           },
                           elevation: 2.0,
+                          fillColor: themeData.colorScheme.primary,
                           padding: EdgeInsets.all(6.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(99.0),
-                            side: BorderSide(
-                              color: themeData.colorScheme.onSurface,
-                              width: 2,
-                            ),
+                            // side: BorderSide(
+                            //   color: themeData.colorScheme.onSurface,
+                            //   width: 2,
+                            // ),
                           ),
                           child: Text(S.current.receive,
-                              style: TextStyle(fontSize: 17)),
+                              style: TextStyle(fontSize: 17, color: themeData.colorScheme.onPrimary)),
                         ),
                       ),
                     ],
@@ -719,7 +724,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             ),
             textStyle: themeData.textTheme.button?.copyWith(
               color: themeData.primaryColor,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -907,24 +912,6 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             if (_to != null)
               Row(
                 children: [
-                  SizedBox(width: 20),
-                  Text("Enable Wrapped SOL"),
-                  SizedBox(
-                    height: 24,
-                    width: 40,
-                    child: Transform.scale(
-                      scale: 0.8,
-                      child: Switch(
-                        value: _enableWsol,
-                        onChanged: (b) {
-                          setState(() {
-                            _enableWsol = b;
-                          });
-                          Utils.prefs.setBool(Constants.kKeyEnableWsol, _enableWsol);
-                        },
-                      ),
-                    ),
-                  ),
                   Spacer(),
                   Text("${myBalances[_to]?.tokenAmount.uiAmountString ?? "0"} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened}"),
                   SizedBox(width: 20),
@@ -935,6 +922,25 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    SizedBox(width: 16),
+                    Text(S.of(context).enableWrappedSol),
+                    SizedBox(
+                      height: 24,
+                      width: 40,
+                      child: Transform.scale(
+                        scale: 0.8,
+                        child: Switch(
+                          value: _enableWsol,
+                          onChanged: (b) {
+                            setState(() {
+                              _enableWsol = b;
+                            });
+                            Utils.prefs.setBool(Constants.kKeyEnableWsol, _enableWsol);
+                          },
+                        ),
+                      ),
+                    ),
+                    Spacer(),
                     IconButton(
                       onPressed: () {
                         setState(() {
@@ -995,13 +1001,12 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                       padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-
                         children: [
                           Row(
                             children: [
                               Text(S.current.price),
                               Spacer(),
-                              Text("${((_routes?[_chosenRoute].outAmount ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6) / (_routes?[_chosenRoute].inAmount ?? 0) * pow(10, tokenDetails[_from]?["decimals"] ?? 6)).toFixedTrimmed(6)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened} per ${tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                              Text("${((_routes?[_chosenRoute].outAmount ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6) / (_routes?[_chosenRoute].inAmount ?? 0) * pow(10, tokenDetails[_from]?["decimals"] ?? 6)).toFixedTrimmed(null)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened} per ${tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
                             ],
                           ),
                           Row(
@@ -1238,6 +1243,9 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
       leading: leading,
       title: Text.rich(TextSpan(
         text: name,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+        ),
         children: [
           if (symbol.isNotEmpty)
             TextSpan(
@@ -1265,13 +1273,15 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text("\$ ${usd.toStringAsFixed(2)}"),
+          Text("\$ ${usd.toStringAsFixed(2)}", style: TextStyle(
+            fontWeight: FontWeight.w500,
+          )),
           if (usdChange > 0)
-            Text("+\$ ${usdChange.toStringAsFixed(2)}", style: const TextStyle(color: Colors.green))
+            Text("+\$ ${usdChange.toStringAsFixed(2)}", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500,))
           else if (usdChange < 0)
-            Text("-\$ ${(-usdChange).toStringAsFixed(2)}", style: const TextStyle(color: Colors.red))
+            Text("-\$ ${(-usdChange).toStringAsFixed(2)}", style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500,))
           else
-            const Text("\$ -"),
+            const Text("\$ -", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500,)),
         ],
       ) : null,
     );
@@ -1509,6 +1519,35 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             _tokenRefresherKey.currentState?.show();
             appWidget.startLoadingBalances(KeyManager.instance.pubKey);
             scaffold.showSnackBar(SnackBar(content: Text(sprintf(S.current.tokenAccountsClosed, [toClose.length]))));
+          },
+        ),
+        ListTile(
+          title: Text("Debug"),
+          onTap: () async {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => Scaffold(
+                  appBar: AppBar(
+                    title: Text("Debug"),
+                  ),
+                  body: Column(
+                    children: [
+                      ...List.generate(
+                        9,
+                        (index) => Text(
+                          "ABC w${index + 1}00",
+                          style: TextStyle(fontWeight: FontWeight.values[index]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                settings: const RouteSettings(name: "/settings/debug"),
+              ),
+            ).then((value) {
+              setState(() {});
+            });
           },
         ),
       ],
@@ -1754,7 +1793,7 @@ class _ChooseTokenDialogState extends State<_ChooseTokenDialog> {
                 image: info?["image"],
                 size: 32,
               ) : null,
-              title: Text(info?["symbol"] ?? mint.shortened),
+              title: Text(info?["symbol"] ?? mint.shortened, style: TextStyle(fontWeight: FontWeight.w500),),
               subtitle: Text(info?["name"] ?? ""),
               trailing: widget.balances[mint] != null ? Text(widget.balances[mint]?.tokenAmount.uiAmountString ?? "0") : null,
               onTap: () {

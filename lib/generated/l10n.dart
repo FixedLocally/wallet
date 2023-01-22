@@ -1599,6 +1599,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Enable wSOL`
+  String get enableWrappedSol {
+    return Intl.message(
+      'Enable wSOL',
+      name: 'enableWrappedSol',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

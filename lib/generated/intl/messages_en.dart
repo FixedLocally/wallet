@@ -83,6 +83,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "%s %s is currently delegated to:\n%s.\n\nUnlike on EVM chains, token delegations beyond the scope of a transaction are typically not needed since most contract interactions atomically transfer the necessary tokens, and will not need access to your funds at a later time.\nPlease consider revoking the delegation."),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
+        "enableWrappedSol": MessageLookupByLibrary.simpleMessage("Enable wSOL"),
         "enterNewKey": MessageLookupByLibrary.simpleMessage("Enter new key"),
         "errorSendingTxs":
             MessageLookupByLibrary.simpleMessage("Error sending transactions"),
