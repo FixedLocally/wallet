@@ -21,7 +21,7 @@ extension NumExt on num {
         fractionDigits = fractionDigits! + 3;
       }
     }
-    return double.parse(toStringAsFixed(fractionDigits!)).toString();
+    return toStringAsFixed(fractionDigits!).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
   }
 }
 
