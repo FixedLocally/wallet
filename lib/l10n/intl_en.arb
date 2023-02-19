@@ -155,5 +155,9 @@
   "failedToResolveDomain": "Failed to resolve domain",
   "snsResolveResult": "Domain address: %s\nDomain owner: %s",
   "resolving": "Resolving",
-  "enableWrappedSol": "Enable wSOL"
+  "enableWrappedSol": "Enable wSOL",
+  "removeThisDapp": "Remove %s",
+  "removingDapp": "Removing dApp",
+  "copyUrl": "Copy URL",
+  "copyUrlSuccess": "Copied URL"
 }

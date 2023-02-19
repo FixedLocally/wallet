@@ -22,7 +22,6 @@ import '../widgets/approve_tx.dart';
 import '../widgets/bottom_sheet.dart';
 import '../widgets/header.dart';
 import '../widgets/image.dart';
-import '../widgets/text.dart';
 import '../widgets/text_icon.dart';
 import 'locked.dart';
 import 'mixins/inherited.dart';
@@ -369,8 +368,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
     );
   }
 
-  Widget _createAppTile(String title, String url) {
-    String? host = Uri.parse(url).host;
+  Widget _createAppTile(BuildContext context, App app) {
+    String? host = Uri.parse(app.url).host;
     String? logo = KeyManager.instance.getDomainLogo(host);
     Widget leading = Icon(Icons.language, size: 48,);
     if (logo != null) {
@@ -381,19 +380,60 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
       child: Column(
         children: [
           leading,
-          Text(title, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,),
+          Text(app.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,),
         ],
       ),
       onPressed: () {
         Navigator.push(context, MaterialPageRoute(
           builder: (context) => DAppRoute(
-            title: title,
-            initialUrl: url,
+            title: app.name,
+            initialUrl: app.url,
           ),
           settings: const RouteSettings(name: "/browser"),
         )).then((value) {
           setState(() {});
         });
+      },
+      onLongPress: () {
+        showModalBottomSheet<bool>(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (ctx) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 16),
+                Text(app.name),
+                Text(app.url),
+                ListTile(
+                  title: Text(sprintf(S.current.removeThisDapp, [app.name])),
+                  onTap: () async {
+                    Future f = KeyManager.instance.removeDapp(app.id);
+                    Navigator.pop(context); // the bottom sheet
+                    await Utils.showLoadingDialog(
+                      context: context,
+                      future: f,
+                      text: S.of(context).removingDapp,
+                    );
+                    setState(() {});
+                  },
+                ),
+                ListTile(
+                  title: Text(S.of(context).copyUrl),
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: app.url));
+                    Navigator.pop(context); // the bottom sheet
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(S.of(context).copyUrlSuccess),
+                    ));
+                  },
+                ),
+              ],
+            );
+          },
+        );
       },
     );
   }
@@ -449,20 +489,22 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
   }
 
   Widget _dAppList() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      children: [
-        GridView.extent(
-          maxCrossAxisExtent: 112,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            ...KeyManager.instance.apps.map((dApp) {
-              return _createAppTile(dApp.name, dApp.url);
-            }),
-          ],
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (ctx, _) => ListView(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        children: [
+          GridView.extent(
+            maxCrossAxisExtent: 112,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              ...KeyManager.instance.apps.map((dApp) {
+                return _createAppTile(ctx, dApp);
+              }),
+            ],
+          ),
+        ],
+      ),
     );
   }
   

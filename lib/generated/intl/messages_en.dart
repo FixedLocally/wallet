@@ -75,6 +75,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Copied private key to clipboard"),
         "copySeedSuccess": MessageLookupByLibrary.simpleMessage(
             "Copied secret recovery phrase to clipboard"),
+        "copyUrl": MessageLookupByLibrary.simpleMessage("Copy URL"),
+        "copyUrlSuccess": MessageLookupByLibrary.simpleMessage("Copied URL"),
         "createWallet": MessageLookupByLibrary.simpleMessage("Create Wallet"),
         "creatingWallet":
             MessageLookupByLibrary.simpleMessage("Creating wallet..."),
@@ -156,7 +158,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase."),
         "removeKeyWalletContent": MessageLookupByLibrary.simpleMessage(
             "This will remove the wallet from this list, make sure you have a backup of your private key."),
+        "removeThisDapp": MessageLookupByLibrary.simpleMessage("Remove %s"),
         "removeWallet": MessageLookupByLibrary.simpleMessage("Remove Wallet"),
+        "removingDapp": MessageLookupByLibrary.simpleMessage("Removing dApp"),
         "renameWallet": MessageLookupByLibrary.simpleMessage("Rename Wallet"),
         "renamingWallet":
             MessageLookupByLibrary.simpleMessage("Renaming wallet..."),

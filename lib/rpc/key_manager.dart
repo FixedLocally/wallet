@@ -486,7 +486,7 @@ class KeyManager {
         "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
       });
       // todo could give every app a "weight" to determine usage frequency
-      txn.query("apps", where: "url like ?", whereArgs: ["https://$domain%"]).then((apps) {
+      txn.query("apps", where: "url like ?", whereArgs: ["https://$domain%"]).then((apps) async {
         if (apps.isNotEmpty) {
           for (Map app in apps) {
             txn.update(
@@ -502,16 +502,31 @@ class KeyManager {
           }
         } else {
           print("installing app $domain");
-          txn.insert("apps", {
+          int id = await txn.insert("apps", {
             "url": "https://$domain",
             "name": title,
             "last_used_ts": DateTime.now().millisecondsSinceEpoch ~/ 1000,
             "used_count": 1,
             "starred": 0,
           });
+          _apps.add(App(
+            id: id,
+            url: "https://$domain",
+            name: title,
+            lastUsedTs: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+            usedCount: 1,
+            starred: false,
+          ));
         }
       });
     });
+  }
+
+  Future<void> removeDapp(int id) async {
+    await _db.transaction((txn) async {
+      txn.delete("apps", where: "id=?", whereArgs: [id]);
+    });
+    _apps = _apps.where((element) => element.id != id).toList();
   }
 
   Future<void> requestShowRecoveryPhrase(BuildContext context) async {

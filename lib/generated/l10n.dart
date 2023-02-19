@@ -1609,6 +1609,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Remove %s`
+  String get removeThisDapp {
+    return Intl.message(
+      'Remove %s',
+      name: 'removeThisDapp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Removing dApp`
+  String get removingDapp {
+    return Intl.message(
+      'Removing dApp',
+      name: 'removingDapp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy URL`
+  String get copyUrl {
+    return Intl.message(
+      'Copy URL',
+      name: 'copyUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copied URL`
+  String get copyUrlSuccess {
+    return Intl.message(
+      'Copied URL',
+      name: 'copyUrlSuccess',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
