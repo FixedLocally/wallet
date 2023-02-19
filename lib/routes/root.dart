@@ -82,6 +82,11 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
     }
     _balancesCompleters[pubKey] = balCompleter;
     _tokenInfoCompleters[pubKey] = metadataCompleter;
+
+    // no need to load balance more than once per minute
+    _balanceReloader?.cancel();
+    _balanceReloader = Timer(Duration(minutes: 1), () => _reloadActiveBalances(true));
+
     Utils.getBalances(pubKey).then((value) async {
       balCompleter.complete();
       setState(() {
