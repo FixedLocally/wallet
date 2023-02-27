@@ -159,5 +159,6 @@
   "removeThisDapp": "Remove %s",
   "removingDapp": "Removing dApp",
   "copyUrl": "Copy URL",
-  "copyUrlSuccess": "Copied URL"
+  "copyUrlSuccess": "Copied URL",
+  "view": "View"
 }

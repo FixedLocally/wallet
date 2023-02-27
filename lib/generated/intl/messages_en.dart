@@ -241,6 +241,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unwrapSol": MessageLookupByLibrary.simpleMessage("Unwrap SOL"),
         "unwrappingSol":
             MessageLookupByLibrary.simpleMessage("Unwrapping SOL..."),
+        "view": MessageLookupByLibrary.simpleMessage("View"),
         "viewOnSolscan":
             MessageLookupByLibrary.simpleMessage("View on SolScan"),
         "visitExternalUrl":

@@ -10,6 +10,7 @@ import 'package:solana/base58.dart';
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../generated/l10n.dart';
 import '../models/models.dart';
 import '../rpc/constants.dart';
@@ -1086,6 +1087,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                               );
                               List<Uint8List> txs = [swapTxs.setupTransaction, swapTxs.swapTransaction, swapTxs.cleanupTransaction]
                                   .whereNotNull.map(base64Decode).map((x) => x.sublist(65)).toList();
+                              int swapIndex = swapTxs.setupTransaction != null ? 1 : 0;
+                              String? swapTxid;
                               // todo use jup versioned tx
                               Future<List<TokenChanges>> simulation = Utils.simulateTxs(txs, KeyManager.instance.pubKey, txs.map((e) => -1).toList());
                               bool approved = await Utils.showConfirmBottomSheet(
@@ -1105,7 +1108,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                                 double fromBefore = double.parse(balances[pubKey]?[_from]?.tokenAmount.uiAmountString ?? "0");
                                 double toBefore = double.parse(balances[pubKey]?[_to]?.tokenAmount.uiAmountString ?? "0");
                                 // send tx one by one
-                                for (Uint8List tx in txs) {
+                                for (int i = 0; i < txs.length; i++) {
+                                  Uint8List tx = txs[i];
                                   Completer completer = Completer();
                                   Utils.showLoadingDialog(context: context, future: completer.future, text: S.current.sendingTx);
                                   bool error = false;
@@ -1116,23 +1120,27 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                                         CompiledMessage(ByteArray(tx))), bh.blockhash);
                                     String sig = await Utils.sendTransaction(signedTx);
                                     await Utils.confirmTransaction(sig);
+                                    if (i == swapIndex) {
+                                      swapTxid = sig;
+                                    }
                                   } catch (e) {
                                     error = true;
                                   }
                                   completer.complete();
                                   if (error) {
                                     scaffold.showSnackBar(SnackBar(content: Text(S.current.errorSendingTxs)));
+                                    break;
                                   }
                                 }
                                 // reload routes after trying to swap
                                 // clear input
                                 setState(() {
-                                  _fromAmtController.text = "";
-                                  _amt = "";
+                                  // _fromAmtController.text = "";
+                                  // _amt = "";
                                   _routes = null;
                                   _chosenRoute = -1;
                                 });
-                                // _loadRoutes(_from, _to);
+                                _loadRoutes(_from, _to);
                                 _tokenRefresherKey.currentState?.show();
                                 appWidget.startLoadingBalances(KeyManager.instance.pubKey);
                                 await balancesCompleters[pubKey]!.future;
@@ -1146,7 +1154,20 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                                 // toDelta = double.parse(toDelta).toString();
                                 // fromDelta = fromDelta.replaceAll(RegExp(r"0+$"), "");
                                 // toDelta = toDelta.replaceAll(RegExp(r"0+$"), "");
-                                scaffold.showSnackBar(SnackBar(content: Text(sprintf(S.current.swapSuccess, [fromDelta, tokenDetails[_from]?["symbol"] ?? _from!.shortened, toDelta, tokenDetails[_to]?["symbol"] ?? _to!.shortened]))));
+                                scaffold.showSnackBar(SnackBar(
+                                  content: Text(sprintf(S.current.swapSuccess, [
+                                    fromDelta,
+                                    tokenDetails[_from]?["symbol"] ?? _from!.shortened,
+                                    toDelta,
+                                    tokenDetails[_to]?["symbol"] ?? _to!.shortened
+                                  ])),
+                                  action: SnackBarAction(
+                                    label: S.current.view,
+                                    onPressed: () {
+                                      launchUrl(Uri.parse("https://solscan.io/tx/$swapTxid"));
+                                    },
+                                  ),
+                                ));
                               } else {
                                 _loadedAmt = null;
                                 _loadRoutes(_from, _to);
