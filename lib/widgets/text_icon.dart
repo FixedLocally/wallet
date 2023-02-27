@@ -14,7 +14,7 @@ class TextIcon extends StatelessWidget {
       child: CircleAvatar(
         radius: radius,
         backgroundColor: theme.colorScheme.primary,
-        child: Text(text.split(" ").map((x) => x.substring(0, 1).toUpperCase()).take(2).join(""), style: TextStyle(fontWeight: FontWeight.w500)),
+        child: Text(text.split(" ").where((x) => x.isNotEmpty).map((x) => x.characters.elementAt(0).toUpperCase()).take(2).join(""), style: TextStyle(fontWeight: FontWeight.w500)),
       ),
     );
   }
