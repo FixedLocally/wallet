@@ -7,6 +7,7 @@ import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
@@ -340,7 +341,7 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
     return TextButtonTheme(
       data: TextButtonThemeData(
         style: TextButton.styleFrom(
-          primary: themeData.colorScheme.onPrimary,
+          foregroundColor: themeData.colorScheme.onPrimary,
           backgroundColor: themeData.colorScheme.primary,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -435,7 +436,7 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
                   SizedBox(width: 8),
                   Padding(
                     padding: const EdgeInsets.only(right: 20.0),
-                    child: Text("${(myBalances[nativeSol]?.tokenAmount.uiAmountString ?? "0").doubleParsed - _stakeFee} SOL"),
+                    child: Text("${((myBalances[nativeSol]?.tokenAmount.uiAmountString ?? "0").doubleParsed - _stakeFee).toFixedTrimmed(9)} SOL"),
                   ),
                 ],
               ),
@@ -492,11 +493,17 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
                     config: Ed25519HDPublicKey.fromBase58("StakeConfig11111111111111111111111111111111"),
                   );
                   nav.pop(); // stake amount bottom sheet
-                  await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions([initIx, initStakeIx, delegateStakeIx]), text: S.current.staking);
+                  String tx = await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions([initIx, initStakeIx, delegateStakeIx]), text: S.current.staking);
                   appWidget.startLoadingBalances(signer.toBase58());
                   nav.pop(); // validator list
                   scaffold.showSnackBar(SnackBar(
                     content: Text(sprintf(S.current.stakeSolSuccessful, [amount, widget.validatorInfo["name"] ?? widget.voteAccount.nodePubkey])),
+                    action: SnackBarAction(
+                      label: S.current.view,
+                      onPressed: () {
+                        launchUrl(Uri.parse("https://solscan.io/tx/$tx"));
+                      },
+                    ),
                   ));
                 }
               },

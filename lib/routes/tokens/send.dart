@@ -8,6 +8,7 @@ import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 import 'package:sprintf/sprintf.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
@@ -331,6 +332,12 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                                   scaffold.showSnackBar(
                                     SnackBar(
                                       content: Text(S.current.txConfirmed),
+                                      action: SnackBarAction(
+                                        label: S.current.view,
+                                        onPressed: () {
+                                          launchUrl(Uri.parse("https://solscan.io/tx/$tx"));
+                                        },
+                                      ),
                                     ),
                                   );
                                 } else {
