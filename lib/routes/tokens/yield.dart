@@ -189,7 +189,7 @@ class _YieldDepositRouteState extends State<YieldDepositRoute> with UsesSharedDa
                     context: context,
                     future: completer.future,
                   );
-                  RecentBlockhash bh = await Utils.getBlockhash();
+                  LatestBlockhash bh = await Utils.getBlockhash();
                   for (List<int> tx in txs) {
                     CompiledMessage compiledMessage = CompiledMessage(ByteArray(tx.sublist(65)));
                     Message message = Message.decompile(compiledMessage);

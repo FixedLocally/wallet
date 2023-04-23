@@ -35,10 +35,11 @@ dependencies:
   mobile_scanner: ^2.0.0
   qr_flutter: ^4.0.0
   shared_preferences: ^2.0.15
-  solana: ^0.26.3
+  solana: ^0.29.0
   sprintf: ^6.0.2
   sqflite: ^2.0.3+1
   url_launcher: ^6.1.10
+#  web_socket_channel: ^2.1.0
   webview_flutter: ^3.0.4
   xml: ^6.1.0
 

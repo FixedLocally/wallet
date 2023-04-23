@@ -163,13 +163,13 @@ class RpcServer {
         }
         signedTx = SignedTx(
           signatures: sigs,
-          messageBytes: ByteArray(payload),
+          compiledMessage: CompiledMessage(ByteArray(payload)),
         );
         print(signedTx.signatures);
       } else {
         signedTx = SignedTx(
           signatures: [signature],
-          messageBytes: ByteArray(payload),
+          compiledMessage: CompiledMessage(ByteArray(payload)),
         );
       }
       print(signature.toBase58());

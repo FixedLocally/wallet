@@ -140,13 +140,13 @@ class Utils {
     BigInt? delegatedAmount = delegate != null ? rawDelegatedAmount : null;
     // List<int> _closeAuthority = data.sublist(129, 165);
     // String? closeAuthority = _closeAuthority.sublist(0, 4).any((e) => e != 0) ? base58encode(_closeAuthority.sublist(4)) : null;
-    Account? mintAcct = await _solanaClient.rpcClient.getAccountInfo(
+    AccountResult mintAcct = await _solanaClient.rpcClient.getAccountInfo(
       mint,
       commitment: Commitment.confirmed,
       encoding: Encoding.base64,
     );
     // https://github.com/solana-labs/solana-program-library/blob/48fbb5b7/token/js/src/state/mint.ts#L43
-    int decimals = (mintAcct?.data as BinaryAccountData).data[4 + 32 + 8];
+    int decimals = (mintAcct.value?.data as BinaryAccountData).data[4 + 32 + 8];
     return SplTokenAccountDataInfo(
       mint: mint,
       owner: owner,
@@ -164,14 +164,19 @@ class Utils {
     List<Account?> accounts = [];
     for (int i = 0; i < addresses.length; i += 50) {
       List<String> batch = addresses.sublist(i, min(i + 50, addresses.length));
-      accounts.addAll(await _solanaClient.rpcClient.getMultipleAccounts(batch, commitment: Commitment.confirmed, encoding: Encoding.base64));
+      accounts.addAll((await _solanaClient.rpcClient.getMultipleAccounts(batch, commitment: Commitment.confirmed, encoding: Encoding.base64)).value);
     }
     return accounts;
   }
 
   static Future<TokenChanges> simulateTx(List<int> rawMessage, String owner) async {
     CompiledMessage compiledMessage = CompiledMessage(ByteArray(rawMessage));
-    Message message = Message.decompile(compiledMessage);
+    List<AddressLookupTableAccount> lutAccts = [];
+    if (compiledMessage.version == TransactionVersion.v0) {
+      CompiledMessageV0 v0Message = compiledMessage as CompiledMessageV0;
+      lutAccts = await _solanaClient.rpcClient.getAddressLookUpTableAccounts(v0Message.addressTableLookups);
+    }
+    Message message = Message.decompile(compiledMessage, addressLookupTableAccounts: lutAccts);
     // prepend header
     int sigs = compiledMessage.requiredSignatureCount;
     List<int> simulationPayload = [sigs, ...List.generate(sigs * 64, (_) => 0), ...rawMessage];
@@ -212,8 +217,8 @@ class Utils {
         accountEncoding: Encoding.base64,
         addresses: addresses,
       ),
-    );
-    Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed);
+    ).then((value) => value.value);
+    Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed).then((value) => value.value);
     List results = await Future.wait([statusFuture, solBalanceFuture]).catchError((_) {
       print(_);
       return <Object>[];
@@ -300,8 +305,8 @@ class Utils {
     return changes;
   }
 
-  static Future<RecentBlockhash> getBlockhash() async {
-    return await _solanaClient.rpcClient.getRecentBlockhash(commitment: Commitment.confirmed);
+  static Future<LatestBlockhash> getBlockhash() async {
+    return await _solanaClient.rpcClient.getLatestBlockhash(commitment: Commitment.confirmed).then((value) => value.value);
   }
 
   static Future<String> sendTransaction(SignedTx tx, {Commitment preflightCommitment = Commitment.confirmed}) async {
@@ -313,7 +318,7 @@ class Utils {
 
   static Future<String> sendInstructions(List<Instruction> ixs , {Commitment preflightCommitment = Commitment.confirmed}) async {
     Message msg = Message(instructions: ixs);
-    RecentBlockhash blockhash = await Utils.getBlockhash();
+    LatestBlockhash blockhash = await Utils.getBlockhash();
     SignedTx tx = await KeyManager.instance.signMessage(msg, blockhash.blockhash);
     String sig = await Utils.sendTransaction(tx);
     await Utils.confirmTransaction(sig);
@@ -326,7 +331,7 @@ class Utils {
     Encoding encoding = Encoding.base64,
     DataSlice? dataSlice,
   }) async {
-    return _solanaClient.rpcClient.getAccountInfo(pubkey, commitment: commitment, encoding: encoding, dataSlice: dataSlice);
+    return _solanaClient.rpcClient.getAccountInfo(pubkey, commitment: commitment, encoding: encoding, dataSlice: dataSlice).then((value) => value.value);
   }
 
   static Future<VoteAccounts> getVoteAccounts() {
@@ -379,7 +384,7 @@ class Utils {
       const TokenAccountsFilter.byProgramId(TokenProgram.programId),
       encoding: Encoding.jsonParsed,
       commitment: Commitment.confirmed,
-    );
+    ).then((value) => value.value);
     for (final ProgramAccount value in accounts) {
       if (value.account.data is ParsedSplTokenProgramAccountData) {
         ParsedSplTokenProgramAccountData data = value.account.data as ParsedSplTokenProgramAccountData;
@@ -394,7 +399,7 @@ class Utils {
         }
       }
     }
-    int lamports = await _solanaClient.rpcClient.getBalance(pubKey, commitment: Commitment.confirmed);
+    int lamports = await _solanaClient.rpcClient.getBalance(pubKey, commitment: Commitment.confirmed).then((value) => value.value);
     rawResults.add(SplTokenAccountDataInfoWithUsd(
       info: SplTokenAccountDataInfo(
         tokenAmount: TokenAmount(
@@ -440,7 +445,7 @@ class Utils {
 
   static Future<List<int>> getSolBalances(List<String> addresses) async {
     return _solanaClient.rpcClient.getMultipleAccounts(addresses).then((value) {
-      return value.map((e) => e?.lamports ?? 0).toList();
+      return value.value.map((e) => e?.lamports ?? 0).toList();
     });
   }
 
