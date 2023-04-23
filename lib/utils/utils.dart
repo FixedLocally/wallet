@@ -32,7 +32,10 @@ const wrappedSolMint = "So11111111111111111111111111111111111111112";
 const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 class Utils {
-  static final SolanaClient _solanaClient = SolanaClient(rpcUrl: RpcConstants.kRpcUrl, websocketUrl: RpcConstants.kWsUrl);
+  static final SolanaClient _solanaClient = SolanaClient(
+    rpcUrl: RpcConstants.kRpcUrl,
+    websocketUrl: RpcConstants.kWsUrl,
+  );
 
   static String _injectionJs = "";
   static Completer<void>? _completer;

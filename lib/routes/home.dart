@@ -1141,6 +1141,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                                   _routes = null;
                                   _chosenRoute = -1;
                                 });
+                                _loadedAmt = null;
                                 _loadRoutes(_from, _to);
                                 _tokenRefresherKey.currentState?.show();
                                 appWidget.startLoadingBalances(KeyManager.instance.pubKey);
