@@ -441,8 +441,9 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
 
   Widget _createWalletListTile(ManagedKey key) {
     bool selected = key.active && KeyManager.instance.mockPubKey == null;
+    bool canRemove = KeyManager.instance.canRemoveHdWallet || key.keyType != "seed";
     return Slidable(
-      endActionPane: ActionPane(
+      endActionPane: canRemove ? ActionPane(
         motion: const ScrollMotion(),
         children: [
           SlidableAction(
@@ -455,7 +456,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             label: S.current.removeWallet,
           ),
         ],
-      ),
+      ) : null,
       child: ListTile(
         leading: Stack(
           children: [

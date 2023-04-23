@@ -82,6 +82,7 @@ class KeyManager {
 
   bool get isEmpty => _wallets.isEmpty;
   bool get isNotEmpty => _wallets.isNotEmpty;
+  bool get canRemoveHdWallet => _wallets.where((e) => e.keyType == "seed").length > 1;
   String get pubKey => mockPubKey ?? _activeWallet!.pubKey;
   bool get isHdWallet => mockPubKey != null ? false : _activeWallet!.keyType == "seed";
   bool get isReady => _ready && _wallets.isNotEmpty;
@@ -390,6 +391,7 @@ class KeyManager {
 
   Future<void> requestRemoveWallet(BuildContext context, ManagedKey? managedKey) async {
     late String msg;
+    if (KeyManager.instance.isHdWallet && !KeyManager.instance.canRemoveHdWallet) return;
     if (KeyManager.instance.isHdWallet) {
       msg = S.current.removeHdWalletContent;
     } else {
