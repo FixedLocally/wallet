@@ -152,7 +152,7 @@ module.exports=_regeneratorRuntime=function _regeneratorRuntime(){return exports
                 return rpc("disconnect", opts);
             },
             signTransaction: async function(tx) {
-                let signature = await rpc("signTransaction", {"tx": [...serializeMessage(tx)], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo(), version: tx.version});
+                let signature = await rpc("signTransaction", {"tx": [...serializeMessage(tx)], "recentBlockhash": tx.recentBlockhash || tx.message.recentBlockhash, title: title(), logo: logo(), version: tx.version});
                 signature.signature = new Uint8Array(signature.signature);
                 debugLog("pre", tx.serialize({verifySignatures: false}).toString("base64"));
                 tx.addSignature(signature.publicKey, signature.signature);
@@ -161,7 +161,8 @@ module.exports=_regeneratorRuntime=function _regeneratorRuntime(){return exports
                 return tx;
             },
             signAllTransactions: async function(txs) {
-                let signatures = await rpc("signAllTransactions", {"txs": txs.map((tx) => ({"tx": [...serializeMessage(tx)], "recentBlockhash": tx.recentBlockhash, version: tx.version})), title: title(), logo: logo()});
+                console.log(txs);
+                let signatures = await rpc("signAllTransactions", {"txs": txs.map((tx) => ({"tx": [...serializeMessage(tx)], "recentBlockhash": tx.recentBlockhash || tx.message.recentBlockhash, version: tx.version})), title: title(), logo: logo()});
                 for (let i = 0; i < signatures.length; ++i) {
                     signatures[i].signature = new Uint8Array(signatures[i].signature);
                     debugLog("multi pre", txs[i], signatures[i]);

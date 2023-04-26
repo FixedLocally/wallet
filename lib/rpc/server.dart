@@ -273,18 +273,13 @@ class RpcServer {
     List<Map<String, dynamic>> txs = args["txs"]!.cast<Map<String, dynamic>>();
 
     List<CompiledMessage> compiledMessages = [];
-    List<Message> messages = [];
     List<List<int>> payloads = [];
-    List<String> blockhashes = [];
     List<int> versions = [];
     for (var e in txs) {
       List<int> payload = e["tx"].cast<int>();
       CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
-      Message message = Message.decompile(compiledMessage);
       compiledMessages.add(compiledMessage);
-      messages.add(message);
       payloads.add(payload);
-      blockhashes.add(e["recentBlockhash"]);
       versions.add(e["version"] ?? -1);
     }
 
@@ -311,9 +306,12 @@ class RpcServer {
       List<SignedTx> signedTxs = [];
       List<Signature> signatures = [];
       for (int i = 0; i < payloads.length; ++i) {
-        String recentBlockhash = blockhashes[i];
-        SignedTx signedTx = await KeyManager.instance.signMessage(messages[i], recentBlockhash);
+        // SignedTx signedTx = await KeyManager.instance.signMessage(messages[i], recentBlockhash);
         Signature signature = await KeyManager.instance.sign(payloads[i]);
+        SignedTx signedTx = SignedTx(
+          signatures: [signature],
+          compiledMessage: CompiledMessage(ByteArray(payloads[i])),
+        );
         signedTxs.add(signedTx);
         signatures.add(signature);
         print(signedTx.signatures.first.toBase58());
