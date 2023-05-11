@@ -430,10 +430,10 @@ class S {
     );
   }
 
-  /// `This will remove the wallet from this list, make sure you have a backup of your private key.`
+  /// `This will remove the wallet from this list, please make sure you have a backup of your private key.`
   String get removeKeyWalletContent {
     return Intl.message(
-      'This will remove the wallet from this list, make sure you have a backup of your private key.',
+      'This will remove the wallet from this list, please make sure you have a backup of your private key.',
       name: 'removeKeyWalletContent',
       desc: '',
       args: [],
@@ -1655,6 +1655,26 @@ class S {
     return Intl.message(
       'View',
       name: 'view',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `%s tokens`
+  String get numTokens {
+    return Intl.message(
+      '%s tokens',
+      name: 'numTokens',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are about to burn the following tokens, this action is irreversible, please make sure you've selected the correct tokens.`
+  String get aboutToBurn {
+    return Intl.message(
+      'You are about to burn the following tokens, this action is irreversible, please make sure you\'ve selected the correct tokens.',
+      name: 'aboutToBurn',
       desc: '',
       args: [],
     );

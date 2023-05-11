@@ -1976,8 +1976,36 @@ class _CloseEmptyAccountsDialogState extends State<_CloseEmptyAccountsDialog> wi
           child: Text(S.current.selectAll),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pop(context, _selected);
+          onPressed: () async {
+            List<SplTokenAccountDataInfoWithUsd> nonEmpty = _selected.where((element) => element.tokenAmount.amount != "0").toList();
+            NavigatorState nav = Navigator.of(context);
+            if (nonEmpty.isNotEmpty) {
+              String msg = S.current.aboutToBurn;
+              List<String> burnList = nonEmpty.map((e) => "${e.tokenAmount.uiAmountString} ${sharedData.tokenDetails[e.mint]?["symbol"] ?? e.mint.shortened}").toList();
+              bool approved = await Utils.showConfirmBottomSheet(
+                context: context,
+                title: sprintf(S.current.burnConfirm, [sprintf(S.current.numTokens, [nonEmpty.length])]),
+                bodyBuilder: (ctx) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(msg),
+                    SizedBox(height: 8,),
+                    ...burnList.map((e) => Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text("•"),
+                        ),
+                        Text(e),
+                      ],
+                    )),
+                  ],
+                ),
+              );
+              if (!approved) return;
+            }
+            nav.pop(_selected);
           },
           child: Text(S.of(context).cleanup),
         ),

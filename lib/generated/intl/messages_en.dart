@@ -22,6 +22,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "aboutToBurn": MessageLookupByLibrary.simpleMessage(
+            "You are about to burn the following tokens, this action is irreversible, please make sure you\'ve selected the correct tokens."),
         "activating": MessageLookupByLibrary.simpleMessage("Activating"),
         "active": MessageLookupByLibrary.simpleMessage("Active"),
         "addressCopied": MessageLookupByLibrary.simpleMessage("Address copied"),
@@ -144,6 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "No empty token accounts found"),
         "noRoutesFound":
             MessageLookupByLibrary.simpleMessage("No routes found"),
+        "numTokens": MessageLookupByLibrary.simpleMessage("%s tokens"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "pay": MessageLookupByLibrary.simpleMessage("Pay"),
         "percentFee": MessageLookupByLibrary.simpleMessage("%s%% fee"),
@@ -157,7 +160,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeHdWalletContent": MessageLookupByLibrary.simpleMessage(
             "This will remove the wallet from this list, but you will be able to recover it later with the seed phrase."),
         "removeKeyWalletContent": MessageLookupByLibrary.simpleMessage(
-            "This will remove the wallet from this list, make sure you have a backup of your private key."),
+            "This will remove the wallet from this list, please make sure you have a backup of your private key."),
         "removeThisDapp": MessageLookupByLibrary.simpleMessage("Remove %s"),
         "removeWallet": MessageLookupByLibrary.simpleMessage("Remove Wallet"),
         "removingDapp": MessageLookupByLibrary.simpleMessage("Removing dApp"),
