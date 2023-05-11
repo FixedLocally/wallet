@@ -74,7 +74,7 @@ class NftDetailsRoute extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => DAppRoute(
                         title: "",
-                        initialUrl: "https://solscan.io/token/${tokenDetails["mint"]}",
+                        initialUrl: "https://solscan.io/token/${balance.mint}",
                       ),
                       settings: const RouteSettings(name: "/browser"),
                     ),
