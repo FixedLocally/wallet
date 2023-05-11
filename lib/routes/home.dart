@@ -1553,7 +1553,11 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             _tokenRefresherKey.currentState?.show();
             appWidget.startLoadingBalances(KeyManager.instance.pubKey);
             await Utils.showLoadingDialog(context: context, future: sharedData.balancesCompleters[KeyManager.instance.pubKey]!.future);
-            List<SplTokenAccountDataInfoWithUsd> emptyAccounts = sharedData.balances[KeyManager.instance.pubKey]!.values.where((element) => element.tokenAmount.amount == "0").toList();
+            List<SplTokenAccountDataInfoWithUsd> emptyAccounts = sharedData
+                .balances[KeyManager.instance.pubKey]!.values
+                .where((element) => element.tokenAmount.amount == "0" || (element.usd != null && element.usd! < 0.001))
+                .toList();
+            emptyAccounts.sort(Utils.compoundComparator([(a, b) => (a.tokenAmount.uiAmountString?.doubleParsed ?? 0.0).compareTo(b.tokenAmount.uiAmountString?.doubleParsed ?? 0.0), (a, b) => a.usd?.compareTo(b.usd ?? 0) ?? 0]));
             if (emptyAccounts.isEmpty) {
               scaffold.showSnackBar(SnackBar(content: Text(S.current.noEmptyTokenAccounts)));
               return;
@@ -1567,19 +1571,36 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
             if (toClose.isEmpty) {
               return;
             }
+            List<List<Instruction>> pendingIxs = [[]];
+            int counter = 0;
+            for (SplTokenAccountDataInfoWithUsd account in toClose) {
+              if (counter >= 27) {
+                pendingIxs.add([]);
+                counter = 0;
+              }
+              List<Instruction> last = pendingIxs.last;
+              if (account.tokenAmount.amount.doubleParsed > 0) {
+                last.add(TokenInstruction.burnChecked(
+                  amount: account.tokenAmount.amount.intParsed,
+                  decimals: account.tokenAmount.decimals,
+                  accountToBurnFrom: Ed25519HDPublicKey.fromBase58(account.account),
+                  mint: Ed25519HDPublicKey.fromBase58(account.mint),
+                  owner: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                ));
+                counter += 2;
+              }
+              last.add(
+                TokenInstruction.closeAccount(
+                  accountToClose: Ed25519HDPublicKey.fromBase58(account.account),
+                  destination: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                  owner: Ed25519HDPublicKey.fromBase58(KeyManager.instance.pubKey),
+                ),
+              );
+              ++counter;
+            }
             // each tx can only take 27 accounts
-            for (int i = 0; i < toClose.length; i += 27) {
-              List<Instruction> ixs = [];
-              toClose.skip(i).take(27).forEach((account) {
-                ixs.add(
-                  TokenInstruction.closeAccount(
-                    accountToClose: Ed25519HDPublicKey(base58decode(account.account)),
-                    destination: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
-                    owner: Ed25519HDPublicKey(base58decode(KeyManager.instance.pubKey)),
-                  ),
-                );
-              });
-              await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(ixs));
+            for (int i = 0; i < pendingIxs.length; ++i) {
+              await Utils.showLoadingDialog(context: context, future: Utils.sendInstructions(pendingIxs[i]));
             }
             _tokenRefresherKey.currentState?.show();
             appWidget.startLoadingBalances(KeyManager.instance.pubKey);
@@ -1933,7 +1954,7 @@ class _CloseEmptyAccountsDialogState extends State<_CloseEmptyAccountsDialog> wi
                   }
                 },
                 title: Text(sharedData.tokenDetails[e.mint]?["name"] ?? e.mint.shortened),
-                subtitle: Text(sharedData.tokenDetails[e.mint]?["symbol"] ?? ""),
+                subtitle: Text("${e.tokenAmount.uiAmountString ?? ""} ${sharedData.tokenDetails[e.mint]?["symbol"] ?? ""}"),
               );
             }),
           ],
