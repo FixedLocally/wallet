@@ -56,6 +56,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
   bool _hasEnoughBalance = false;
   bool _locked = false;
   bool _enableWsol = false;
+  bool _invertSwapPrice = false;
 
   @override
   void initState() {
@@ -392,6 +393,7 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
           ),
           settings: const RouteSettings(name: "/browser"),
         )).then((value) {
+          _tokenRefresherKey.currentState?.show();
           setState(() {});
         });
       },
@@ -758,6 +760,8 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
       ]));
       Map<String, dynamic> fromTokenDetail = tokenDetails[_from] ?? {};
       Map<String, dynamic> toTokenDetail = tokenDetails[_to] ?? {};
+      double price = ((_routes?[_chosenRoute].outAmount ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6) / (_routes?[_chosenRoute].inAmount ?? 0) * pow(10, tokenDetails[_from]?["decimals"] ?? 6));
+      double inversePrice = 1 / price;
       return TextButtonTheme(
         data: TextButtonThemeData(
           style: TextButton.styleFrom(
@@ -1050,7 +1054,16 @@ class _HomeRouteState extends State<HomeRoute> with UsesSharedData, WidgetsBindi
                             children: [
                               Text(S.current.price),
                               Spacer(),
-                              Text("${((_routes?[_chosenRoute].outAmount ?? 0) / pow(10, tokenDetails[_to]?["decimals"] ?? 6) / (_routes?[_chosenRoute].inAmount ?? 0) * pow(10, tokenDetails[_from]?["decimals"] ?? 6)).toFixedTrimmed(null)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened} per ${tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _invertSwapPrice = !_invertSwapPrice;
+                                  });
+                                },
+                                child: _invertSwapPrice
+                                  ? Text("${inversePrice.toFixedTrimmed(null)} ${tokenDetails[_from]?["symbol"] ?? _to!.shortened} per ${tokenDetails[_to]?["symbol"] ?? _from!.shortened}")
+                                  : Text("${price.toFixedTrimmed(null)} ${tokenDetails[_to]?["symbol"] ?? _to!.shortened} per ${tokenDetails[_from]?["symbol"] ?? _from!.shortened}"),
+                              ),
                             ],
                           ),
                           Row(
