@@ -183,8 +183,8 @@
                 return txs;
             },
             signAndSendTransaction: async function(tx, opts) {
-                let sigs = tx.signatures.map(x => ({"publicKey": x.publicKey.toBase58(), "signature": x.signature ? [...x.signature] : null}));
-                let sig = await rpc("signAndSendTransaction", {"tx": [...serializeMessage(tx)], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo(), sigs, version: tx.version, ...opts});
+                let sigs = tx.signatures.map((x, i) => ({"publicKey": tx.message.accountKeys[i].toBase58(), "signature": x.signature ? [...x.signature] : [...x]}));
+                let sig = await rpc("signAndSendTransaction", {"tx": [...serializeMessage(tx)], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo(), sigs, version: tx.version === "legacy" ? -1 : tx.version, ...opts});
                 debugLog(sig);
                 return sig;
             },
@@ -219,11 +219,14 @@
         phantom.solana.__defineGetter__("isConnected", function() {
             return injectedScope["isConnected"];
         });
+        Object.freeze(solana);
+        Object.freeze(phantom);
         window.__defineGetter__("solana", () => solana);
         window.__defineGetter__("phantom", () => phantom);
         //#region wallet standard functions
         let signAndSendTransactionFunc = async (...inputs) => {
-            if (injectedScope.isConnected) throw new Error('not connected');
+            console.log("wallet-standard: signAndSendTransaction", inputs);
+            if (!injectedScope.isConnected) throw new Error('not connected');
 
             const outputs = [];
 
@@ -232,10 +235,10 @@
                 const { transaction, account, chain, options } = inputs[0];
                 const { minContextSlot, preflightCommitment, skipPreflight, maxRetries } = options || {};
                 if (account.address !== injectedScope.publicKey) throw new Error('invalid account');
-                if (chain === "solana:mainnet") throw new Error('invalid chain');
+                if (chain !== "solana:mainnet" && chain !== undefined) throw new Error('invalid chain');
 
                 const { signature } = await solana.signAndSendTransaction(
-                    VersionedTransaction.deserialize(transaction),
+                    solanaWeb3.VersionedTransaction.deserialize(transaction),
                     {
                         preflightCommitment,
                         minContextSlot,
@@ -254,6 +257,7 @@
             return outputs;
         }
         let signTransactionFunc = SolanaSignTransactionMethod = async (...inputs) => {
+            console.log("wallet-standard: signTransaction", inputs);
             if (!injectedScope.publicKey) throw new Error('not connected');
 
             const outputs = [];
@@ -261,10 +265,10 @@
             if (inputs.length >= 1) {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const { transaction, account, chain } = inputs[0];
-                if (chain != "solana:mainnet") throw new Error('invalid chain');
+                if (chain !== "solana:mainnet" && chain !== undefined) throw new Error('invalid chain');
                 if (account.address !== injectedScope.publicKey) throw new Error('invalid account');
 
-                const signedTransactions = await solana.signAllTransactions(transactions);
+                const signedTransactions = await solana.signAllTransactions(inputs.map(x => solanaWeb3.VersionedTransaction.deserialize(x.transaction)));
 
                 outputs.push(
                     ...signedTransactions.map((signedTransaction) => ({ signedTransaction: signedTransaction.serialize() }))
@@ -278,6 +282,7 @@
             return () => solana.off(event, listener);
         };
         let signMessageFunc = async (...inputs) => {
+            console.log("wallet-standard: signMessage", inputs);
             if (account.address !== injectedScope.publicKey) throw new Error('invalid account');
 
             const outputs = [];
@@ -310,9 +315,11 @@
             // StandardConnectFeature
             "standard:connect": {
                 version: "1.0.0",
-                connect: (input) => {
+                connect: async (input) => {
+                    if (input == undefined) input = {};
                     console.log("wallet-standard: connect", input);
-                    return solana.connect({onlyIfTrusted: !!input.silent});
+                    let conn = await solana.connect({onlyIfTrusted: !!input.silent});
+                    return walletObj.accounts;
                 },
             },
             // StandardDisconnectFeature
@@ -344,16 +351,26 @@
             "solana:signMessage": {
                 version: "1.0.0",
                 signMessage: signMessageFunc,
+            },
+            "mint:": {
+                mint: solana,
+            },
+        }));
+        walletObj.__defineGetter__("accounts", () => {
+            if (injectedScope.publicKey) {
+                return [{
+                    address: injectedScope.publicKey,
+                    publicKey: solanaWeb3.bs58.decode(injectedScope.publicKey.toBase58()),
+                    chains: ["solana:mainnet"],
+                    features: Object.keys(walletObj.features),
+                    label: "Placeholder label",
+                    icon: iconUrl,
+                }];
+            } else {
+                return [];
             }
-        }));
-        walletObj.__defineGetter__("account", () => ({
-            address: injectedScope.publicKey,
-            publicKey: solanaWeb3.bs58.decode(injectedScope.publicKey),
-            chains: ["solana:mainnet"],
-            features: [Object.keys(walletObj.features)],
-            label: "Placeholder label",
-            icon: iconUrl,
-        }));
+        });
+        walletObj.__defineGetter__("publicKey", () => injectedScope.publicKey);
 
 
         const callback = ({ register }) => register(walletObj);
