@@ -156,7 +156,7 @@ class RpcServer {
           Ed25519HDPublicKey publicKey = Ed25519HDPublicKey.fromBase58(e["publicKey"]);
           return Signature((e["signature"] ?? []).cast<int>(), publicKey: publicKey);
         }).toList();
-        int dummyIndex = sigs.indexWhere((element) => element.bytes.isEmpty);
+        int dummyIndex = sigs.indexWhere((element) => element.publicKey.toString() == KeyManager.instance.pubKey.toString());
         if (dummyIndex >= 0) {
           sigs[dummyIndex] = signature;
         } else {
