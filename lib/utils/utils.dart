@@ -309,10 +309,11 @@ class Utils {
     return await _solanaClient.rpcClient.getLatestBlockhash(commitment: Commitment.confirmed).then((value) => value.value);
   }
 
-  static Future<String> sendTransaction(SignedTx tx, {Commitment preflightCommitment = Commitment.confirmed}) async {
+  static Future<String> sendTransaction(SignedTx tx, {Commitment preflightCommitment = Commitment.confirmed, bool skipPreflight = false}) async {
     return _solanaClient.rpcClient.sendTransaction(
       tx.encode(),
       preflightCommitment: preflightCommitment,
+      skipPreflight: skipPreflight,
     );
   }
 

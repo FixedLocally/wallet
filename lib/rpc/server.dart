@@ -126,6 +126,7 @@ class RpcServer {
 
     List<int> payload = args["tx"].cast<int>();
     int version = args["version"] ?? -1;
+    bool skipPreflight = args["skipPreflight"] ?? false;
 
     Future<List<TokenChanges>> simulation = Utils.simulateTxs([payload], KeyManager.instance.pubKey, [version]);
     bool approved = await Utils.showConfirmBottomSheet(
@@ -176,7 +177,7 @@ class RpcServer {
       print(signedTx.encode());
       if (send) {
         try {
-          String sig = await Utils.sendTransaction(signedTx);
+          String sig = await Utils.sendTransaction(signedTx, skipPreflight: skipPreflight);
           return RpcResponse.primitive({
             "signature": {"type": null, "value": sig},
             "publicKey": {
