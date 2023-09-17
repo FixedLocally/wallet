@@ -112,7 +112,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
   Future _runInjection() async {
     Completer completer = Completer();
     _injectionCompleter = completer;
-    String js = '(${Utils.injectionJs})("$_realMessageHandlerKey", ${jsonEncode(_bogusMessageHandlerKeys)})';
+    String js = '${Utils.injectionJs}("$_realMessageHandlerKey", ${jsonEncode(_bogusMessageHandlerKeys)})';
     Future f1 = _controller!.runJavascript(js);
     await f1;
     completer.complete();
