@@ -328,22 +328,28 @@ class RpcServer {
             sigs.add(sig);
           }
           return RpcResponse.primitive(sigs.map((e) => {
-            "signature": {"type": null, "value": e},
-            "publicKey": {
-              "type": "PublicKey",
-              "value": [KeyManager.instance.pubKey]
-            },
+            "type": null,
+            "value": {
+              "signature": {"type": null, "value": e},
+              "publicKey": {
+                "type": "PublicKey",
+                "value": [KeyManager.instance.pubKey]
+              },
+            }
           }).toList());
         } on JsonRpcException catch (e) {
           return RpcResponse.error(e.code, e.message);
         }
       }
       return RpcResponse.primitive(signatures.map((e) => {
-        "signature": {"type": null, "value": e.bytes},
-        "publicKey": {
-          "type": "PublicKey",
-          "value": [KeyManager.instance.pubKey]
-        },
+        "type": null,
+        "value": {
+          "signature": {"type": null, "value": e.bytes},
+          "publicKey": {
+            "type": "PublicKey",
+            "value": [KeyManager.instance.pubKey]
+          },
+        }
       }).toList());
     } else {
       return RpcResponse.error(RpcConstants.kUserRejected);

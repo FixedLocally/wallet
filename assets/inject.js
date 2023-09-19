@@ -57,11 +57,7 @@
                 // constructor
                 _result = newCall(solanaWeb3[result.type], result.value);
             } else {
-                if (result.value != null) {
-                    _result = result.value;
-                } else {
-                    _result = result;
-                }
+                _result = result.value;
                 debugLog("nest", _result);
                 if (Array.isArray(_result)) {
                     return _result.map(parseRpcResult);
@@ -225,7 +221,7 @@
         window.__defineGetter__("phantom", () => phantom);
         //#region wallet standard functions
         let signAndSendTransactionFunc = async (...inputs) => {
-            console.log("wallet-standard: signAndSendTransaction", inputs);
+            console.log("wallet-standard:signAndSendTransaction", inputs);
             if (!injectedScope.isConnected) throw new Error('not connected');
 
             const outputs = [];
@@ -257,7 +253,7 @@
             return outputs;
         }
         let signTransactionFunc = SolanaSignTransactionMethod = async (...inputs) => {
-            console.log("wallet-standard: signTransaction", inputs);
+            console.log("wallet-standard:signTransaction", inputs);
             if (!injectedScope.publicKey) throw new Error('not connected');
 
             const outputs = [];
@@ -282,7 +278,7 @@
             return () => solana.off(event, listener);
         };
         let signMessageFunc = async (...inputs) => {
-            console.log("wallet-standard: signMessage", inputs);
+            console.log("wallet-standard:signMessage", inputs);
             if (account.address !== injectedScope.publicKey) throw new Error('invalid account');
 
             const outputs = [];
@@ -317,7 +313,7 @@
                 version: "1.0.0",
                 connect: async (input) => {
                     if (input == undefined) input = {};
-                    console.log("wallet-standard: connect", input);
+                    console.log("wallet-standard:connect", input);
                     let conn = await solana.connect({onlyIfTrusted: !!input.silent});
                     return walletObj.accounts;
                 },
@@ -326,7 +322,7 @@
             "standard:disconnect": {
                 version: "1.0.0",
                 disconnect: () => {
-                    console.log("wallet-standard: disconnect");
+                    console.log("wallet-standard:disconnect");
                     return solana.disconnect();
                 }
             },
@@ -396,7 +392,7 @@
         //#endregion
 
         // debug
-        // window.injectedScope = injectedScope;
-        // window.eventHandlers = eventHandlers;
+         window.injectedScope = injectedScope;
+         window.eventHandlers = eventHandlers;
     })();
 })
