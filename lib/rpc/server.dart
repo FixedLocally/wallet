@@ -29,7 +29,7 @@ class RpcServer {
 
   static Future<RpcResponse> entryPoint(ContextHolder contextHolder, String method, Map args) async {
     if (!_init) await _doInit();
-    print("rpcEntryPoint: $method, $args");
+    debugPrint("rpcEntryPoint: $method, $args");
     switch (method) {
       case "print":
         return _print(contextHolder, args);
@@ -57,7 +57,7 @@ class RpcServer {
 
   // print a message to the console
   static Future<RpcResponse> _print(ContextHolder contextHolder, Map args) async {
-    print("rpcCall: print: ${args["message"]}");
+    debugPrint("rpcCall: print: ${args["message"]}");
     return RpcResponse.primitive(0);
   }
 
@@ -166,15 +166,15 @@ class RpcServer {
           signatures: sigs,
           compiledMessage: CompiledMessage(ByteArray(payload)),
         );
-        print(signedTx.signatures);
+        debugPrint("${signedTx.signatures}");
       } else {
         signedTx = SignedTx(
           signatures: [signature],
           compiledMessage: CompiledMessage(ByteArray(payload)),
         );
       }
-      print(signature.toBase58());
-      print(signedTx.encode());
+      debugPrint(signature.toBase58());
+      debugPrint(signedTx.encode());
       if (send) {
         try {
           String sig = await Utils.sendTransaction(signedTx, skipPreflight: skipPreflight);
@@ -250,7 +250,7 @@ class RpcServer {
     if (approved) {
       Signature signature = await KeyManager.instance.sign(payload);
 
-      print(signature.toBase58());
+      debugPrint(signature.toBase58());
       return RpcResponse.primitive({
         "signature": {"type": null, "value": signature.bytes},
         "publicKey": {
@@ -315,9 +315,9 @@ class RpcServer {
         );
         signedTxs.add(signedTx);
         signatures.add(signature);
-        print(signedTx.signatures.first.toBase58());
-        print(signedTx.encode());
-        print(signature.toBase58());
+        debugPrint(signedTx.signatures.first.toBase58());
+        debugPrint(signedTx.encode());
+        debugPrint(signature.toBase58());
       }
 
       if (send) {

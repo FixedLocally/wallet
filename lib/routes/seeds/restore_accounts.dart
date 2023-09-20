@@ -133,7 +133,7 @@ class _ImportAccountsRouteState extends State<ImportAccountsRoute> {
                       builder: (_) => EntryPointRoute(),
                       settings: const RouteSettings(name: "/"),
                     ));
-                    print(KeyManager.instance.isEmpty);
+                    debugPrint("${KeyManager.instance.isEmpty}");
                   },
           ),
         ],

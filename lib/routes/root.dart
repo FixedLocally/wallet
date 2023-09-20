@@ -55,16 +55,16 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
     _jupRouteMapLoading = true;
     JupiterIndexedRouteMap routeMap = await _jupClient.getIndexedRouteMap();
     _jupRouteMap = routeMap;
-    print("got jup map");
+    debugPrint("got jup map");
     List<String> topTokens = await Utils.getTopTokens();
     topTokens.asMap().forEach((key, value) {
       _jupTopTokens[value] = key;
     });
     List<String> mints = routeMap.mintKeys.toList();
     mints.removeWhere((element) => _tokenDetails.keys.contains(element));
-    print(mints);
+    debugPrint("$mints");
     Utils.getTokens(mints).then((value) {
-      print("got ${value.length} tokens");
+      debugPrint("got ${value.length} tokens");
       setState(() {
         value.forEach((mint, info) {
           if (info != null) _tokenDetails[mint] = info;

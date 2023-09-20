@@ -220,7 +220,7 @@ class Utils {
     ).then((value) => value.value);
     Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed).then((value) => value.value);
     List results = await Future.wait([statusFuture, solBalanceFuture]).catchError((_) {
-      print(_);
+      debugPrint(_);
       return <Object>[];
     });
     if (results.isEmpty) return TokenChanges.error("cannot get results");

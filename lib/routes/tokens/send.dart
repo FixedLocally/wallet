@@ -123,9 +123,9 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                             });
                             if (value.endsWith(".sol")) {
                               // could be a SNS name
-                              print("could be a SNS name");
+                              debugPrint("could be a SNS name");
                               SnsResolver.resolve(value).then((value) {
-                                print("value -> ${value.owner?.toBase58()}");
+                                debugPrint("value -> ${value.owner?.toBase58()}");
                                 if (value.owner == null) {
                                   setState(() {
                                     _snsRecipient = null;

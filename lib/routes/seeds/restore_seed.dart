@@ -161,7 +161,7 @@ class _RestoreSeedRouteState extends State<RestoreSeedRoute> {
 
   Future<bool> onPaste(TextSelectionDelegate delegate) {
     return Clipboard.getData(Clipboard.kTextPlain).then((value) {
-      print("paste: ${value}");
+      debugPrint("paste: $value");
       if (value != null) {
         return paste(value.text);
       }

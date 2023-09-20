@@ -503,7 +503,7 @@ class KeyManager {
             );
           }
         } else {
-          print("installing app $domain");
+          debugPrint("installing app $domain");
           int id = await txn.insert("apps", {
             "url": "https://$domain",
             "name": title,
