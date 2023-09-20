@@ -279,7 +279,6 @@
         };
         let signMessageFunc = async (...inputs) => {
             console.log("wallet-standard:signMessage", inputs);
-            if (account.address !== injectedScope.publicKey) throw new Error('invalid account');
 
             const outputs = [];
 
