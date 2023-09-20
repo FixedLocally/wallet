@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +8,7 @@ import '../generated/l10n.dart';
 import 'mixins/timer.dart';
 import '../utils/utils.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 import 'mixins/context_holder.dart';
 import '../rpc/rpc.dart';
@@ -28,9 +28,9 @@ class DAppRoute extends StatefulWidget {
 }
 
 class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute>, TimerMixin<DAppRoute> {
-  WebViewController? _controller;
   String? _title;
   String? _subtitle;
+  late WebViewController _controller;
   late Random _random;
   late StreamSubscription<RpcEvent> _sub;
 
@@ -40,19 +40,19 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
   bool _ready = false;
   bool _exit = false;
 
-  Set<JavascriptChannel> get _jsChannels => {
-    JavascriptChannel(
+  Set<JavaScriptChannel> get _jsChannels => {
+    JavaScriptChannel(
       name: 'messageHandler$_realMessageHandlerKey',
-      onMessageReceived: (JavascriptMessage message) async {
+      onMessageReceived: (JavaScriptMessage message) async {
         String msg = message.message;
         Map call = jsonDecode(msg);
         String method = call['method'];
         Map params = call['params'] ?? {};
         int id = call['id'];
-        String url = await _controller?.currentUrl() ?? "";
+        String url = await _controller.currentUrl() ?? "";
         params['domain'] = Uri.parse(url).host;
         RpcServer.entryPoint(contextHolder, method, params).then((value) {
-          print("rpcCall: $method, $params => $value");
+          debugPrint("rpcCall: $method, $params => $value");
           if (value.isError) {
             _rpcReject(value.response, id);
           } else {
@@ -65,9 +65,9 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
         // ));
       }
     ),
-    ..._bogusMessageHandlerKeys.map((key) => JavascriptChannel(
+    ..._bogusMessageHandlerKeys.map((key) => JavaScriptChannel(
         name: 'messageHandler$key',
-        onMessageReceived: (JavascriptMessage message) {
+        onMessageReceived: (JavaScriptMessage message) {
           // does nothing.
         }
     )),
@@ -78,25 +78,95 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
 
   final List<String> _bogusMessageHandlerKeys = [];
 
+  int _progress = 0;
+
   @override
   void initState() {
     super.initState();
     _random = Random();
     _realMessageHandlerKey = _createKey();
-    if (Platform.isAndroid) WebView.platform = AndroidWebView();
     _ready = true;
     for (int i = 0; i < 99; ++i) {
       _bogusMessageHandlerKeys.add(_createKey());
     }
+
+    // create webview controller and enable js
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted);
+    // enable debugging if necessary
+    if (_controller.platform is AndroidWebViewController) {
+      AndroidWebViewController.enableDebugging(!kReleaseMode);
+    }
+    // initialUrl
+    _controller.loadRequest(Uri.parse(widget.initialUrl));
+    _controller.setNavigationDelegate(NavigationDelegate(
+      onPageStarted: (String url) {
+        _runInjection();
+        setState(() {
+          _title = S.current.loading;
+          _subtitle = url;
+        });
+      },
+      onPageFinished: (String url) async {
+        _runInjection();
+        _controller.getTitle().then((title) {
+          if (title != null) {
+            setState(() {
+              _subtitle = url;
+              _title = title;
+            });
+          }
+        });
+      },
+      onProgress: (int progress) {
+        debugPrint("onProgress: $progress");
+        setState(() {
+          _progress = progress;
+        });
+        if (progress == 100) {
+          // hide progress bar after 500ms
+          Future.delayed(const Duration(milliseconds: 500), () {
+            setState(() {
+              _progress = 0;
+            });
+          });
+        }
+      },
+      onUrlChange: (UrlChange request) async {
+        setState(() {
+          _subtitle = request.url;
+        });
+        // return NavigationDecision.navigate;
+      },
+      onNavigationRequest: (NavigationRequest request) async {
+        debugPrint("onNavigationRequest: ${request.url}");
+        // page changed
+        if (RpcServer.connected) {
+          await RpcServer.entryPoint(contextHolder, "disconnect", {});
+        }
+        setState(() {
+          _title = request.url;
+          _subtitle = null;
+        });
+        return NavigationDecision.navigate;
+      },
+      onWebResourceError: (WebResourceError error) {
+        debugPrint("onWebResourceError: ${error.errorType}");
+      },
+    ));
+
+    for (JavaScriptChannel c in _jsChannels) {
+      _controller.addJavaScriptChannel(c.name, onMessageReceived: c.onMessageReceived);
+    }
     _sub = RpcServer.eventStream.listen((event) async {
-      print("rpcEvent: $event");
-      await _controller?.runJavascript("window.eventIngestion$_realMessageHandlerKey('${event.trigger}', ${jsonEncode(event.response)}, ${jsonEncode(event.updates)})");
+      debugPrint("rpcEvent: $event");
+      await _controller.runJavaScript("window.eventIngestion$_realMessageHandlerKey('${event.trigger}', ${jsonEncode(event.response)}, ${jsonEncode(event.updates)})");
     });
   }
 
   @override
   void onTimer() {
-    _controller?.getTitle().then((value) {
+    _controller.getTitle().then((value) {
       if (value != _title) {
         setState(() {
           _title = value;
@@ -113,7 +183,7 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
     Completer completer = Completer();
     _injectionCompleter = completer;
     String js = '${Utils.injectionJs}("$_realMessageHandlerKey", ${jsonEncode(_bogusMessageHandlerKeys)})';
-    Future f1 = _controller!.runJavascript(js);
+    Future f1 = _controller.runJavaScript(js);
     await f1;
     completer.complete();
   }
@@ -140,11 +210,19 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
             Navigator.pop(context);
           },
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(2),
+          child: _progress > 0 ? LinearProgressIndicator(
+            value: _progress / 100,
+            backgroundColor: Colors.white,
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
+          ) : SizedBox(),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              _controller?.reload();
+              _controller.reload();
             },
           ),
         ],
@@ -154,8 +232,8 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
 
     return WillPopScope(
       onWillPop: () async {
-        if (await _controller?.canGoBack() == true && !_exit) {
-          _controller?.goBack();
+        if (await _controller.canGoBack() == true && !_exit) {
+          _controller.goBack();
           return false;
         }
         return true;
@@ -165,66 +243,21 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
   }
 
   Widget _webView() {
-    return WebView(
+    return WebViewWidget(
       // initialUrl: 'https://r3byv.csb.app/',
-      initialUrl: widget.initialUrl,
-      // initialUrl: 'https://tulip.garden/',
-      // initialUrl: 'https://mainnet.zeta.markets/',
-      // initialUrl: 'https://solend.fi/dashboard',
-      // initialUrl: 'http://localhost:3000/',
-      // initialUrl: widget.initialUrl,
-      javascriptMode: JavascriptMode.unrestricted,
-      javascriptChannels: _jsChannels,
-      debuggingEnabled: !kReleaseMode,
-
-      onPageStarted: (String url) {
-        _runInjection();
-        setState(() {
-          _title = S.current.loading;
-          _subtitle = url;
-        });
-      },
-      onWebViewCreated: (WebViewController webviewController) {
-        _controller = webviewController;
-        // _loadHtmlFromAssets();
-      },
-      onPageFinished: (String url) async {
-        _runInjection();
-        _controller?.getTitle().then((title) {
-          if (title != null) {
-            setState(() {
-              _subtitle = url;
-              _title = title;
-            });
-          }
-        });
-      },
-      navigationDelegate: (NavigationRequest request) async {
-        String currentUrl = await _controller!.currentUrl() ?? "";
-        if (request.url.split("#").first != currentUrl.split("#").first) {
-          // page changed
-          if (RpcServer.connected) {
-            await RpcServer.entryPoint(contextHolder, "disconnect", {});
-          }
-          setState(() {
-            _title = request.url;
-            _subtitle = null;
-          });
-        }
-        return NavigationDecision.navigate;
-      },
+      controller: _controller,
     );
   }
 
   void _rpcResolve(dynamic response, int id) {
     String msg = jsonEncode(response);
-    print('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)');
-    _injectionCompleter.future.then((value) => _controller!.runJavascript('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)'));
+    debugPrint('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)');
+    _injectionCompleter.future.then((value) => _controller.runJavaScript('window["resolveRpc$_realMessageHandlerKey"]($id, $msg)'));
   }
 
   void _rpcReject(dynamic response, int id) {
     String msg = jsonEncode(response);
-    _injectionCompleter.future.then((value) => _controller!.runJavascript('window["rejectRpc$_realMessageHandlerKey"]($id, $msg)'));
+    _injectionCompleter.future.then((value) => _controller.runJavaScript('window["rejectRpc$_realMessageHandlerKey"]($id, $msg)'));
   }
 
   @override
@@ -232,4 +265,11 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
     _sub.cancel();
     super.dispose();
   }
+}
+
+class JavaScriptChannel {
+  final String name;
+  final void Function(JavaScriptMessage) onMessageReceived;
+
+  JavaScriptChannel({required this.name, required this.onMessageReceived});
 }
