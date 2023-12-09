@@ -157,6 +157,7 @@
                 return rpc("disconnect", opts);
             },
             signTransaction: async function(tx) {
+                console.log(tx);
                 let signature = await rpc("signTransaction", {"tx": [...serializeMessage(tx)], "recentBlockhash": tx.recentBlockhash || tx.message.recentBlockhash, title: title(), logo: logo(), version: tx.version});
                 signature.signature = new Uint8Array(signature.signature);
                 debugLog("pre", tx.serialize({verifySignatures: false}).toString("base64"));
@@ -179,7 +180,8 @@
                 return txs;
             },
             signAndSendTransaction: async function(tx, opts) {
-                let sigs = tx.signatures.map((x, i) => ({"publicKey": tx.message.accountKeys[i].toBase58(), "signature": x.signature ? [...x.signature] : [...x]}));
+                console.log(tx);
+                let sigs = tx.signatures.map((x, i) => ({"publicKey": (tx.message.accountKeys || tx.message.staticAccountKeys)[i].toBase58(), "signature": x.signature ? [...x.signature] : [...x]}));
                 let sig = await rpc("signAndSendTransaction", {"tx": [...serializeMessage(tx)], "recentBlockhash": tx.recentBlockhash, title: title(), logo: logo(), sigs, version: tx.version === "legacy" ? -1 : tx.version, ...opts});
                 debugLog(sig);
                 return sig;
