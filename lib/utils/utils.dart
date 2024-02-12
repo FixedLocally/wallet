@@ -181,6 +181,7 @@ class Utils {
     }
     int solOffset = 0;
     Map<String, double> changes = {};
+    Map<String, List<Delegation>> delegations = {};
     List<dynamic> resultChanges = result["changes"];
     List<String> mints = [];
     for (Map<String, dynamic> change in resultChanges) {
@@ -188,6 +189,8 @@ class Utils {
       String mint = change["mint"];
       int before = int.parse(change["balanceBefore"]);
       int after = int.parse(change["balanceAfter"]);
+      int delegatedAmount = int.parse(change["delegateAmount"] ?? "0");
+      String delegate = change["delegateAfter"];
       if (change["authorityBefore"] != owner) before = 0;
       if (change["authorityAfter"] != owner) after = 0;
       int diff = after - before;
@@ -196,7 +199,9 @@ class Utils {
       } else {
         changes[mint] = (changes[mint] ?? 0) + diff;
       }
-      // todo handle delegations
+      if (delegatedAmount > 0) {
+        delegations[mint] = (delegations[mint] ?? []) + [Delegation(delegate, delegatedAmount.toDouble())];
+      }
       mints.add(mint);
     }
     Map<String, Map<String, dynamic>?> tokens = await getTokens(mints);
@@ -204,8 +209,13 @@ class Utils {
       if (tokens[mint] != null && changes[mint] != null) {
         changes[mint] = changes[mint]! / pow(10, tokens[mint]!["decimals"]);
       }
+      if (tokens[mint] != null && delegations[mint] != null) {
+        delegations[mint] = delegations[mint]!.map((e) => Delegation(e.delegate, e.amount / pow(10, tokens[mint]!["decimals"]))).toList();
+      }
     }
-    return TokenChanges(changes, {}, {}, tokens, solOffset);
+    print(changes);
+    print(delegations);
+    return TokenChanges(changes, delegations, {}, tokens, solOffset);
     // return TokenChanges(changes, delegations, updatedAcctsMap, await getTokens(updatedAcctsMap.values.map((e) => e.mint).toList()), postSolBalance - preSolBalance);
   }
 
@@ -640,7 +650,7 @@ class Utils {
 
 class TokenChanges {
   final Map<String, double> changes;
-  final Map<String, double> delegations;
+  final Map<String, List<Delegation>> delegations;
   final Map<String, SplTokenAccountDataInfo> updatedAccounts;
   final Map<String, Map<String, dynamic>?> tokens;
   final int solOffset;
@@ -653,7 +663,7 @@ class TokenChanges {
 
   static TokenChanges merge(List<TokenChanges> tokenChanges) {
     Map<String, double> changes = {};
-    Map<String, double> delegations = {};
+    Map<String, List<Delegation>> delegations = {};
     Map<String, SplTokenAccountDataInfo> updatedAccounts = {};
     Map<String, Map<String, dynamic>> tokens = {};
     int solOffset = 0;
@@ -672,7 +682,7 @@ class TokenChanges {
         tokens[key] = value;
       });
       tokenChanges[i].delegations.forEach((key, value) {
-        delegations[key] = (delegations[key] ?? 0) + value;
+        delegations[key] = (delegations[key] ?? []) + value;
       });
       solOffset += tokenChanges[i].solOffset;
     }
@@ -695,27 +705,28 @@ class TokenChanges {
       return Column(
         children: [
           ...delegations.map((key, value) {
-            String mint = updatedAccounts[key]!.mint;
+            String mint = key;
             // String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
             String symbol = tokens[mint]?["symbol"] ?? mint;
             symbol = symbol.isNotEmpty ? symbol : "${mint.substring(0, 5)}...";
-            if (updatedAccounts[key]?.delegateAmount != null) {
-              return MapEntry(
-                key,
-                HighlightedText(
-                  text: sprintf(S.current.approveToTransfer, [
-                    updatedAccounts[key]?.delegateAmount?.uiAmountString,
-                    symbol,
-                    updatedAccounts[key]?.delegate?.shortened
-                  ]),
-                  highlightStyle: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
-                  normalStyle: TextStyle(color: Colors.amber),
-                  textAlign: TextAlign.center,
-                ),
-              );
-            } else {
-              return MapEntry(key, const SizedBox.shrink());
-            }
+            return MapEntry(
+              key,
+              Column(
+                children: value.map((e) {
+                  return HighlightedText(
+                    text: sprintf(S.current.approveToTransfer, [
+                      e.amount.toFixedTrimmed(6),
+                      symbol,
+                      // updatedAccounts[key]?.delegate?.shortened
+                      e.delegate.shortened,
+                    ]),
+                    highlightStyle: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                    normalStyle: TextStyle(color: Colors.amber),
+                    textAlign: TextAlign.center,
+                  );
+                }).toList(),
+              ),
+            );
           }).values,
           HighlightedText(
             text: "SOL: #${solOffset > 0 ? "+" : ""}${(solOffset / lamportsPerSol).toStringAsFixed(6)}#",
@@ -752,6 +763,18 @@ class TokenChanges {
   @override
   String toString() {
     return 'TokenChanges{changes: $changes, updatedAccounts: $updatedAccounts, solOffset: $solOffset, errorMessage: $errorMessage}';
+  }
+}
+
+class Delegation {
+  final String delegate;
+  final double amount;
+
+  Delegation(this.delegate, this.amount);
+
+  @override
+  String toString() {
+    return 'Delegation{delegate: $delegate, amount: $amount}';
   }
 }
 
