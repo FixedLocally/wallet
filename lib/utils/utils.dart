@@ -26,6 +26,7 @@ import 'extensions.dart';
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
 const String _priceApiUrl = "https://validator.utopiamint.xyz/api/price/";
 const String _tokenMetadataApiUrl = "https://validator.utopiamint.xyz/api/token/";
+const String _simulateApiUrl = "https://validator.utopiamint.xyz/api/simulate/";
 const String _yieldApiUrl = "https://validator.utopiamint.xyz/api/yield";
 const nativeSol = "native-sol";
 const wrappedSolMint = "So11111111111111111111111111111111111111112";
@@ -170,118 +171,42 @@ class Utils {
   }
 
   static Future<TokenChanges> simulateTx(List<int> rawMessage, String owner) async {
-    CompiledMessage compiledMessage = CompiledMessage(ByteArray(rawMessage));
-    List<AddressLookupTableAccount> lutAccts = [];
-    if (compiledMessage.version == TransactionVersion.v0) {
-      CompiledMessageV0 v0Message = compiledMessage as CompiledMessageV0;
-      lutAccts = await _solanaClient.rpcClient.getAddressLookUpTableAccounts(v0Message.addressTableLookups);
+    Map<String, dynamic> result = json.decode(await _httpPost(_simulateApiUrl, {
+      "payload": base64Encode(rawMessage),
+      "subject": owner,
+    }));
+    print("simulate result $result");
+    if (result["success"] == false) {
+      return TokenChanges.error(result["error"], false);
     }
-    Message message = Message.decompile(compiledMessage, addressLookupTableAccounts: lutAccts);
-    // prepend header
-    int sigs = compiledMessage.requiredSignatureCount;
-    List<int> simulationPayload = [sigs, ...List.generate(sigs * 64, (_) => 0), ...rawMessage];
-    // all addresses involved in the transaction
-    List<String> addresses = message.instructions
-        .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
-        .expand((e) => e).toSet().toList();
-    // all accounts involved in the transaction while interacting with token programs (must get)
-    List<String> tokenProgramAddresses = message.instructions
-        .where((e) => e.programId.toBase58() == TokenProgram.programId || e.programId.toBase58() == AssociatedTokenAccountProgram.programId)
-        .map((e) => e.accounts.map((e) => e.pubKey.toBase58()).toList()).toList()
-    // normal token accts are unlikely to have that many 1s, probably system accts
-        .expand((e) => e).where((e) => !e.contains("111111111")).toSet().toList();
-    List<Account?> accounts = await batchGetAccounts(addresses);
-    Map<String, Account?> accountMap = {};
-    for (int i = 0; i < addresses.length; ++i) {
-      accountMap[addresses[i]] = accounts[i];
-    }
-    // remove accounts that are not token accts and not null
-    for (int i = 0; i < addresses.length; i++) {
-      if (accounts[i] != null) {
-        if ((accounts[i]!.data as BinaryAccountData).data.length != 165) {
-          addresses[i] = "";
-        }
-      } else {
-        if (!tokenProgramAddresses.contains(addresses[i])) {
-          addresses[i] = "";
-        }
-      }
-    }
-    addresses = addresses.where((element) => element.isNotEmpty).toList();
-    addresses = [...addresses, owner];
-    Future<TransactionStatus> statusFuture = _solanaClient.rpcClient.simulateTransaction(
-      base64Encode(simulationPayload),
-      replaceRecentBlockhash: true,
-      commitment: Commitment.confirmed,
-      accounts: SimulateTransactionAccounts(
-        accountEncoding: Encoding.base64,
-        addresses: addresses,
-      ),
-    ).then((value) => value.value);
-    Future<int> solBalanceFuture = _solanaClient.rpcClient.getBalance(owner, commitment: Commitment.confirmed).then((value) => value.value);
-    List results = await Future.wait([statusFuture, solBalanceFuture]).catchError((_) {
-      debugPrint(_);
-      return <Object>[];
-    });
-    if (results.isEmpty) return TokenChanges.error("cannot get results");
-    if ((results[0] as TransactionStatus).err != null) {
-      return TokenChanges.error("simulation failed");
-    }
-    TransactionStatus status = results[0];
-    int preSolBalance = results[1];
-
-    List<String> tokenAccounts = [];
-    List<Future<SplTokenAccountDataInfo>> updatedAcctFutures = [];
-    List<Future<SplTokenAccountDataInfo?>> preBalanceFutures = [];
-    int count = 0;
-    for (int i = 0; i < addresses.length - 1; ++i) {
-      Account? element = status.accounts?[i];
-      if (element?.data is BinaryAccountData) {
-        List<int> data = (element?.data as BinaryAccountData).data;
-        if (data.length == RpcConstants.kTokenAccountLength) {
-          tokenAccounts.add(addresses[i]);
-          updatedAcctFutures.add(Utils.parseTokenAccount(data));
-          // print("updated account: ${addresses[i]} $data");
-          if (accountMap[addresses[i]] != null) {
-            preBalanceFutures.add(Utils.parseTokenAccount((accountMap[addresses[i]]!.data as BinaryAccountData).data));
-          } else {
-            preBalanceFutures.add(Future.value(null));
-          }
-          ++count;
-        }
-      }
-    }
-    int postSolBalance = status.accounts?.last.lamports ?? 0;
-    List result = await Future.wait([Future.wait(updatedAcctFutures), Future.wait(preBalanceFutures)]);
-    List<SplTokenAccountDataInfo> updatedAccts = result[0];
-    List<SplTokenAccountDataInfo?> preBalances = result[1];
-    Map<String, SplTokenAccountDataInfo> updatedAcctsMap = {};
+    int solOffset = 0;
     Map<String, double> changes = {};
-    Map<String, double> delegations = {};
-    for (int i = 0; i < count; ++i) {
-      double oldAmt = double.parse(preBalances[i]?.tokenAmount.uiAmountString ?? "0");
-      double newAmt = double.parse(updatedAccts[i].tokenAmount.uiAmountString!);
-      // print("processing account ${tokenAccounts[i]}");
-      if (preBalances[i]?.owner == owner || preBalances[i] == null) {
-        // print("owner match");
-        if (updatedAccts[i].owner == owner) {
-          // print("updated owner match");
-          changes[tokenAccounts[i]] = newAmt - oldAmt;
-        } else {
-          // print("updated owner mismatch ${updatedAccts[i].owner}");
-          // setAuthority'd - new balance is 0
-          changes[tokenAccounts[i]] = -oldAmt;
-        }
-        if (preBalances[i]?.delegate != updatedAccts[i].delegate) {
-          // print("updated delegation ${updatedAccts[i].delegate} <= ${preBalances[i]?.delegate}");
-          // print("updated delegated amount ${updatedAccts[i].delegateAmount?.uiAmountString} <= ${preBalances[i]?.delegateAmount?.uiAmountString}");
-          // delegated - new balance is decreased by delegate amount
-          delegations[tokenAccounts[i]] = (delegations[tokenAccounts[i]] ?? 0.0) + double.parse(updatedAccts[i].delegateAmount?.uiAmountString ?? "0");
-        }
-        updatedAcctsMap[tokenAccounts[i]] = updatedAccts[i];
+    List<dynamic> resultChanges = result["changes"];
+    List<String> mints = [];
+    for (Map<String, dynamic> change in resultChanges) {
+      String address = change["account"];
+      String mint = change["mint"];
+      int before = int.parse(change["balanceBefore"]);
+      int after = int.parse(change["balanceAfter"]);
+      if (change["authorityBefore"] != owner) before = 0;
+      if (change["authorityAfter"] != owner) after = 0;
+      int diff = after - before;
+      if (address == owner) {
+        solOffset += diff;
+      } else {
+        changes[mint] = (changes[mint] ?? 0) + diff;
+      }
+      // todo handle delegations
+      mints.add(mint);
+    }
+    Map<String, Map<String, dynamic>?> tokens = await getTokens(mints);
+    for (String mint in mints) {
+      if (tokens[mint] != null && changes[mint] != null) {
+        changes[mint] = changes[mint]! / pow(10, tokens[mint]!["decimals"]);
       }
     }
-    return TokenChanges(changes, delegations, updatedAcctsMap, await getTokens(updatedAcctsMap.values.map((e) => e.mint).toList()), postSolBalance - preSolBalance);
+    return TokenChanges(changes, {}, {}, tokens, solOffset);
+    // return TokenChanges(changes, delegations, updatedAcctsMap, await getTokens(updatedAcctsMap.values.map((e) => e.mint).toList()), postSolBalance - preSolBalance);
   }
 
   static Future<TokenChanges> simulateVersionedTx(List<int> rawMessage, String owner) async {
@@ -800,7 +725,7 @@ class TokenChanges {
             ),
           ),
           ...changes.map((key, value) {
-            String mint = updatedAccounts[key]!.mint;
+            String mint = key;
             // String shortMint = mint.length > 5 ? "${mint.substring(0, 5)}..." : mint;
             String symbol = tokens[mint]?["symbol"] ?? mint;
             symbol = symbol.isNotEmpty ? symbol : "${mint.substring(0, 5)}...";
