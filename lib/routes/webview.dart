@@ -134,22 +134,28 @@ class _DAppRouteState extends State<DAppRoute> with ContextHolderMixin<DAppRoute
       },
       onUrlChange: (UrlChange request) async {
         setState(() {
-          _subtitle = request.url;
-        });
-        // return NavigationDecision.navigate;
-      },
-      onNavigationRequest: (NavigationRequest request) async {
-        debugPrint("onNavigationRequest: ${request.url}");
-        // page changed
-        if (RpcServer.connected) {
-          await RpcServer.entryPoint(contextHolder, "disconnect", {});
-        }
-        setState(() {
           _title = request.url;
           _subtitle = null;
         });
-        return NavigationDecision.navigate;
+        if (RpcServer.connected) {
+          await RpcServer.entryPoint(contextHolder, "disconnect", {});
+        }
+        // return NavigationDecision.navigate;
       },
+      // onNavigationRequest: (NavigationRequest request) async {
+      //   if (!request.isMainFrame) return NavigationDecision.prevent;
+      //   debugPrint("onNavigationRequest: ${request.url}");
+      //   debugPrint("onNavigationRequest: ${request.isMainFrame}");
+      //   // page changed
+      //   if (RpcServer.connected) {
+      //     await RpcServer.entryPoint(contextHolder, "disconnect", {});
+      //   }
+      //   setState(() {
+      //     _title = request.url;
+      //     _subtitle = null;
+      //   });
+      //   return NavigationDecision.navigate;
+      // },
       onWebResourceError: (WebResourceError error) {
         debugPrint("onWebResourceError: ${error.errorType}");
       },
