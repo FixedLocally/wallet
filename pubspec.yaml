@@ -36,11 +36,12 @@ dependencies:
   qr_flutter: ^4.0.0
   shared_preferences: ^2.0.15
   solana: ^0.29.0
+  solana_mobile_wallet: ^0.1.0+1
   sprintf: ^6.0.2
   sqflite: ^2.0.3+1
   url_launcher: ^6.1.10
 #  web_socket_channel: ^2.1.0
-  webview_flutter: ^4.2.4
+  webview_flutter: ^4.5.0
   webview_flutter_android: ^3.10.1
   xml: ^6.1.0
 
