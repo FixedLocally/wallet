@@ -72,7 +72,7 @@ class KeyManager {
   List<ManagedKey> _wallets = [];
   ManagedKey? _activeWallet;
   String? mockPubKey;
-  Map<String, String?> _domainLogos = {};
+  final Map<String, String?> _domainLogos = {};
   List<App> _apps = [];
 
   static KeyManager get instance {

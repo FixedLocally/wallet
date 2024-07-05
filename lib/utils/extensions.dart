@@ -15,9 +15,9 @@ extension NumExt on num {
   String toFixedTrimmed(int? fractionDigits) {
     if (fractionDigits == null) {
       fractionDigits = 6;
-      num _this = this;
-      while (_this < 1) {
-        _this *= 1000;
+      num that = this;
+      while (that < 1) {
+        that *= 1000;
         fractionDigits = fractionDigits! + 3;
       }
     }
