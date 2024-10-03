@@ -115,7 +115,12 @@ class _ConfirmBottomSheetState extends State<ConfirmBottomSheet> {
                       onPressed: _confirmed ? () {
                         Navigator.of(context).pop(true);
                       } : null,
-                      child: Text(widget.confirmText ?? S.current.yes),
+                      child: Text(
+                        widget.confirmText ?? S.current.yes,
+                        style: TextStyle(
+                          color: themeData.colorScheme.onPrimary,
+                        ),
+                      ),
                     ),
                   ),
                 ),

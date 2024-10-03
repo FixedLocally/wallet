@@ -43,7 +43,7 @@ dependencies:
   url_launcher: ^6.1.10
 #  web_socket_channel: ^2.1.0
   webview_flutter: ^4.5.0
-  webview_flutter_android: ^3.10.1
+#  webview_flutter_android: ^3.10.1
   xml: ^6.1.0
 
 dev_dependencies:
