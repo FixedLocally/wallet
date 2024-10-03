@@ -47,7 +47,7 @@
         const { fetch: originalFetch } = window;
         window.fetch = async (...args) => {
           let [resource, config] = args;
-          var requestedURL = resource.valueOf();
+          var requestedURL = (resource.url || resource).valueOf();
           if (_kBlockedDomains.some(x => requestedURL.includes(`/${x}/`))){
             var resp = new Response().statusText="Blocked";
             console.log("blocked fetch", requestedURL);
