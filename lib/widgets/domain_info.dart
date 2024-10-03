@@ -35,10 +35,10 @@ class DomainInfoWidget extends StatelessWidget {
         SizedBox(height: 16),
         Text(
           title,
-          style: theme.textTheme.headline6,
+          style: theme.textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
-        Text(domain, style: theme.textTheme.subtitle1,),
+        Text(domain, style: theme.textTheme.titleMedium,),
       ],
     );
   }

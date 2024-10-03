@@ -50,7 +50,7 @@ class HighlightedText extends StatelessWidget {
     return RichText(
       textAlign: textAlign,
       text: TextSpan(
-        style: (Theme.of(context).textTheme.bodyText2 ?? TextStyle()).merge(normalStyle),
+        style: (Theme.of(context).textTheme.bodyMedium ?? TextStyle()).merge(normalStyle),
         children: children,
       ),
     );

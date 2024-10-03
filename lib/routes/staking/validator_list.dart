@@ -221,7 +221,7 @@ class _ValidatorListRouteState extends State<ValidatorListRoute> {
               if (validatorInfo?["website"] != null)
                 Text(
                   validatorInfo?["website"]!,
-                  style: Theme.of(context).textTheme.caption,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               SizedBox(height: 8),
               ElevatedButton(
@@ -346,7 +346,7 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
-          textStyle: themeData.textTheme.button?.copyWith(
+          textStyle: themeData.textTheme.labelLarge?.copyWith(
             color: themeData.primaryColor,
             fontWeight: FontWeight.w500,
           ),
@@ -359,7 +359,7 @@ class _StakeBottomSheetState extends State<_StakeBottomSheet> with UsesSharedDat
           children: [
             Text(
               S.current.stakeSolToValidator,
-              style: themeData.textTheme.subtitle1,
+              style: themeData.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 8),

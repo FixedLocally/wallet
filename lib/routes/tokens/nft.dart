@@ -145,7 +145,7 @@ class NftDetailsRoute extends StatelessWidget {
                   },
                   child: Text(
                     S.current.send,
-                    style: theme.textTheme.button,
+                    style: theme.textTheme.labelLarge,
                   ),
                 ),
               ),

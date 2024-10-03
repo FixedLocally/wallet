@@ -420,7 +420,7 @@ class CustomExpansionTileState extends State<CustomExpansionTile> with SingleTic
     _headerColorTween
       ..begin = widget.collapsedTextColor
           ?? expansionTileTheme.collapsedTextColor
-          ?? theme.textTheme.subtitle1!.color
+          ?? theme.textTheme.titleMedium!.color
       ..end = widget.textColor ?? expansionTileTheme.textColor ?? colorScheme.primary;
     _iconColorTween
       ..begin = widget.collapsedIconColor

@@ -18,27 +18,28 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   bip39: ^1.0.6
-  cached_network_image: ^3.2.1
+  cached_network_image: ^3.4.1
   crypto: ^3.0.2
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  flutter_cache_manager: ^3.3.0
+  flutter_cache_manager: ^3.4.1
   flutter_localizations:
     sdk: flutter
-  flutter_secure_storage: ^5.1.0
-  flutter_slidable: ^2.0.0
-  flutter_svg: ^1.1.3
-  intl: ^0.18.0
-  jupiter_aggregator: ^1.0.0
+  flutter_secure_storage: ^9.2.2
+  flutter_slidable: ^3.1.1
+  flutter_svg: ^2.0.10+1
+  intl: ^0.19.0
+#  jupiter_aggregator: ^1.0.0
   local_auth: ^2.1.2
-  mobile_scanner: ^2.0.0
+  mobile_scanner: ^5.2.3
   qr_flutter: ^4.0.0
   shared_preferences: ^2.0.15
-  solana: ^0.29.0
-  solana_mobile_wallet: ^0.1.0+1
-  sprintf: ^6.0.2
+  solana: ^0.31.0
+  solana_mobile_wallet: ^0.2.0+1
+  sprintf: ^7.0.0
   sqflite: ^2.0.3+1
+  sqflite_common_ffi: ^2.2.4
   url_launcher: ^6.1.10
 #  web_socket_channel: ^2.1.0
   webview_flutter: ^4.5.0
@@ -46,7 +47,7 @@ dependencies:
   xml: ^6.1.0
 
 dev_dependencies:
-  flutter_lints: ^2.0.0
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
 

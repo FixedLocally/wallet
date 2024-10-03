@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:solana/dto.dart' hide Instruction;
 import 'package:solana/solana.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../generated/l10n.dart';
 import '../../rpc/key_manager.dart';
@@ -100,7 +101,7 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
                     BottomSheetAction(title: S.current.withdraw, value: 2),
                 ],
               );
-              late Future f;
+              late Future<String> f;
               switch (action) {
                 case 0:
                   // unstake
@@ -154,12 +155,21 @@ class _StakeAccountsRouteState extends State<StakeAccountsRoute> {
                   ));
                   break;
                 default:
-                  f = Future.value(null);
+                  f = Future.value("");
                   break;
               }
               // there is actual action
               if (action < 100) {
-                await Utils.showLoadingDialog(context: context, future: f);
+                String tx = await Utils.showLoadingDialog(context: context, future: f);
+                scaffold.showSnackBar(SnackBar(
+                  content: Text(S.current.txConfirmed),
+                  action: SnackBarAction(
+                    label: S.current.view,
+                    onPressed: () {
+                      launchUrl(Uri.parse("https://solscan.io/tx/$tx"));
+                    },
+                  ),
+                ));
                 if (action != 2) {
                   Account acct = (await Utils.getAccount(
                     stakeKey,

@@ -38,12 +38,12 @@ class _ConfirmBottomSheetState extends State<ConfirmBottomSheet> {
       child: TextButtonTheme(
         data: TextButtonThemeData(
           style: TextButton.styleFrom(
-            primary: themeData.colorScheme.onPrimary,
+            // primary: themeData.colorScheme.onPrimary,
             backgroundColor: themeData.colorScheme.primary,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(40)),
             ),
-            textStyle: themeData.textTheme.button?.copyWith(
+            textStyle: themeData.textTheme.labelLarge?.copyWith(
               color: themeData.primaryColor,
               fontWeight: FontWeight.w500,
             ),
@@ -54,7 +54,7 @@ class _ConfirmBottomSheetState extends State<ConfirmBottomSheet> {
           children: [
             SizedBox(height: 16),
             if (widget.title != null) ...[
-              Text(widget.title!, style: themeData.textTheme.headline6),
+              Text(widget.title!, style: themeData.textTheme.titleLarge),
             ],
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),

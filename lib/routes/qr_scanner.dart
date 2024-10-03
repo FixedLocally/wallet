@@ -19,8 +19,8 @@ class _QrScannerRouteState extends State<QrScannerRoute> {
         title: Text(S.current.scanQrCode),
       ),
       body: MobileScanner(
-        onDetect: (Barcode code, MobileScannerArguments? args) {
-          String value = code.rawValue ?? "";
+        onDetect: (BarcodeCapture code) {
+          String value = code.barcodes.first.rawValue ?? "";
           try {
             Ed25519HDPublicKey.fromBase58(value);
             Navigator.pop(context, value);

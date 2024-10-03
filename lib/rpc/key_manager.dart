@@ -545,7 +545,7 @@ class KeyManager {
           header: Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).errorColor.withOpacity(0.33),
+              color: Theme.of(context).colorScheme.error.withOpacity(0.33),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(S.current.seedPhraseWarning),

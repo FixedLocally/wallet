@@ -24,10 +24,10 @@ import '../widgets/text.dart';
 import 'extensions.dart';
 
 const String _topTokensUrl = "https://cache.jup.ag/top-tokens";
-const String _priceApiUrl = "https://validator.utopiamint.xyz/api/price/";
-const String _tokenMetadataApiUrl = "https://validator.utopiamint.xyz/api/token/";
-const String _simulateApiUrl = "https://validator.utopiamint.xyz/api/simulate/";
-const String _yieldApiUrl = "https://validator.utopiamint.xyz/api/yield";
+const String _priceApiUrl = "https://api.hanabi.so/price/";
+const String _tokenMetadataApiUrl = "https://api.hanabi.so/token/";
+const String _simulateApiUrl = "https://api.hanabi.so/simulate/";
+const String _yieldApiUrl = "https://api.hanabi.so/yield";
 const nativeSol = "native-sol";
 const wrappedSolMint = "So11111111111111111111111111111111111111112";
 const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -81,7 +81,7 @@ class Utils {
     // List<Future<List<Object?>>> futures = remainingTokens.map((token) async {
     //   // artificial delay to avoid hitting the rate limit
     //   await Future.delayed(Duration(milliseconds: i++ * 100));
-    //   Map resp = jsonDecode(await _httpGet("https://validator.utopiamint.xyz/api/token/$token"));
+    //   Map resp = jsonDecode(await _httpGet("https://api.hanabi.so/token/$token"));
     //   return [token, resp["success"] ? resp["token"] : null];
     // }).toList();
     // List<List> metadatas = await Future.wait(futures);
@@ -391,8 +391,9 @@ class Utils {
   }
 
   static Future<List<String>> getYieldableTokens() async {
-    Map resp = jsonDecode(await httpGet("$_yieldApiUrl/all"));
-    return resp["tokens"].cast<String>();
+    // Map resp = jsonDecode(await httpGet("$_yieldApiUrl/all"));
+    // return resp["tokens"].cast<String>();
+    return [];
   }
 
   static Future<List<String>> getTopTokens() async {
@@ -640,7 +641,7 @@ class Utils {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).errorColor.withOpacity(0.33),
+        color: Theme.of(context).colorScheme.error.withOpacity(0.33),
         borderRadius: BorderRadius.circular(8),
       ),
       child: child,

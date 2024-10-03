@@ -10,8 +10,8 @@ class RpcConstants {
 
   static const int kTokenAccountLength = 165;
 
-  static final Uri kRpcUrl = Uri.parse("https://solana-mainnet.phantom.app/YBPpkkN4g91xDiAnTE9r0RcMkjg0sKUIWvAfoFVJ");
-  static final Uri kWsUrl = Uri.parse("wss://solana-mainnet.phantom.app/YBPpkkN4g91xDiAnTE9r0RcMkjg0sKUIWvAfoFVJ");
+  static final Uri kRpcUrl = Uri.parse("https://rpc.hanabi.so/DWsseY2nLGoMMOF7tq6IJOcLlQdcVvrD");
+  static final Uri kWsUrl = Uri.parse("wss://rpc.hanabi.so/DWsseY2nLGoMMOF7tq6IJOcLlQdcVvrD");
   // static final Uri kWsUrl = Uri.parse("wss://ssc-dao.genesysgo.net");
   // static final Uri kRpcUrl = Uri.parse("https://ssc-dao.genesysgo.net");
 

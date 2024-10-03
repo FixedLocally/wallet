@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jupiter_aggregator/jupiter_aggregator.dart';
 
 import '../../utils/utils.dart';
 import '../root.dart';
@@ -20,7 +19,6 @@ mixin UsesSharedData<T extends StatefulWidget> on State<T> {
 
   // swap data
   Map<String, int> get jupTopTokens => sharedData.jupTopTokens;
-  JupiterIndexedRouteMap? get jupRouteMap => sharedData.jupRouteMap;
   bool get jupRouteMapLoading => sharedData.jupRouteMapLoading;
 
   // yield data

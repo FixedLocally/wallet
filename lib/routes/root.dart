@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jupiter_aggregator/jupiter_aggregator.dart';
 
 import '../rpc/key_manager.dart';
 import '../utils/utils.dart';
@@ -26,9 +25,7 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
   final Map<String, Map<String, dynamic>> _tokenDetails = {};
 
   // swap data
-  final JupiterAggregatorClient _jupClient = JupiterAggregatorClient();
   final Map<String, int> _jupTopTokens = {};
-  JupiterIndexedRouteMap? _jupRouteMap;
   bool _jupRouteMapLoading = false;
 
   // yield data
@@ -51,27 +48,7 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
   }
 
   Future<void> loadJupRouteIndex() async {
-    if (_jupRouteMap != null || _jupRouteMapLoading) return;
-    _jupRouteMapLoading = true;
-    JupiterIndexedRouteMap routeMap = await _jupClient.getIndexedRouteMap();
-    _jupRouteMap = routeMap;
-    debugPrint("got jup map");
-    List<String> topTokens = await Utils.getTopTokens();
-    topTokens.asMap().forEach((key, value) {
-      _jupTopTokens[value] = key;
-    });
-    List<String> mints = routeMap.mintKeys.toList();
-    mints.removeWhere((element) => _tokenDetails.keys.contains(element));
-    debugPrint("$mints");
-    Utils.getTokens(mints).then((value) {
-      debugPrint("got ${value.length} tokens");
-      setState(() {
-        value.forEach((mint, info) {
-          if (info != null) _tokenDetails[mint] = info;
-        });
-        _jupRouteMapLoading = false;
-      });
-    });
+    // noop
   }
 
   void startLoadingBalances(String pubKey) {
@@ -103,34 +80,6 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
         });
       });
     });
-  }
-
-  Future<List<JupiterRoute>> getQuotes({
-    required String fromMint,
-    required String toMint,
-    required int amount,
-    double? slippage,
-  }) async {
-    return _jupClient.getQuote(
-      inputMint: fromMint,
-      outputMint: toMint,
-      amount: amount,
-      slippage: slippage,
-      // feeBps: 10,
-    ).catchError((_) => <JupiterRoute>[]);
-  }
-
-  Future<JupiterSwapTransactions> getSwapTransactions({
-    required String userPublicKey,
-    required JupiterRoute route,
-    bool wrapUnwrapSOL = true,
-  }) async {
-    return _jupClient.getSwapTransactions(
-      userPublicKey: userPublicKey,
-      route: route,
-      wrapUnwrapSOL: wrapUnwrapSOL,
-      // feeBps: 10,
-    );
   }
 
   void _reloadActiveBalances([bool reschedule = false]) {
@@ -167,7 +116,6 @@ class WalletAppWidgetState extends State<WalletAppWidget> with WidgetsBindingObs
   Widget build(BuildContext context) {
     return WalletAppInheritedWidget(
       jupRouteMapLoading: _jupRouteMapLoading,
-      jupRouteMap: _jupRouteMap,
       jupTopTokens: _jupTopTokens,
       balances: _balances,
       balancesCompleters: _balancesCompleters,
@@ -195,7 +143,6 @@ class WalletAppInheritedWidget extends InheritedWidget {
 
   // swap data
   final Map<String, int> jupTopTokens;
-  final JupiterIndexedRouteMap? jupRouteMap;
   final bool jupRouteMapLoading;
 
   // yield data
@@ -207,7 +154,6 @@ class WalletAppInheritedWidget extends InheritedWidget {
     required this.tokenInfoCompleters,
     required this.tokenDetails,
     required this.jupTopTokens,
-    required this.jupRouteMap,
     required this.jupRouteMapLoading,
     required this.yieldableTokens,
     required super.child,

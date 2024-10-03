@@ -193,7 +193,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       _snsRecipient!,
-                      style: themeData.textTheme.caption,
+                      style: themeData.textTheme.bodySmall,
                     ),
                   ),
                 if (_recipientError != null)
@@ -201,7 +201,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       _recipientError!,
-                      style: (themeData.textTheme.caption ?? const TextStyle())
+                      style: (themeData.textTheme.bodySmall ?? const TextStyle())
                           .copyWith(color: themeData.colorScheme.error),
                     ),
                   ),
@@ -226,7 +226,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       _amountError!,
-                      style: (themeData.textTheme.caption ?? const TextStyle())
+                      style: (themeData.textTheme.bodySmall ?? const TextStyle())
                           .copyWith(color: themeData.colorScheme.error),
                     ),
                   ),
@@ -237,7 +237,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                     children: [
                       Text(
                         "${widget.balance.tokenAmount.uiAmountString} $symbol",
-                        style: themeData.textTheme.subtitle2,
+                        style: themeData.textTheme.titleSmall,
                       ),
                       SizedBox(width: 8),
                       TextButton(
@@ -248,7 +248,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
-                          textStyle: themeData.textTheme.button?.copyWith(
+                          textStyle: themeData.textTheme.labelLarge?.copyWith(
                             color: themeData.primaryColor,
                             fontWeight: FontWeight.w500,
                           ),
@@ -353,7 +353,7 @@ class _SendTokenRouteState extends State<SendTokenRoute> {
                         },
                         child: Text(
                           S.current.send,
-                          style: themeData.textTheme.button,
+                          style: themeData.textTheme.labelLarge,
                         ),
                       ),
                     ),

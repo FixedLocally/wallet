@@ -54,12 +54,12 @@ class _YieldDepositRouteState extends State<YieldDepositRoute> with UsesSharedDa
       body: TextButtonTheme(
         data: TextButtonThemeData(
           style: TextButton.styleFrom(
-            primary: theme.colorScheme.onPrimary,
+            // primary: theme.colorScheme.onPrimary,
             backgroundColor: theme.colorScheme.primary,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
-            textStyle: theme.textTheme.button?.copyWith(
+            textStyle: theme.textTheme.labelLarge?.copyWith(
               color: theme.primaryColor,
               fontWeight: FontWeight.w500,
             ),

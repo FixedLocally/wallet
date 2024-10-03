@@ -17,7 +17,7 @@ Future<int> showActionBottomSheet({
           children: [
             Padding(
               padding: const EdgeInsets.all(8),
-              child: Text(title, style: Theme.of(context).textTheme.headline6),
+              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
             ),
             ...actions.map((action) => ListTile(
               title: Text(action.title),

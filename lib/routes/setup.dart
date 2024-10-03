@@ -24,7 +24,7 @@ class _SetupRouteState extends State<SetupRoute> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(S.current.setupWalletContent, style: Theme.of(context).textTheme.headline5,),
+            Text(S.current.setupWalletContent, style: Theme.of(context).textTheme.headlineSmall,),
             const SizedBox(height: 20,),
             ElevatedButton(
               child: Text(S.current.importWallet),

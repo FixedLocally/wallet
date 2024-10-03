@@ -33,11 +33,12 @@ class _DepositTokenRouteState extends State<DepositTokenRoute> {
                   borderRadius: BorderRadius.circular(12),
                   color: Colors.white,
                 ),
-                child: QrImage(
+                child: QrImageView(
                   data: KeyManager.instance.pubKey,
-                  backgroundColor: Colors.white,
-                  padding: EdgeInsets.zero,
+                  version: QrVersions.auto,
+                  // size: 200.0,
                 ),
+
               ),
               Utils.wrapField(
                 wrapColor: themeData.colorScheme.background,

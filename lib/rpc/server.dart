@@ -281,7 +281,11 @@ class RpcServer {
       CompiledMessage compiledMessage = CompiledMessage(ByteArray(payload));
       compiledMessages.add(compiledMessage);
       payloads.add(payload);
-      versions.add(e["version"] ?? -1);
+      if (e["version"] == "legacy") {
+        versions.add(-1);
+      } else {
+        versions.add(e["version"] ?? -1);
+      }
     }
 
     Future<List<TokenChanges>> simulation = Utils.simulateTxs(payloads, KeyManager.instance.pubKey, versions);
