@@ -38,6 +38,7 @@ class WalletApp extends StatelessWidget {
     );
     ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
+      scaffoldBackgroundColor: Color(0xff292e2c),
       colorScheme: const ColorScheme(
         brightness: Brightness.dark,
         primary: Color(0xff57fdc1),
