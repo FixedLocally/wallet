@@ -305,6 +305,18 @@ class Utils {
 
   static Future<Map<String, dynamic>> _getCoinGeckoPrices(List<String> tokens) async {
     if (tokens.isEmpty) return {};
+    if (tokens.length > 50) {
+      Map<String, dynamic> res = {};
+      List<Future<Map<String, dynamic>>> fs = [];
+      for (int i = 0; i < tokens.length; i += 50) {
+        fs.add(_getCoinGeckoPrices(tokens.sublist(i, (i + 50).clamp(i, tokens.length))));
+      }
+      List<Map<String, dynamic>> ress = await Future.wait(fs);
+      for (var r in ress) {
+        res.addAll(r);
+      }
+      return res;
+    }
     Map<String, dynamic> prices = {};
     Map<String, dynamic> json = jsonDecode(await _httpPost(_priceApiUrl, tokens));
     if (json["success"] == true) {
@@ -352,7 +364,7 @@ class Utils {
       usdChange: 0,
       account: pubKey,
     ));
-    Set<String> mints = rawResults.map((e) => e.mint).toSet();
+    Set<String> mints = rawResults.where((x) => x.tokenAmount.amount != "0").map((e) => e.mint).toSet();
     mints.add(wrappedSolMint);
     Map<String, dynamic> prices = await _getCoinGeckoPrices(mints.toList());
     List<SplTokenAccountDataInfoWithUsd> results = rawResults.map((e) {
